@@ -23,11 +23,19 @@ jobs:
           python-version: "3.11"
           cache: pip
 
+      - name: Set up Node (UI smoke test drives headless Chrome over CDP)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Tests
         run: make test
+
+      - name: UI smoke test
+        run: node scripts/ui_smoke.mjs
 
       - name: Schema validation
         run: python scripts/validate_results.py

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:42:36Z",
+  "generated_at": "2026-11-12T13:03:26Z",
   "seed": 7,
   "source": "src/quantum/risk.py",
   "data_provenance": "synthetic",
@@ -105,5 +105,5 @@
     ]
   },
   "within_tolerance": true,
-  "notes": "IterativeAmplitudeEstimation (qiskit-algorithms 0.4.0), epsilon_target=0.005 per amplitude, 95% confidence, 100 shots per round, seeded Aer sampler. 3 scenario qubits loaded exactly with StatePreparation, 1 objective qubit. VaR search: P(L<=0.000) ~ 0.8755; P(L<=0.444) ~ 0.9524. tail_prob is P(L > 0), the chance that the plan falls short and an unplanned cut is needed. CVaR CI combines the numerator and denominator intervals. Simulation time 1.88 s. Exact values come from the same discrete distribution; at 3 scenario qubits this is classically trivial, so no speed-up is claimed. Demand and shortfall are synthetic."
+  "notes": "IterativeAmplitudeEstimation (qiskit-algorithms 0.4.0), epsilon_target=0.005 per amplitude, 95% confidence, 100 shots per round, seeded Aer sampler. 3 scenario qubits loaded exactly with StatePreparation, 1 objective qubit. VaR search: P(L<=0.000) ~ 0.8755; P(L<=0.444) ~ 0.9524. tail_prob is P(L > 0), the chance that the plan falls short and an unplanned cut is needed. CVaR CI combines the numerator and denominator intervals. Simulation time 1.76 s. Exact values come from the same discrete distribution; at 3 scenario qubits this is classically trivial, so no speed-up is claimed. Demand and shortfall are synthetic."
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:37:34Z",
+  "generated_at": "2026-11-12T13:03:02Z",
   "seed": 7,
   "source": "scripts/run_quantum.py",
   "data_provenance": "synthetic",
@@ -75,7 +75,7 @@
       "p_optimal": 0.002197265625,
       "approx_ratio": 0.6084693170362904,
       "fairness_entropy": 0.9920750627830647,
-      "runtime_s": 0.196,
+      "runtime_s": 0.211,
       "best_cost": 10.5,
       "best_bits": "100101000100100010011100",
       "notes": "Exact simulated state: P(optimal)=0.0009, approx ratio=0.6156, valid probability=1.0000. Optimiser evaluations: 1. Transpiled depth 60."
@@ -92,7 +92,7 @@
       "p_optimal": 0.0078125,
       "approx_ratio": 0.786373015372981,
       "fairness_entropy": 0.9976122109763321,
-      "runtime_s": 3.292,
+      "runtime_s": 3.277,
       "best_cost": 10.5,
       "best_bits": "100101000100100010011100",
       "notes": "Exact simulated state: P(optimal)=0.0098, approx ratio=0.7855, valid probability=1.0000. Optimiser evaluations: 138. Transpiled depth 68."
@@ -109,7 +109,7 @@
       "p_optimal": 0.005859375,
       "approx_ratio": 0.7977924962197567,
       "fairness_entropy": 0.9973611402403239,
-      "runtime_s": 5.054,
+      "runtime_s": 5.059,
       "best_cost": 10.5,
       "best_bits": "100110000100010010011100",
       "notes": "Exact simulated state: P(optimal)=0.0074, approx ratio=0.8026, valid probability=1.0000. Optimiser evaluations: 159. Transpiled depth 84."
@@ -143,7 +143,7 @@
       "p_optimal": 0.00927734375,
       "approx_ratio": 0.8460102696572553,
       "fairness_entropy": 0.9980547458329154,
-      "runtime_s": 14.303,
+      "runtime_s": 14.264,
       "best_cost": 10.5,
       "best_bits": "100101000100100010011100",
       "notes": "Exact simulated state: P(optimal)=0.0084, approx ratio=0.8460, valid probability=1.0000. Optimiser evaluations: 159. Transpiled depth 429."
@@ -160,7 +160,7 @@
       "p_optimal": 0.000244140625,
       "approx_ratio": 0.12411400579637107,
       "fairness_entropy": 0.9928481298129478,
-      "runtime_s": 2.347,
+      "runtime_s": 2.307,
       "best_cost": 10.5,
       "best_bits": "000111001100000010011100",
       "notes": "Exact simulated state: P(optimal)=0.0002, approx ratio=0.1281, valid probability=0.1998. Optimiser evaluations: 153. Transpiled depth 27. Quota penalty strength 11.50; invalid samples score 0."
@@ -177,7 +177,7 @@
       "p_optimal": 0.000244140625,
       "approx_ratio": 0.18328660534274221,
       "fairness_entropy": 0.993349444397582,
-      "runtime_s": 4.547,
+      "runtime_s": 4.499,
       "best_cost": 10.5,
       "best_bits": "100011000101000010011100",
       "notes": "Exact simulated state: P(optimal)=0.0004, approx ratio=0.1935, valid probability=0.2953. Optimiser evaluations: 159. Transpiled depth 52. Quota penalty strength 11.50; invalid samples score 0."
@@ -245,7 +245,7 @@
       "p_optimal": 0.23828125,
       "approx_ratio": 0.8331580528846154,
       "fairness_entropy": 0.9378918898317632,
-      "runtime_s": 0.545,
+      "runtime_s": 0.54,
       "best_cost": 4.666666666666668,
       "best_bits": "01100100",
       "notes": "Exact simulated state: P(optimal)=0.2466, approx ratio=0.8355, valid probability=1.0000. Optimiser evaluations: 159. Transpiled depth 47."
@@ -262,11 +262,11 @@
       "p_optimal": 0.3,
       "approx_ratio": 0.7846153846153847,
       "fairness_entropy": 0.9460668969674665,
-      "runtime_s": 9.377,
+      "runtime_s": 9.16,
       "best_cost": 4.666666666666668,
       "best_bits": "01100100",
       "notes": "GroverOptimizer (qiskit-optimization 0.7.0), 20 independent runs with seeds 7000..7019, Aer SamplerV2 (statevector simulator) with 1024 shots per circuit, num_iterations=3. Quota enforced as a penalty of strength 7.833; coefficients multiplied by 6 and rounded to integers (largest rounding error 3.55e-15 in scaled units). 6 key qubits + 10 value qubits. Each sample is the final answer of one full run: 18 of 20 valid, 6 of 20 optimal, 7 distinct answers. Costs are the true unscaled cost. Simulator only; no speed-up claimed."
     }
   ],
-  "notes": "Quantum rows are sampled from the Aer statevector simulator. approx_ratio is the mean over all samples with invalid samples scored 0. No speed-up is claimed: the exact answer is instant at this size."
+  "notes": "Quantum rows are sampled from the Aer statevector simulator. approx_ratio is the mean over all samples with invalid samples scored 0. No speed-up is claimed: at this size classical brute force gives the exact answer."
 }

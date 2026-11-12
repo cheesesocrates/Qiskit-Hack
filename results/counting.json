@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:26:16Z",
+  "generated_at": "2026-11-12T13:03:24Z",
   "seed": 7,
   "source": "src/quantum/counting.py",
   "data_provenance": "synthetic",
@@ -32,5 +32,5 @@
   "confidence_alpha": 0.05,
   "oracle_queries": 4000,
   "flexibility_bits": 3.169925001442312,
-  "notes": "Iterative amplitude estimation (qiskit-algorithms IterativeAmplitudeEstimation, epsilon_target=0.01 on the amplitude a = count/256, confidence 95%, 100 shots per round, Grover powers [0, 0, 1, 6, 33]) on the Aer statevector SIMULATOR, seeded. The oracle is a reversible circuit: per-hour Hamming weight by controlled increments, comparison with the quota, AND with 'protected feeders are on'. Tolerance = max(CI half-width in counts, 1 plan) = 1.000; within_tolerance means the exact count is inside the CI or within the tolerance of the estimate. The exact count comes from enumerating all 256 strings; at 8 search qubits this is classically trivial, so no quantum speed-up is claimed. oracle_queries counts shots x Grover power over all rounds (Q-calls, from the IAE result). Runtime of the simulation: 0.45 s. Cross-check: enumeration equals exact.n_valid = 9 in the plans file."
+  "notes": "Iterative amplitude estimation (qiskit-algorithms IterativeAmplitudeEstimation, epsilon_target=0.01 on the amplitude a = count/256, confidence 95%, 100 shots per round, Grover powers [0, 0, 1, 6, 33]) on the Aer statevector SIMULATOR, seeded. The oracle is a reversible circuit: per-hour Hamming weight by controlled increments, comparison with the quota, AND with 'protected feeders are on'. Tolerance = max(CI half-width in counts, 1 plan) = 1.000; within_tolerance means the exact count is inside the CI or within the tolerance of the estimate. The exact count comes from enumerating all 256 strings; at 8 search qubits this is classically trivial, so no quantum speed-up is claimed. oracle_queries counts shots x Grover power over all rounds (Q-calls, from the IAE result). Runtime of the simulation: 0.48 s. Cross-check: enumeration equals exact.n_valid = 9 in the plans file."
 }

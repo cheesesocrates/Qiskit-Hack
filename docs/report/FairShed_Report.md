@@ -1,6 +1,6 @@
 # FairShed: a fair, auditable load-shedding planner with Qiskit
 
-Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 13:00 UTC from commit 618ef39 by scripts/fill_report.py.
+Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 13:05 UTC from commit 140eb39 by scripts/fill_report.py.
 
 > Simulator only. Every feeder, demand figure and outage ledger in this report is synthetic, on illustrative Karachi zones. Weather in the forecast is a real Open-Meteo snapshot. No quantum speed-up is claimed: every instance here is also solved exactly by classical brute force or MILP, and that exact answer is the yardstick for every quantum number.
 
@@ -97,24 +97,24 @@ All rows use the same instance and the same exact reference: 4500 valid plans, c
 | Exact (brute force) | base | n/a | n/a | n/a | 100.0% | 1.0000 | 1.000 | 0.994 | n/a |
 | Round-robin | base | n/a | n/a | n/a | 100.0% | 0.0000 | 0.952 | 0.994 | n/a |
 | Random valid plan | base | n/a | n/a | n/a | 100.0% | 0.0000 | 0.619 | 0.992 | n/a |
-| Dicke state only (uniform over valid plans) | base | 18 | 0 | 4096 | 100.0% | 0.0022 | 0.608 | 0.992 | 0.20 |
-| Dicke + XY-mixer QAOA, p=1 | base | 18 | 1 | 4096 | 100.0% | 0.0078 | 0.786 | 0.998 | 3.29 |
-| Dicke + XY-mixer QAOA, p=3 | base | 18 | 3 | 4096 | 100.0% | 0.0059 | 0.798 | 0.997 | 5.05 |
+| Dicke state only (uniform over valid plans) | base | 18 | 0 | 4096 | 100.0% | 0.0022 | 0.608 | 0.992 | 0.21 |
+| Dicke + XY-mixer QAOA, p=1 | base | 18 | 1 | 4096 | 100.0% | 0.0078 | 0.786 | 0.998 | 3.28 |
+| Dicke + XY-mixer QAOA, p=3 | base | 18 | 3 | 4096 | 100.0% | 0.0059 | 0.798 | 0.997 | 5.06 |
 | Grover-mixer QAOA, p=1 | base | 18 | 1 | 4096 | 100.0% | 0.0037 | 0.745 | 0.996 | 2.42 |
-| Grover-mixer QAOA, p=3 | base | 18 | 3 | 4096 | 100.0% | 0.0093 | 0.846 | 0.998 | 14.30 |
-| Penalty QAOA (X mixer), p=1 | base | 18 | 1 | 4096 | 19.6% | 0.0002 | 0.124 | 0.993 | 2.35 |
-| Penalty QAOA (X mixer), p=3 | base | 18 | 3 | 4096 | 27.9% | 0.0002 | 0.183 | 0.993 | 4.55 |
+| Grover-mixer QAOA, p=3 | base | 18 | 3 | 4096 | 100.0% | 0.0093 | 0.846 | 0.998 | 14.26 |
+| Penalty QAOA (X mixer), p=1 | base | 18 | 1 | 4096 | 19.6% | 0.0002 | 0.124 | 0.993 | 2.31 |
+| Penalty QAOA (X mixer), p=3 | base | 18 | 3 | 4096 | 27.9% | 0.0002 | 0.183 | 0.993 | 4.50 |
 | Exact (brute force) | block_4x2 | n/a | n/a | n/a | 100.0% | 1.0000 | 1.000 | 0.985 | n/a |
 | Round-robin | block_4x2 | n/a | n/a | n/a | 100.0% | 0.0000 | 0.808 | 0.887 | n/a |
 | Random valid plan | block_4x2 | n/a | n/a | n/a | 100.0% | 0.1070 | 0.602 | 0.887 | n/a |
-| Grover-mixer QAOA, p=2 | block_4x2 | 6 | 2 | 1024 | 100.0% | 0.2383 | 0.833 | 0.938 | 0.55 |
-| Grover Adaptive Search (GroverOptimizer) | block_4x2 | 16 | n/a | 20 | 90.0% | 0.3000 | 0.785 | 0.946 | 9.38 |
+| Grover-mixer QAOA, p=2 | block_4x2 | 6 | 2 | 1024 | 100.0% | 0.2383 | 0.833 | 0.938 | 0.54 |
+| Grover Adaptive Search (GroverOptimizer) | block_4x2 | 16 | n/a | 20 | 90.0% | 0.3000 | 0.785 | 0.946 | 9.16 |
 
 ![Figure 2. Approximation ratio on the base instance.](figures/ablation.png)
 
 *Figure 2. Approximation ratio on the base instance.*
 
-Best quantum row by approximation ratio: Grover-mixer QAOA, p=3 at 0.846. Highest sampled P(optimal): Grover-mixer QAOA, p=3 at 0.0093, against 0.0022 for sampling the Dicke state alone (uniform over valid plans). The single deterministic round-robin plan scores 0.952, higher than the mean QAOA sample; it is one plan, while the QAOA rows average over thousands of samples. A uniformly random valid plan averages 0.619. Penalty QAOA with the X mixer produces valid plans in only 19.6% and 27.9% of samples, which is why the constraint-preserving mixers matter. The honest reading: the constraint-preserving circuits always produce valid plans and shift probability towards cheap ones, but at 18 qubits classical brute force over all valid plans gives the exact answer, and per-shot P(optimal) stays below 0.9%.
+Best quantum row by approximation ratio: Grover-mixer QAOA, p=3 at 0.846. Highest sampled P(optimal): Grover-mixer QAOA, p=3 at 0.0093, against 0.0022 for sampling the Dicke state alone (uniform over valid plans). The single deterministic round-robin plan scores 0.952, higher than the mean QAOA sample; it is one plan, while the QAOA rows average over thousands of samples. A uniformly random valid plan averages 0.619. Penalty QAOA with the X mixer produces valid plans in only 19.6% and 27.9% of samples, which is why the constraint-preserving mixers matter. The honest reading: the constraint-preserving circuits always produce valid plans and shift probability towards cheap ones, but at 18 qubits classical brute force over all valid plans gives the exact answer, and per-shot P(optimal) is at most 0.93%.
 
 ### 4.2 Fair lottery among tied optima
 
@@ -261,7 +261,7 @@ Angles: COBYLA from a small grid of linear-ramp starts (src.quantum.qaoa.QAOARun
 
 ## 6. Validation
 
-30 of 30 proof checks pass in the last test run (results/checks.json, written 2026-11-12T12:48:03Z). Each is a pytest test.
+30 of 30 proof checks pass in the last test run (results/checks.json, written 2026-11-12T13:05:49Z). Each is a pytest test.
 
 *Table 11. Proof checks.*
 

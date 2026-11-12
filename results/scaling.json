@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:36:38Z",
+  "generated_at": "2026-11-12T13:04:08Z",
   "seed": 7,
   "source": "src/quantum/scaling.py",
   "data_provenance": "synthetic",
@@ -21,7 +21,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.057761300000493065,
+      "runtime_s": 0.06421640000007756,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.007; untruncated statevector reference, same angles and shots"
     },
@@ -37,7 +37,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.04926589999922726,
+      "runtime_s": 0.051415299998552655,
       "status": "ok",
       "notes": "85 of 512 samples valid; shot standard error of the ratio 0.013; peak bond dimension 2 reached the cap, so the state was truncated"
     },
@@ -53,7 +53,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 16.2,
-      "runtime_s": 0.04944580000028509,
+      "runtime_s": 0.04662890000145126,
       "status": "ok",
       "notes": "505 of 512 samples valid; shot standard error of the ratio 0.009; peak bond dimension 4 reached the cap, so the state was truncated"
     },
@@ -69,7 +69,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.05559439999979077,
+      "runtime_s": 0.053283000001101755,
       "status": "ok",
       "notes": "509 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 8 reached the cap, so the state was truncated"
     },
@@ -85,7 +85,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.06376000000000204,
+      "runtime_s": 0.06435969999984081,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 16 reached the cap, so the state was truncated"
     },
@@ -101,7 +101,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.06623649999983172,
+      "runtime_s": 0.06736950000049546,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 22 is below the cap 32, so nothing was truncated beyond 1e-16"
     },
@@ -117,7 +117,7 @@
       "exact_cost_max": 35.2,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.7,
-      "runtime_s": 0.06905980000010459,
+      "runtime_s": 0.06592060000002675,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 22 is below the cap 64, so nothing was truncated beyond 1e-16"
     },
@@ -133,7 +133,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 10.833333333333334,
-      "runtime_s": 0.08214270000007673,
+      "runtime_s": 0.08165010000084294,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.008; untruncated statevector reference, same angles and shots"
     },
@@ -151,7 +151,7 @@
       "best_sampled_cost": null,
       "runtime_s": null,
       "status": "failed",
-      "notes": "failed: worker process crashed (exit code 3221225477): File \"C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.11-64\\Lib\\threading.py\", line 1045 in _bootstrap_inner | File \"C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.11-64\\Lib\\threading.py\", line 1002 in _bootstrap | Thread 0x00004634 (most recent call first):"
+      "notes": "failed: worker process crashed (exit code 3221225477): File \"C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.11-64\\Lib\\threading.py\", line 1045 in _bootstrap_inner | File \"C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.11-64\\Lib\\threading.py\", line 1002 in _bootstrap | Thread 0x000010a4 (most recent call first):"
     },
     {
       "n_feeders": 8,
@@ -165,7 +165,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.833333333333336,
-      "runtime_s": 0.05312580000008893,
+      "runtime_s": 0.05435570000008738,
       "status": "ok",
       "notes": "1 of 512 samples valid; shot standard error of the ratio 0.002; peak bond dimension 4 reached the cap, so the state was truncated"
     },
@@ -181,7 +181,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 10.833333333333334,
-      "runtime_s": 0.0666968999994424,
+      "runtime_s": 0.06137269999999262,
       "status": "ok",
       "notes": "510 of 512 samples valid; shot standard error of the ratio 0.007; peak bond dimension 8 reached the cap, so the state was truncated"
     },
@@ -197,7 +197,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 10.833333333333334,
-      "runtime_s": 0.09938869999950839,
+      "runtime_s": 0.09304119999978866,
       "status": "ok",
       "notes": "511 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 16 reached the cap, so the state was truncated"
     },
@@ -213,7 +213,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 10.833333333333334,
-      "runtime_s": 0.1545083999999406,
+      "runtime_s": 0.15779160000056436,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.008; peak bond dimension 32 reached the cap, so the state was truncated"
     },
@@ -229,7 +229,7 @@
       "exact_cost_max": 34.833333333333336,
       "exact_method": "brute_force",
       "best_sampled_cost": 10.833333333333334,
-      "runtime_s": 0.16149870000026567,
+      "runtime_s": 0.1650179999996908,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.008; peak bond dimension 40 is below the cap 64, so nothing was truncated beyond 1e-16"
     },
@@ -245,7 +245,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 13.0,
-      "runtime_s": 0.09113499999966734,
+      "runtime_s": 0.09139539999887347,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.006; untruncated statevector reference, same angles and shots"
     },
@@ -261,7 +261,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 18.0,
-      "runtime_s": 0.06573219999972935,
+      "runtime_s": 0.06611420000081125,
       "status": "ok",
       "notes": "12 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 40 reached the cap, so the state was truncated"
     },
@@ -277,7 +277,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 17.0,
-      "runtime_s": 0.07225500000004104,
+      "runtime_s": 0.0733840999982931,
       "status": "ok",
       "notes": "142 of 512 samples valid; shot standard error of the ratio 0.015; peak bond dimension 40 reached the cap, so the state was truncated"
     },
@@ -293,7 +293,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 13.0,
-      "runtime_s": 0.08449819999987085,
+      "runtime_s": 0.08325629999853845,
       "status": "ok",
       "notes": "326 of 512 samples valid; shot standard error of the ratio 0.016; peak bond dimension 40 reached the cap, so the state was truncated"
     },
@@ -309,7 +309,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 12.5,
-      "runtime_s": 0.14057619999948656,
+      "runtime_s": 0.13675069999953848,
       "status": "ok",
       "notes": "502 of 512 samples valid; shot standard error of the ratio 0.007; peak bond dimension 40 reached the cap, so the state was truncated"
     },
@@ -325,7 +325,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 12.5,
-      "runtime_s": 0.4121104000005289,
+      "runtime_s": 0.4202650999995967,
       "status": "ok",
       "notes": "511 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 40 reached the cap, so the state was truncated"
     },
@@ -341,7 +341,7 @@
       "exact_cost_max": 52.5,
       "exact_method": "brute_force",
       "best_sampled_cost": 14.0,
-      "runtime_s": 1.9184738999992987,
+      "runtime_s": 1.9222225000012259,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -357,7 +357,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 0.10895020000043587,
+      "runtime_s": 0.11681590000080178,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.005; untruncated statevector reference, same angles and shots"
     },
@@ -373,7 +373,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 16.4,
-      "runtime_s": 0.0757885000002716,
+      "runtime_s": 0.07582970000112255,
       "status": "ok",
       "notes": "149 of 512 samples valid; shot standard error of the ratio 0.016; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -389,7 +389,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 0.08177210000030755,
+      "runtime_s": 0.08762930000011693,
       "status": "ok",
       "notes": "140 of 512 samples valid; shot standard error of the ratio 0.016; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -405,7 +405,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 0.09848310000052152,
+      "runtime_s": 0.09782910000103584,
       "status": "ok",
       "notes": "237 of 512 samples valid; shot standard error of the ratio 0.019; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -421,7 +421,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 0.17716480000035517,
+      "runtime_s": 0.21358869999858143,
       "status": "ok",
       "notes": "488 of 512 samples valid; shot standard error of the ratio 0.009; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -437,7 +437,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 0.6525124999998297,
+      "runtime_s": 0.6685223999993468,
       "status": "ok",
       "notes": "510 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -453,7 +453,7 @@
       "exact_cost_max": 56.900000000000006,
       "exact_method": "brute_force",
       "best_sampled_cost": 15.899999999999999,
-      "runtime_s": 3.877323699999579,
+      "runtime_s": 3.793755800001236,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -469,7 +469,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 34.42857142857143,
-      "runtime_s": 0.08839900000020862,
+      "runtime_s": 0.09004520000053162,
       "status": "ok",
       "notes": "112 of 512 samples valid; shot standard error of the ratio 0.014; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -485,7 +485,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 35.42857142857143,
-      "runtime_s": 0.12928389999979117,
+      "runtime_s": 0.11439590000009048,
       "status": "ok",
       "notes": "121 of 512 samples valid; shot standard error of the ratio 0.013; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -501,7 +501,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 33.92857142857143,
-      "runtime_s": 0.17901759999949718,
+      "runtime_s": 0.1493973000015103,
       "status": "ok",
       "notes": "88 of 512 samples valid; shot standard error of the ratio 0.012; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -517,7 +517,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 32.92857142857143,
-      "runtime_s": 0.32780929999989894,
+      "runtime_s": 0.3282181999984459,
       "status": "ok",
       "notes": "368 of 512 samples valid; shot standard error of the ratio 0.015; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -533,7 +533,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 32.92857142857143,
-      "runtime_s": 1.2920377000000371,
+      "runtime_s": 1.2580042999998113,
       "status": "ok",
       "notes": "504 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -549,7 +549,7 @@
       "exact_cost_max": 73.42857142857142,
       "exact_method": "milp",
       "best_sampled_cost": 32.92857142857143,
-      "runtime_s": 8.640725700000075,
+      "runtime_s": 8.566629099999773,
       "status": "ok",
       "notes": "512 of 512 samples valid; shot standard error of the ratio 0.005; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -565,7 +565,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 42.27777777777778,
-      "runtime_s": 0.12543879999975616,
+      "runtime_s": 0.12554119999913382,
       "status": "ok",
       "notes": "113 of 512 samples valid; shot standard error of the ratio 0.013; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -581,7 +581,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 41.27777777777778,
-      "runtime_s": 0.14637730000049487,
+      "runtime_s": 0.14670180000030086,
       "status": "ok",
       "notes": "50 of 512 samples valid; shot standard error of the ratio 0.010; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -597,7 +597,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 41.27777777777777,
-      "runtime_s": 0.24326039999959903,
+      "runtime_s": 0.23433880000084173,
       "status": "ok",
       "notes": "79 of 512 samples valid; shot standard error of the ratio 0.013; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -613,7 +613,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 41.27777777777778,
-      "runtime_s": 0.6101257999998779,
+      "runtime_s": 0.6024740000011661,
       "status": "ok",
       "notes": "229 of 512 samples valid; shot standard error of the ratio 0.017; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -629,7 +629,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 39.27777777777777,
-      "runtime_s": 2.0239590999999564,
+      "runtime_s": 2.0162041999992653,
       "status": "ok",
       "notes": "472 of 512 samples valid; shot standard error of the ratio 0.010; peak bond dimension 64 reached the cap, so the state was truncated"
     },
@@ -645,7 +645,7 @@
       "exact_cost_max": 99.27777777777777,
       "exact_method": "milp",
       "best_sampled_cost": 39.27777777777777,
-      "runtime_s": 14.148362700000689,
+      "runtime_s": 14.190211500001169,
       "status": "ok",
       "notes": "502 of 512 samples valid; shot standard error of the ratio 0.006; peak bond dimension 64 reached the cap, so the state was truncated"
     }

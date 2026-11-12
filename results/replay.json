@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:41:02Z",
+  "generated_at": "2026-11-12T13:04:55Z",
   "seed": 7,
   "source": "scripts/run_replay.py",
   "data_provenance": "synthetic",
@@ -140,7 +140,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 4.796729900000173,
+      "runtime_s": 4.7846494000004895,
       "audit_passed": true
     },
     {
@@ -189,7 +189,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 3.1071917999997822,
+      "runtime_s": 2.95837500000016,
       "audit_passed": true
     },
     {
@@ -236,7 +236,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 3.164332299999842,
+      "runtime_s": 2.924237200000789,
       "audit_passed": true
     },
     {
@@ -285,7 +285,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 3.8488320999995267,
+      "runtime_s": 3.627102600001308,
       "audit_passed": true
     },
     {
@@ -335,7 +335,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 4.011720499999683,
+      "runtime_s": 3.8968336999987514,
       "audit_passed": true
     },
     {
@@ -386,7 +386,7 @@
         0.0,
         1.0
       ],
-      "runtime_s": 4.609284400000433,
+      "runtime_s": 4.3151488000003155,
       "audit_passed": true
     },
     {
@@ -438,7 +438,7 @@
         0.0,
         1.0
       ],
-      "runtime_s": 4.490747900000315,
+      "runtime_s": 4.321533000000272,
       "audit_passed": true
     },
     {
@@ -487,7 +487,7 @@
         0.0,
         2.0
       ],
-      "runtime_s": 4.615264400000342,
+      "runtime_s": 4.321316999999908,
       "audit_passed": true
     },
     {
@@ -537,7 +537,7 @@
         0.0,
         2.0
       ],
-      "runtime_s": 4.158579299999474,
+      "runtime_s": 4.076393299999836,
       "audit_passed": true
     },
     {
@@ -585,7 +585,7 @@
         0.0,
         3.0
       ],
-      "runtime_s": 4.104755700000169,
+      "runtime_s": 3.995800999999119,
       "audit_passed": true
     },
     {
@@ -635,7 +635,7 @@
         0.0,
         3.0
       ],
-      "runtime_s": 3.1298759999999675,
+      "runtime_s": 2.9925205999988975,
       "audit_passed": true
     },
     {
@@ -682,7 +682,7 @@
         0.0,
         4.0
       ],
-      "runtime_s": 2.8318387999997867,
+      "runtime_s": 2.6409395999999106,
       "audit_passed": true
     }
   ],

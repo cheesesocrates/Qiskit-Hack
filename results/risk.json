@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:42:36Z",
+  "seed": 7,
+  "source": "src/quantum/risk.py",
+  "data_provenance": "synthetic",
+  "method": "iterative_amplitude_estimation",
+  "block": {
+    "n_feeders": 8,
+    "feeder_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "critical_feeder_ids": [
+      2,
+      6
+    ],
+    "description": "The synthetic 8-feeder cluster of 5 MW feeders at the forecast peak hour (19:00 on the day-ahead forecast): predicted shortfall 13.404 MW, plan sheds 3 feeders = 15 MW. Critical (protected) feeders [2, 6] are never in the plan; any shortfall the plan does not cover needs an unplanned cut."
+  },
+  "alpha": 0.95,
+  "loss_unit": "MW of shortfall not covered by the plan at the peak hour",
+  "residual_source": "results/forecast.json residuals: actual minus predicted on the ridge model's test hours, 8 equal-width bins (mid-points used), n=168",
+  "scenarios": [
+    {
+      "label": "residual -5.83 to -4.62 MW",
+      "shortfall_extra_mw": -5.226437499999999,
+      "prob": 0.017857142857142856,
+      "loss": 0.0
+    },
+    {
+      "label": "residual -4.62 to -3.41 MW",
+      "shortfall_extra_mw": -4.0153125,
+      "prob": 0.03571428571428571,
+      "loss": 0.0
+    },
+    {
+      "label": "residual -3.41 to -2.20 MW",
+      "shortfall_extra_mw": -2.8041875,
+      "prob": 0.10119047619047619,
+      "loss": 0.0
+    },
+    {
+      "label": "residual -2.20 to -0.99 MW",
+      "shortfall_extra_mw": -1.5930624999999998,
+      "prob": 0.17261904761904762,
+      "loss": 0.0
+    },
+    {
+      "label": "residual -0.99 to +0.22 MW",
+      "shortfall_extra_mw": -0.3819374999999998,
+      "prob": 0.4523809523809524,
+      "loss": 0.0
+    },
+    {
+      "label": "residual +0.22 to +1.43 MW",
+      "shortfall_extra_mw": 0.8291875000000002,
+      "prob": 0.09523809523809523,
+      "loss": 0.0
+    },
+    {
+      "label": "residual +1.43 to +2.65 MW",
+      "shortfall_extra_mw": 2.0403125000000006,
+      "prob": 0.07738095238095238,
+      "loss": 0.44431250000000055
+    },
+    {
+      "label": "residual +2.65 to +3.86 MW",
+      "shortfall_extra_mw": 3.2514375,
+      "prob": 0.047619047619047616,
+      "loss": 1.6554375000000014
+    }
+  ],
+  "n_qubits": 4,
+  "epsilon_target": 0.005,
+  "confidence_alpha": 0.05,
+  "oracle_queries": 29900,
+  "exact": {
+    "expected_loss": 0.11321168154761915,
+    "tail_prob": 0.125,
+    "var": 0.44431250000000055,
+    "cvar": 0.9056934523809532
+  },
+  "estimated": {
+    "expected_loss": 0.11195663507203604,
+    "expected_loss_ci": [
+      0.10920343017438931,
+      0.11470983996968277
+    ],
+    "tail_prob": 0.1246064710278261,
+    "tail_prob_ci": [
+      0.12377066206604913,
+      0.12544227998960306
+    ],
+    "var": 0.4443125,
+    "cvar": 0.9106996737647027,
+    "cvar_ci": [
+      0.8903737392900452,
+      0.9312711645057975
+    ]
+  },
+  "within_tolerance": true,
+  "notes": "IterativeAmplitudeEstimation (qiskit-algorithms 0.4.0), epsilon_target=0.005 per amplitude, 95% confidence, 100 shots per round, seeded Aer sampler. 3 scenario qubits loaded exactly with StatePreparation, 1 objective qubit. VaR search: P(L<=0.000) ~ 0.8755; P(L<=0.444) ~ 0.9524. tail_prob is P(L > 0), the chance that the plan falls short and an unplanned cut is needed. CVaR CI combines the numerator and denominator intervals. Simulation time 1.88 s. Exact values come from the same discrete distribution; at 3 scenario qubits this is classically trivial, so no speed-up is claimed. Demand and shortfall are synthetic."
+}

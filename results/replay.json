@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:08:53Z",
+  "generated_at": "2026-11-12T12:41:02Z",
   "seed": 7,
   "source": "scripts/run_replay.py",
   "data_provenance": "synthetic",
@@ -97,7 +97,7 @@
       "lon": 66.985
     }
   ],
-  "solver_requested": "exact",
+  "solver_requested": "quantum",
   "frames": [
     {
       "step": 0,
@@ -106,17 +106,17 @@
       "forecast_mw": 4.858,
       "quota": 1,
       "plan": [
-        0,
-        0,
-        0,
-        0,
-        0,
         1,
+        0,
+        0,
+        0,
+        0,
+        0,
         0,
         0
       ],
       "changed_from_previous": [
-        5
+        0
       ],
       "revised_vs_prior_plan": [],
       "window_quotas": [
@@ -124,23 +124,23 @@
         2,
         2
       ],
-      "window_bits": "000001000100100010010000",
+      "window_bits": "100000000100100000010100",
       "cost": 5.833333333333333,
       "exact_cost": 5.833333333333333,
       "matches_exact": true,
-      "solver_used": "exact",
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
       "warm_started": false,
       "ledger_after": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
         1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
         0.0,
         0.0
       ],
-      "runtime_s": 0.1418066001497209,
+      "runtime_s": 4.796729900000173,
       "audit_passed": true
     },
     {
@@ -160,8 +160,8 @@
         0
       ],
       "changed_from_previous": [
-        3,
-        5
+        0,
+        3
       ],
       "revised_vs_prior_plan": [
         1,
@@ -173,23 +173,23 @@
         2,
         2
       ],
-      "window_bits": "000100000100100010010000",
-      "cost": 7.0,
-      "exact_cost": 7.0,
+      "window_bits": "000100000100010000011000",
+      "cost": 6.5,
+      "exact_cost": 6.5,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        0.0,
+        1.0,
         0.0,
         0.0,
         1.0,
         0.0,
-        1.0,
+        0.0,
         0.0,
         0.0
       ],
-      "runtime_s": 0.14828369999304414,
+      "runtime_s": 3.1071917999997822,
       "audit_passed": true
     },
     {
@@ -213,32 +213,30 @@
         5
       ],
       "revised_vs_prior_plan": [
-        1,
-        4,
-        5
+        1
       ],
       "window_quotas": [
         1,
         2,
         2
       ],
-      "window_bits": "000001000001100011000000",
-      "cost": 8.333333333333332,
-      "exact_cost": 8.333333333333332,
+      "window_bits": "000001000001100001000100",
+      "cost": 7.833333333333333,
+      "exact_cost": 7.833333333333333,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        0.0,
+        1.0,
         0.0,
         0.0,
         1.0,
         0.0,
-        2.0,
+        1.0,
         0.0,
         0.0
       ],
-      "runtime_s": 0.16523619974032044,
+      "runtime_s": 3.164332299999842,
       "audit_passed": true
     },
     {
@@ -248,8 +246,8 @@
       "forecast_mw": 7.17,
       "quota": 2,
       "plan": [
-        0,
         1,
+        0,
         0,
         0,
         1,
@@ -258,12 +256,12 @@
         0
       ],
       "changed_from_previous": [
-        1,
+        0,
         4,
         5
       ],
       "revised_vs_prior_plan": [
-        1,
+        0,
         3
       ],
       "window_quotas": [
@@ -271,23 +269,23 @@
         2,
         3
       ],
-      "window_bits": "010010000001000111001000",
-      "cost": 11.333333333333334,
-      "exact_cost": 11.333333333333334,
+      "window_bits": "100010000001010001001001",
+      "cost": 10.833333333333334,
+      "exact_cost": 10.833333333333334,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        0.0,
-        1.0,
-        0.0,
-        1.0,
-        1.0,
         2.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
-      "runtime_s": 0.504888900090009,
+      "runtime_s": 3.8488320999995267,
       "audit_passed": true
     },
     {
@@ -297,8 +295,8 @@
       "forecast_mw": 9.087,
       "quota": 2,
       "plan": [
-        1,
         0,
+        1,
         0,
         1,
         0,
@@ -313,31 +311,31 @@
         4
       ],
       "revised_vs_prior_plan": [
-        0,
-        7
+        1,
+        5
       ],
       "window_quotas": [
         2,
         3,
         3
       ],
-      "window_bits": "100100000000110111010000",
-      "cost": 12.833333333333332,
+      "window_bits": "010100001000110001010001",
+      "cost": 13.833333333333332,
       "exact_cost": 12.833333333333332,
-      "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "matches_exact": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        1.0,
+        2.0,
         1.0,
         0.0,
         2.0,
         1.0,
-        2.0,
+        1.0,
         0.0,
         0.0
       ],
-      "runtime_s": 0.6747165000997484,
+      "runtime_s": 4.011720499999683,
       "audit_passed": true
     },
     {
@@ -348,39 +346,39 @@
       "quota": 3,
       "plan": [
         0,
+        0,
+        0,
+        0,
         1,
-        0,
-        0,
         1,
-        0,
         0,
         1
       ],
       "changed_from_previous": [
-        0,
         1,
         3,
         4,
+        5,
         7
       ],
       "revised_vs_prior_plan": [
-        1,
-        5
+        0,
+        7
       ],
       "window_quotas": [
         3,
         3,
         3
       ],
-      "window_bits": "010010011001010001001001",
-      "cost": 14.833333333333334,
+      "window_bits": "000011011100010000011001",
+      "cost": 16.833333333333336,
       "exact_cost": 14.833333333333334,
-      "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "matches_exact": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        1.0,
         2.0,
+        1.0,
         0.0,
         2.0,
         2.0,
@@ -388,7 +386,7 @@
         0.0,
         1.0
       ],
-      "runtime_s": 0.8693292001262307,
+      "runtime_s": 4.609284400000433,
       "audit_passed": true
     },
     {
@@ -399,11 +397,11 @@
       "quota": 3,
       "plan": [
         1,
-        0,
-        0,
         1,
         0,
         1,
+        0,
+        0,
         0,
         0
       ],
@@ -415,29 +413,32 @@
         5,
         7
       ],
-      "revised_vs_prior_plan": [],
+      "revised_vs_prior_plan": [
+        3,
+        5
+      ],
       "window_quotas": [
         3,
         3,
         3
       ],
-      "window_bits": "100101000100100110010100",
-      "cost": 12.833333333333332,
-      "exact_cost": 12.833333333333332,
+      "window_bits": "110100000000110111010000",
+      "cost": 13.333333333333332,
+      "exact_cost": 13.333333333333332,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        2.0,
+        3.0,
         2.0,
         0.0,
         3.0,
         2.0,
-        3.0,
+        2.0,
         0.0,
         1.0
       ],
-      "runtime_s": 0.9413171000778675,
+      "runtime_s": 4.490747900000315,
       "audit_passed": true
     },
     {
@@ -448,11 +449,11 @@
       "quota": 3,
       "plan": [
         0,
+        0,
+        0,
+        0,
         1,
-        0,
-        0,
         1,
-        0,
         0,
         1
       ],
@@ -470,15 +471,15 @@
         3,
         3
       ],
-      "window_bits": "010010011001010001001001",
-      "cost": 12.833333333333334,
-      "exact_cost": 12.833333333333334,
-      "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "window_bits": "000011011001100001000101",
+      "cost": 14.833333333333334,
+      "exact_cost": 13.333333333333334,
+      "matches_exact": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        2.0,
         3.0,
+        2.0,
         0.0,
         3.0,
         3.0,
@@ -486,7 +487,7 @@
         0.0,
         2.0
       ],
-      "runtime_s": 0.9141080998815596,
+      "runtime_s": 4.615264400000342,
       "audit_passed": true
     },
     {
@@ -497,11 +498,11 @@
       "quota": 4,
       "plan": [
         1,
+        1,
         0,
+        1,
+        1,
         0,
-        1,
-        1,
-        1,
         0,
         0
       ],
@@ -513,30 +514,30 @@
         7
       ],
       "revised_vs_prior_plan": [
-        4
+        1
       ],
       "window_quotas": [
         4,
         3,
         3
       ],
-      "window_bits": "100111000100010110011000",
-      "cost": 15.833333333333334,
-      "exact_cost": 15.833333333333334,
+      "window_bits": "110110000100010110011000",
+      "cost": 16.333333333333336,
+      "exact_cost": 16.333333333333336,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        3.0,
+        4.0,
         3.0,
         0.0,
         4.0,
         4.0,
-        4.0,
+        3.0,
         0.0,
         2.0
       ],
-      "runtime_s": 0.7246468001976609,
+      "runtime_s": 4.158579299999474,
       "audit_passed": true
     },
     {
@@ -557,9 +558,9 @@
       ],
       "changed_from_previous": [
         0,
-        1,
         3,
         4,
+        5,
         7
       ],
       "revised_vs_prior_plan": [],
@@ -570,21 +571,21 @@
       ],
       "window_bits": "010001011001100001000001",
       "cost": 12.333333333333334,
-      "exact_cost": 12.333333333333334,
+      "exact_cost": 12.333333333333332,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        3.0,
+        4.0,
         4.0,
         0.0,
         4.0,
         4.0,
-        5.0,
+        4.0,
         0.0,
         3.0
       ],
-      "runtime_s": 0.6540133999660611,
+      "runtime_s": 4.104755700000169,
       "audit_passed": true
     },
     {
@@ -620,21 +621,21 @@
       ],
       "window_bits": "000110000100000110000000",
       "cost": 5.833333333333334,
-      "exact_cost": 5.833333333333334,
+      "exact_cost": 5.833333333333333,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
-        3.0,
+        4.0,
         4.0,
         0.0,
         5.0,
         5.0,
-        5.0,
+        4.0,
         0.0,
         3.0
       ],
-      "runtime_s": 0.16601269971579313,
+      "runtime_s": 3.1298759999999675,
       "audit_passed": true
     },
     {
@@ -644,8 +645,8 @@
       "forecast_mw": 7.575,
       "quota": 2,
       "plan": [
-        1,
         0,
+        1,
         0,
         0,
         0,
@@ -654,56 +655,53 @@
         1
       ],
       "changed_from_previous": [
-        0,
+        1,
         3,
         4,
         7
       ],
-      "revised_vs_prior_plan": [
-        0,
-        1
-      ],
+      "revised_vs_prior_plan": [],
       "window_quotas": [
         2,
         1,
         1
       ],
-      "window_bits": "100000010100000010000000",
-      "cost": 5.333333333333333,
-      "exact_cost": 5.333333333333333,
+      "window_bits": "010000011000000000000100",
+      "cost": 4.833333333333333,
+      "exact_cost": 4.833333333333333,
       "matches_exact": true,
-      "solver_used": "exact",
-      "warm_started": false,
+      "solver_used": "quantum (Grover-mixer QAOA, p=2, best of 256 shots)",
+      "warm_started": true,
       "ledger_after": [
         4.0,
-        4.0,
+        5.0,
         0.0,
         5.0,
         5.0,
-        5.0,
+        4.0,
         0.0,
         4.0
       ],
-      "runtime_s": 0.06063659954816103,
+      "runtime_s": 2.8318387999997867,
       "audit_passed": true
     }
   ],
   "summary": {
     "n_frames": 12,
     "n_changed": 48,
-    "matches_exact_count": 12,
-    "total_hardship": 31.5,
+    "matches_exact_count": 9,
+    "total_hardship": 32.0,
     "fairness_spread_hours": 1.0,
     "final_ledger": [
       4.0,
-      4.0,
+      5.0,
       0.0,
       5.0,
       5.0,
-      5.0,
+      4.0,
       0.0,
       4.0
     ]
   },
-  "notes": "Synthetic feeders (8 illustrative Karachi zones; feeder 2 hospital and feeder 6 water pump protected). Receding horizon: 12 hourly frames from 12:00 on 2026-10-28 (the last test day of the classical ridge forecast; weather source open-meteo-snapshot, demand and shortfall series synthetic). Each step solves a 3-hour window and commits only its first hour. The first window hour uses the actual shortfall (known when the hour starts); the later hours use the forecast. Hours past 23:00 wrap onto the same forecast day because no next-day forecast exists. Quotas are ceil(MW / 5) clipped to 0..4. The ledger starts at zero at 12:00 (earlier cuts that day are not modelled). Solver requested: exact. Frames solved by the quantum command: 0; by exact as a fallback after a quantum failure: 0; by exact directly: 12. Every plan was re-evaluated here and checked for validity; exact_cost is the brute-force optimum of the same window. warm_started is true only when the solver that produced the plan was given the previous window's plan shifted by one hour (the exact solver never is). audit_passed is the audit of the window plan, including the daily-hours rule applied to the replay ledger."
+  "notes": "Synthetic feeders (8 illustrative Karachi zones; feeder 2 hospital and feeder 6 water pump protected). Receding horizon: 12 hourly frames from 12:00 on 2026-10-28 (the last test day of the classical ridge forecast; weather source open-meteo-snapshot, demand and shortfall series synthetic). Each step solves a 3-hour window and commits only its first hour. The first window hour uses the actual shortfall (known when the hour starts); the later hours use the forecast. Hours past 23:00 wrap onto the same forecast day because no next-day forecast exists. Quotas are ceil(MW / 5) clipped to 0..4. The ledger starts at zero at 12:00 (earlier cuts that day are not modelled). Solver requested: quantum. Frames solved by the quantum command: 12; by exact as a fallback after a quantum failure: 0; by exact directly: 0. Every plan was re-evaluated here and checked for validity; exact_cost is the brute-force optimum of the same window. warm_started is true only when the solver that produced the plan was given the previous window's plan shifted by one hour (the exact solver never is). audit_passed is the audit of the window plan, including the daily-hours rule applied to the replay ledger."
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:39:47Z",
+  "generated_at": "2026-11-12T12:43:27Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -206,6 +206,14 @@
       "test": "tests/quantum/test_counting_gas.py::test_gas_rows_consistent"
     },
     {
+      "id": "Q12",
+      "name": "Amplitude estimation of expected loss and tail probability matches the exact values",
+      "passed": true,
+      "detail": "E[L] exact 0.3000, estimate 0.2988; P(L>0) exact 0.2000, estimate 0.1993",
+      "area": "quantum",
+      "test": "tests/quantum/test_risk.py::test_iae_matches_exact"
+    },
+    {
       "id": "S01",
       "name": "Committed schemas match schemas/build_schemas.py",
       "passed": true,
@@ -225,14 +233,14 @@
       "id": "S03",
       "name": "All results JSON files validate against their schemas",
       "passed": true,
-      "detail": "19 files valid, 1 not generated yet",
+      "detail": "20 files valid, 0 not generated yet",
       "area": "shared",
       "test": "tests/test_schemas.py::test_results_validate"
     }
   ],
   "summary": {
-    "total": 28,
-    "passed": 28,
+    "total": 29,
+    "passed": 29,
     "failed": 0
   }
 }

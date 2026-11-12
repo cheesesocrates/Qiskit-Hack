@@ -10,15 +10,18 @@ verified), **not started**, **not working** (tried, fails: see `docs/KNOWN_ISSUE
 
 ## RESUME HERE
 
-- Updated: 2026-11-12 19:20 PKT (UTC+5), session 3 (dashboard redesign) on branch `feat/ui`.
-- Deadline: 2026-11-12 23:59 PKT. Code freeze 22:59. `v1.0-submission` (commit `c2ba24e`) is the
-  safe tag; never move it. The redesign merges to main via a pull request and is tagged
-  `v1.1-submission` only if `tasks.py test`, `tasks.py ui-smoke` and `validate_results.py` pass.
-- Remote: `https://github.com/cheesesocrates/Qiskit-Hack` (origin). CI runs on push and on PRs.
-- Branch state: every screen redesigned, smoke test with all checks green at 1440 x 900, contrast
-  check green. Safe to merge once the full test suite passes on the branch.
-- Half-finished: nothing on the branch. Not built: presenter mode (P2).
-- Next command: `.venv/Scripts/python.exe scripts/tasks.py test` on `feat/ui`, then open the PR.
+- Updated: 2026-11-12 19:25 PKT (UTC+5), end of session 3 (dashboard redesign).
+- Deadline: 2026-11-12 23:59 PKT. Code freeze 22:59. Never push after 23:59.
+- `main` contains the redesign (PR #1, merge `50239ca`) and this docs update (PR #2).
+  Submit from tag `v1.1-submission` (the merge commit of PR #2). `v1.0-submission` (`c2ba24e`,
+  the earlier UI) stays as a fallback; never move or delete either tag.
+- Passing on the PR #1 branch and in CI (Ubuntu): `tasks.py test` 58 passed (includes the UI
+  smoke, contrast and not-available checks), `tasks.py ui-smoke` all pass, `validate_results.py`
+  20 valid. 32 of 32 proof checks pass.
+- Half-finished: nothing. Not built: presenter mode (P2).
+- By hand: record the 3-minute video from the new UI using `docs/demo_script.md`, re-check every
+  link in a private window, submit from `v1.1-submission`.
+- Next command for a new session: `.venv/Scripts/python.exe scripts/tasks.py test`.
 
 ## Session 3: dashboard redesign (branch feat/ui)
 

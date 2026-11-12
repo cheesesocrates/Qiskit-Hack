@@ -8,6 +8,8 @@ results are reproducible. Zone names are illustrative Karachi labels only.
                 round-robin and random-valid plans clearly break the cap
   block_4x2     4 feeders x 2 hours, 8 variables, 9 valid plans (counting, Grover search)
   scale_<N>x2   N feeders x 2 hours for the scaling curve (N = 6, 8, 10, 12, 16, 20)
+  scale_20x<T>  20 feeders x T hours (T = 3, 4): larger MPS instances, since the zone table
+                holds 20 feeders at most
 """
 from __future__ import annotations
 
@@ -18,6 +20,7 @@ HEATWAVE_SEED = 11
 # hardship multiplier per hour of the 14:00-17:00 window: heat stress peaks at 15:00
 HEATWAVE_HOUR_FACTOR = (0.8, 1.4, 1.1)
 SCALE_SIZES = (6, 8, 10, 12, 16, 20)
+SCALE_LONG = ((20, 3), (20, 4))   # (feeders, hours) beyond 2 hours
 
 
 def _base() -> tuple:
@@ -73,17 +76,18 @@ def _block_4x2() -> tuple:
         "Grover Adaptive Search.")
 
 
-def _scale(n: int):
+def _scale(n: int, n_hours: int = 2):
     def build() -> tuple:
         protected = {2: "hospital"} if n == 6 else {2: "hospital", 6: "water_pump"}
         n_free = n - len(protected)
         q0 = max(1, round(n_free / 3))
-        quotas = [q0, min(q0 + 1, n_free)]
-        inst = generate(n_feeders=n, n_hours=2, quotas=quotas, seed=100 + n, name=f"scale_{n}x2",
+        quotas = [min(q0 + (t % 2), n_free) for t in range(n_hours)]     # T=2: [q0, q0+1] as before
+        seed = 100 + n if n_hours == 2 else 100 + n + 10 * n_hours
+        inst = generate(n_feeders=n, n_hours=n_hours, quotas=quotas, seed=seed, name=f"scale_{n}x{n_hours}",
                         protected=protected, start_hour=18)
         return inst, (
-            f"Scaling instance: {n} synthetic feeders x 2 hours ({inst.n_vars} variables, "
-            f"{n_free} non-protected), quotas {quotas[0]} and {quotas[1]}. Protected: "
+            f"Scaling instance: {n} synthetic feeders x {n_hours} hours ({inst.n_vars} variables, "
+            f"{n_free} non-protected), quotas " + ", ".join(map(str, quotas)) + ". Protected: "
             + ", ".join(f"feeder {k} ({v})" for k, v in protected.items()) + ".")
     return build
 
@@ -91,3 +95,5 @@ def _scale(n: int):
 SCENARIOS: dict = {"base": _base, "heatwave_cap": _heatwave_cap, "block_4x2": _block_4x2}
 for _n in SCALE_SIZES:
     SCENARIOS[f"scale_{_n}x2"] = _scale(_n)
+for _n, _t in SCALE_LONG:
+    SCENARIOS[f"scale_{_n}x{_t}"] = _scale(_n, _t)

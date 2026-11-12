@@ -25,7 +25,8 @@ Table 1. Where to find each requirement.
 | Reflect on correctness, limits and trade-offs | B. Awareness of limits | 8 |
 | Architecture diagram | C. Implementation | 5 |
 | Originality | D. Innovation | 7 |
-| Glossary of terms (linked from the text) | E. Presentation | 10 |
+| Website: the interactive dashboard | C. Outputs, E. Demonstration | 10 |
+| Glossary of terms (linked from the text) | E. Presentation | 11 |
 
 ## 2. Problem statement
 
@@ -169,7 +170,18 @@ Figure 2. Memory for exact simulation (computed) and for the MPS simulation (mea
 - Commands: python scripts/tasks.py setup, then test, demo and ui (the dashboard). Code and results: https://github.com/cheesesocrates/Qiskit-Hack.
 - 36 of 36 proof checks pass (results/checks.json); scripts/validate_results.py checks every results file against its schema. Optimiser angles differ slightly between machines, so sampled counts reproduce on one machine.
 
-## 10. Glossary
+## 10. Website
+
+The interactive dashboard is online at [https://fairshed.vercel.app/](https://fairshed.vercel.app/). It reads the same [JSON results files](#g-json) as this report, so the numbers on screen match the numbers here.
+
+- **Schedule:** the city map with each hour's plan; protected feeders always stay on.
+- **Replay and rules:** the 12-hour [replay](#g-replay) hour by hour, and a rule checker that scores any schedule.
+- **Results:** method comparison, fair tie-breaks, risk and counting, bigger cities ([MPS](#g-mps)) and the shortage forecast.
+- **Inner working:** plain-language pages on how FairShed works and the methods.
+
+The site replays plans computed in advance on the [simulator](#g-simulator); the quantum planner does not run in the browser. All data is synthetic.
+
+## 11. Glossary
 
 - <a id="g-amplitude-estimation"></a>**Amplitude estimation:** A quantum method that estimates a probability built into a circuit, such as the share of valid plans. We use the iterative version in Qiskit and check every estimate against the exact value.
 - <a id="g-approx-ratio"></a>**Approximation ratio:** How close a plan is to the best one: 1 is the best valid plan, 0 the worst valid plan, and an invalid plan scores 0. A circuit's ratio is the average over its tries.

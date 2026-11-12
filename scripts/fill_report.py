@@ -38,6 +38,7 @@ NA = "not available"
 TEAM_LINE = ("Team: Hello Child. Members: Raahim Babar, Zarrar Nadeem, Ahmed Ayan Arsalan. "
              "Domain: Energy and Smart Infrastructure.")
 FIG1_WIDTH_IN, FIG2_WIDTH_IN = 7.03, 6.53
+WEBSITE_URL = "https://fairshed.vercel.app/"
 CONTEXT_SOURCE = ("Dunya News, 6 October 2026",
                   "https://dunyanews.tv/en/Business/976376-electricity-shortfall-in-pakistan-exceeds-4000mw")
 
@@ -412,7 +413,8 @@ def build() -> list:
         ["Reflect on correctness, limits and trade-offs", "B. Awareness of limits", "8"],
         ["Architecture diagram", "C. Implementation", "5"],
         ["Originality", "D. Innovation", "7"],
-        ["Glossary of terms (linked from the text)", "E. Presentation", "10"]],
+        ["Website: the interactive dashboard", "C. Outputs, E. Demonstration", "10"],
+        ["Glossary of terms (linked from the text)", "E. Presentation", "11"]],
         "Table 1. Where to find each requirement.", None)]
 
     # ---------------------------------------------------------------- 2. problem statement
@@ -657,7 +659,19 @@ def build() -> list:
                        f"{checks} proof checks pass (results/checks.json); scripts/validate_results.py checks every "
                        "results file against its schema. Optimiser angles differ slightly between machines, so "
                        "sampled counts reproduce on one machine."])]
-    B += [("h1", "10. Glossary"), ("glossary", GLOSSARY)]
+    n_frames = rep["summary"]["n_frames"] if rep else None
+    B += [("h1", "10. Website"),
+          ("p", f"The interactive dashboard is online at [[{WEBSITE_URL}|{WEBSITE_URL}]]. It reads the same "
+                "[[JSON results files|json]] as this report, so the numbers on screen match the numbers here."),
+          ("bullets", [("Schedule: ", "the city map with each hour's plan; protected feeders always stay on."),
+                       ("Replay and rules: ", (f"the {n_frames}-hour " if n_frames else "the ") +
+                        "[[replay|replay]] hour by hour, and a rule checker that scores any schedule."),
+                       ("Results: ", "method comparison, fair tie-breaks, risk and counting, bigger cities "
+                                     "([[MPS|mps]]) and the shortage forecast."),
+                       ("Inner working: ", "plain-language pages on how FairShed works and the methods.")]),
+          ("p", "The site replays plans computed in advance on the [[simulator|simulator]]; the quantum planner does "
+                "not run in the browser. All data is synthetic.")]
+    B += [("h1", "11. Glossary"), ("glossary", GLOSSARY)]
     return B
 
 

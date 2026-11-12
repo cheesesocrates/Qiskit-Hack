@@ -32,3 +32,6 @@ results/tmp/
 *.avi
 *.webm
 *.m4v
+
+.vercel
+.env*

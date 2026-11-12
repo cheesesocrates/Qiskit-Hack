@@ -75,10 +75,13 @@ export async function loadResults({ base, schemasBase, scenarios, fetchFn }) {
     schemas[name] = r.json || null;
   }));
 
-  // directory listings (root and each sub folder) to skip probing absent files
+  // directory listings (root and each sub folder) to skip probing absent files. Only a local static
+  // server (python http.server, the smoke test) lists folders; a host such as Vercel answers 404,
+  // which would show as console errors, so the listing is not requested there.
   const listings = {};
+  const local = typeof location === 'undefined' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const dirs = [...new Set(targets.map((t) => (t.rel.includes('/') ? t.rel.split('/')[0] + '/' : '')))];
-  await Promise.all(dirs.map(async (d) => { listings[d] = await listDir(base + d, f); }));
+  if (local) await Promise.all(dirs.map(async (d) => { listings[d] = await listDir(base + d, f); }));
 
   const files = {};
   await Promise.all(targets.map(async ({ rel, schemaName }) => {

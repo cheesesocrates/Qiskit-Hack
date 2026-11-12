@@ -1,0 +1,10 @@
+# The deployed site is the static dashboard only: ui/ reads ../results/*.json and ../schemas/.
+# Everything else (Python source, venv, report, media) stays out of the upload.
+/*
+!/ui
+!/results
+!/schemas
+!/vercel.json
+/results/tmp
+**/__pycache__
+**/*.pyc

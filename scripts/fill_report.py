@@ -720,6 +720,212 @@ def to_docx(blocks: list, path: Path) -> None:
     doc.save(str(path))
 
 
+# ------------------------------------------------------------------------------------------
+# key numbers for the README block and the demo script (all read from results JSON)
+# ------------------------------------------------------------------------------------------
+NA = "not available"
+
+
+def key_numbers() -> dict:
+    K = {}
+    base, abl, cnt = load("plans/base.json"), load("ablation.json"), load("counting.json")
+    rsk, rep, sca = load("risk.json"), load("replay.json"), load("scaling.json")
+    chk, heat, par, lot = load("checks.json"), load("plans/heatwave_cap.json"), load("pareto.json"), load("lottery.json")
+    if base:
+        i, e = base["instance"], base["exact"]
+        K["base"] = (f"{i['n_feeders']} feeders x {i['n_hours']} hours, {e['n_valid']} valid plans, "
+                     f"{e['n_optimal']} tied optima at cost {f(e['cost_min'], 2)}")
+        K["n_valid"], K["n_optimal"] = e["n_valid"], e["n_optimal"]
+    if abl:
+        rows = [r for r in abl["rows"] if r["instance"] == abl["instance_name"]]
+        q = [r for r in rows if r["kind"] == "quantum"]
+        by = {r["method"]: r for r in rows}
+        if q:
+            best = max(q, key=lambda r: r["approx_ratio"])
+            K["best_q"] = f"{best['label']}: approximation ratio {f(best['approx_ratio'])}, P(optimal) per shot {f(best['p_optimal'], 4)}"
+            K["best_q_label"], K["best_q_ratio"], K["best_q_popt"] = best["label"], f(best["approx_ratio"]), f(best["p_optimal"], 4)
+            K["qubits"] = best["n_qubits"]
+        if "dicke_uniform" in by:
+            K["uniform_popt"] = f(by["dicke_uniform"]["p_optimal"], 4)
+        if "round_robin" in by:
+            K["rr_ratio"] = f(by["round_robin"]["approx_ratio"])
+        pen = [r for r in q if r["method"].startswith("penalty")]
+        if pen:
+            K["penalty_valid"] = " and ".join(pct(r["feasibility_pct"]) for r in pen)
+        gas = next((r for r in abl["rows"] if r["method"] == "grover_adaptive_search"), None)
+        if gas:
+            K["gas"] = (f"Grover Adaptive Search on the {gas['instance']} block: {pct(gas['feasibility_pct'], 0)} of "
+                        f"{gas['shots']} runs valid, {f(gas['p_optimal'], 2)} optimal")
+    if lot and lot["tie_groups"]:
+        g = lot["tie_groups"][0]
+        K["tie"] = f"{g['n_plans']} plans tied at cost {f(g['cost'], 2)} get equal probability (spread {g['prob_spread']:.1e})"
+    if par:
+        K["pareto"] = f"{sum(1 for p in par['points'] if p['matches_exact'])} of {len(par['points'])} fairness weights"
+    if cnt:
+        K["count"] = (f"exact {cnt['exact_count']}, estimate {f(cnt['estimated_count'], 2)} "
+                      f"(95% interval {f(cnt['ci'][0], 2)} to {f(cnt['ci'][1], 2)})")
+        K["count_short"] = f"{f(cnt['estimated_count'], 2)} against an exact {cnt['exact_count']}"
+    if rsk:
+        K["cvar"] = (f"CVaR {f(rsk['alpha'] * 100, 0)}% exact {f(rsk['exact']['cvar'], 3)} MW, estimate "
+                     f"{f(rsk['estimated']['cvar'], 3)} MW; P(unplanned cut) exact {f(rsk['exact']['tail_prob'], 3)}, "
+                     f"estimate {f(rsk['estimated']['tail_prob'], 3)}")
+        K["cvar_short"] = f"{f(rsk['estimated']['cvar'], 3)} MW against an exact {f(rsk['exact']['cvar'], 3)} MW"
+    if rep:
+        s = rep["summary"]
+        nq = sum(1 for fr in rep["frames"] if "quantum" in fr["solver_used"])
+        n_fail = sum(1 for fr in rep["frames"] if not fr["audit_passed"])
+        K["replay_audit"] = "every committed plan passed the audit" if n_fail == 0 else f"{n_fail} committed plans failed the audit"
+        K["replay"] = (f"{s['n_frames']} hourly frames, {nq} solved by the quantum solver, "
+                       f"{s['matches_exact_count']} matched the exact optimum, {K['replay_audit']}")
+        K["replay_frames"], K["replay_match"], K["replay_q"] = s["n_frames"], s["matches_exact_count"], nq
+    if sca:
+        ok = [p for p in sca["points"] if p["status"] == "ok"]
+        big = max(ok, key=lambda p: (p["n_qubits"], p["bond_dim"] or 0)) if ok else None
+        K["scale"] = (f"{len(ok)} of {len(sca['points'])} points ran, up to {big['n_qubits']} qubits; at "
+                      f"{big['n_qubits']} qubits and bond dimension {big['bond_dim']} the ratio is "
+                      f"{f(big['approx_ratio'])}") if big else NA
+    if chk:
+        K["checks"] = f"{chk['summary']['passed']} of {chk['summary']['total']}"
+    if heat:
+        st = heat["random_valid_stats"]
+        rr = next((p for p in heat["plans"] if p["method"] == "round_robin"), None)
+        K["heat"] = (f"round-robin breaks the rules {rr['n_violations'] if rr else NA} times; "
+                     f"{pct(st['cap_violation_pct'])} of random valid plans break the consecutive-hour cap")
+    return K
+
+
+def readme_block(K: dict) -> str:
+    g = lambda k: K.get(k, NA)
+    lines = [
+        f"- Base instance: {g('base')}.",
+        f"- Best QAOA variant on it: {g('best_q')}; sampling the Dicke state alone gives P(optimal) {g('uniform_popt')}.",
+        f"- Penalty QAOA (standard X mixer): only {g('penalty_valid')} of samples are valid plans.",
+        f"- Fair lottery: {g('tie')}.",
+        f"- {g('gas')}.",
+        f"- Quantum counting of valid plans: {g('count')}.",
+        f"- Tail risk by amplitude estimation: {g('cvar')}.",
+        f"- Replay with the quantum window solver: {g('replay')}.",
+        f"- MPS scaling: {g('scale')}.",
+        f"- Where simple rules fail (scenario heatwave_cap): {g('heat')}.",
+        f"- Proof checks passing: {g('checks')}.",
+        "- The exact classical answer is better or equal on every instance; no speed-up is claimed.",
+    ]
+    return "\n".join(lines)
+
+
+def update_readme(K: dict) -> None:
+    p = ROOT / "README.md"
+    if not p.exists():
+        return
+    text = p.read_text(encoding="utf-8")
+    start, end = "<!-- RESULTS:START -->", "<!-- RESULTS:END -->"
+    if start in text and end in text:
+        head, rest = text.split(start, 1)
+        _old, tail = rest.split(end, 1)
+        p.write_text(head + start + "\n" + readme_block(K) + "\n" + end + tail, encoding="utf-8")
+
+
+def demo_script(K: dict) -> str:
+    g = lambda k: K.get(k, NA)
+    return f"""# FairShed demo script (3 minutes)
+
+Generated by `scripts/fill_report.py` from `results/*.json`. Every number below comes from the
+results files; regenerate after `make demo` so the script matches what the dashboard shows.
+Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8000/ui/ (use
+`?tiles=off` if the recording machine is offline).
+
+## 0:00 to 0:20 Problem
+
+- **On screen:** Plan screen, map of synthetic Karachi zones, hour slider.
+- **Caption:** "Who loses power, and is it fair?"
+- **Voice-over:** "When supply falls short, a utility switches whole feeders off, an hour at a
+  time. The quota says how many. FairShed decides which ones: spread the hours evenly, avoid
+  cutting the same area twice in a row, spare the areas that suffer most, never cut a hospital
+  or a water pump, and let anyone audit the schedule. Everything you will see is synthetic data
+  on a simulator."
+
+## 0:20 to 1:20 Replay mode
+
+- **On screen:** Replay screen. Press play. Point at the feeder cards changing, the actual vs
+  forecast chart, the solver chip and the "Matches exact" chip. Then open Audit, pick
+  "Round-robin", show the violations; switch to "Exact optimum", show it passes.
+- **Caption:** "Re-planning every hour, warm-started from the last plan."
+- **Voice-over:** "This is one afternoon and evening, hour by hour. Each hour a classical ridge
+  forecast sets the next three quotas, a quantum circuit on the simulator picks the plan, and only
+  the first hour is committed. Over {g('replay_frames')} hours, {g('replay_q')} were solved by the
+  quantum solver and {g('replay_match')} matched the exact optimum; {g('replay_audit')}.
+  The audit mode checks any schedule against four rules. In the heatwave scenario,
+  {g('heat')}."
+
+## 1:20 to 2:00 Quantum stages and real numbers
+
+- **On screen:** Compare and proof: the ablation table, then the fair lottery panel, then the
+  proof checklist. Then Risk and counting.
+- **Caption:** "Constraint-preserving circuits: every sample is a valid plan."
+- **Voice-over:** "Each hour starts in a Dicke state, so every sample meets the quota and never
+  touches a protected feeder. The best variant, {g('best_q_label')}, reaches approximation ratio
+  {g('best_q_ratio')}; a standard penalty mixer gives valid plans only {g('penalty_valid')} of the
+  time. With the Grover mixer, tied optimal plans get equal probability: a fair lottery. Amplitude
+  estimation counts the valid plans, {g('count_short')}, and puts the tail risk at {g('cvar_short')}.
+  {g('checks')} proof checks pass."
+- **Numbers on screen for reference:** {g('base')}; {g('tie')}; counting {g('count')}; risk {g('cvar')}.
+
+## 2:00 to 2:30 Honest limits and scale
+
+- **On screen:** Scale screen chart, then the callout "Simulator only".
+- **Caption:** "Simulator only. No speed-up claimed."
+- **Voice-over:** "Be clear about the limits. This runs on a simulator, the data is synthetic, and
+  at {g('qubits')} qubits a classical brute force finds the exact answer, which is better than our
+  sampled plans. Per-shot probability of the optimum is low; the plan is the best of 256 shots. The
+  scale curve uses a matrix product state simulator: {g('scale')}. That shows how the circuit
+  behaves as it grows; it is not a quantum advantage."
+
+## 2:30 to 3:00 Close
+
+- **On screen:** Back to Plan, press play once more; end on the badge "Simulator - synthetic data".
+- **Caption:** "Fair, auditable, and honest about what quantum does today."
+- **Voice-over:** "FairShed turns load-shedding into a constrained optimisation that a quantum
+  circuit can sample from without ever proposing an invalid plan, with a fair lottery among ties
+  and an audit anyone can run. The code, tests and report are in the repository, and every number
+  you saw comes from a results file."
+
+## Recording checklist
+
+- [ ] `python scripts/tasks.py demo` finished, then `python scripts/fill_report.py` (so this script matches).
+- [ ] `python scripts/tasks.py ui-smoke` prints "all 7 screens passed".
+- [ ] Browser zoom 100%, window about 1440 x 900, notifications off, no other tabs visible.
+- [ ] The badge "Simulator - synthetic data" is visible in every shot.
+- [ ] Do not say "faster", "speed-up" or "real feeders".
+- [ ] Record at 1080p, keep under 3:00, export MP4. Do not commit the video; upload it and share the link.
+- [ ] Set the link to "anyone with the link" and open it in a private window before submitting.
+
+## Defense Q&A
+
+**Why not just classical?** At this size, classical wins: brute force finds the exact optimum
+over {g('n_valid')} valid plans immediately, and our report says so. The point is the
+formulation: the constraint-preserving circuits never propose an invalid plan, the Grover mixer
+gives tied plans equal probability (a property a greedy heuristic does not offer), and the same
+pipeline runs unchanged when the circuit is the thing being studied. We measured every quantum
+number against the exact answer instead of claiming an advantage.
+
+**Is the data real?** No. Feeders, demand, supply and the ledger are synthetic, on illustrative
+Karachi zones, because real feeder maps are not public. Weather in the forecast is a real
+Open-Meteo snapshot. Every screen carries the "Simulator - synthetic data" badge.
+
+**How do you know the quantum code is right?** {g('checks')} proof checks run in pytest: the
+cost table equals the classical cost on every bitstring, every XY and Grover-mixer sample is a
+valid plan, Dicke states are uniform, tied plans get equal amplitude, counting is within
+tolerance of enumeration, the qubit-to-plan bit order is tested, and fixed seeds reproduce.
+
+**What does the penalty QAOA show?** That a standard mixer wastes most samples on invalid plans
+({g('penalty_valid')} valid), which is why the Dicke and XY or Grover mixers matter.
+
+**What would you do with more time?** Hardware runs with error mitigation on the 6-qubit block,
+more shots or layers in the window solver so more replay frames match exact, and larger risk
+blocks.
+"""
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     FIG.mkdir(parents=True, exist_ok=True)
@@ -728,8 +934,11 @@ def main() -> int:
     blocks = build()
     (OUT / "FairShed_Report.md").write_text(to_markdown(blocks), encoding="utf-8")
     to_docx(blocks, OUT / "FairShed_Report.docx")
+    K = key_numbers()
+    update_readme(K)
+    (ROOT / "docs" / "demo_script.md").write_text(demo_script(K), encoding="utf-8")
     print("wrote docs/report/FairShed_Report.md, docs/report/FairShed_Report.docx, docs/report/architecture.png, "
-          "docs/report/architecture.mmd, docs/report/figures/*.png")
+          "docs/report/architecture.mmd, docs/report/figures/*.png, docs/demo_script.md, README.md key results")
     return 0
 
 

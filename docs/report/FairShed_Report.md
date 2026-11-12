@@ -1,6 +1,6 @@
 # FairShed: a fair, auditable load-shedding planner with Qiskit
 
-Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 12:53 UTC from commit b00251d by scripts/fill_report.py.
+Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 12:56 UTC from commit fb32c2d by scripts/fill_report.py.
 
 > Simulator only. Every feeder, demand figure and outage ledger in this report is synthetic, on illustrative Karachi zones. Weather in the forecast is a real Open-Meteo snapshot. No quantum speed-up is claimed: every instance here is also solved exactly by classical brute force or MILP, and that exact answer is the yardstick for every quantum number.
 
@@ -321,7 +321,7 @@ Specific issues from docs/KNOWN_ISSUES.md:
 | Replay frames worse than exact | limit | 3 of 12 frames (16:00, 17:00, 19:00) commit a plan whose window cost is above the exact optimum. All 12 plans are valid and pass the audit. |
 | Cross-machine reproducibility | limit | Fixed seeds reproduce results on one machine. COBYLA angles differ in the 4th decimal between machines (BLAS/OS), so sampled counts can differ slightly across machines. |
 | GAS runtime on StatevectorSampler | limit | GroverOptimizer with qiskit's StatevectorSampler took 258 s for 10 runs. The stage uses the Aer sampler (9.4 s for 20 runs). |
-| UI smoke test in CI | limit | `tests/ui/test_ui_smoke.py` needs Node 22+ and Chrome/Chromium/Edge. It skips (with the reason) when either is missing, so CI may report it as skipped. |
+| UI smoke test without a browser | limit | `tests/ui/test_ui_smoke.py` needs Node 22+ and Chrome, Chromium or Edge. It skips (with the reason) when either is missing. CI installs Node 22 and uses the runner's Chrome, and the smoke test passes there (7 of 7 screens on run 43222257341). |
 | Weather data | limit | Weather is a committed snapshot of the real Open-Meteo archive; demand, supply and shortfall are synthetic. `forecast.json` says so in `weather_provenance` and `demand_provenance`. |
 
 ## 8. Reproducibility

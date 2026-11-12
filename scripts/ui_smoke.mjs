@@ -18,31 +18,36 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SCREENS = ['plan', 'compare', 'audit', 'replay', 'risk', 'scale', 'forecast'];
-const OUT = join(ROOT, 'results', 'tmp', 'ui_smoke');
+const SCREENS = ['home', 'schedule', 'replay/watch', 'replay/rules', 'results/scoreboard', 'results/lottery',
+  'results/uncertainty', 'results/scale', 'results/forecast', 'learn/how', 'learn/algorithms', 'learn/glossary'];
+const shotName = (s) => s.replace('/', '-');
 const args = process.argv.slice(2);
-const resultsArg = args.includes('--results') ? args[args.indexOf('--results') + 1] : null;
+const argv = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
+const resultsArg = argv('--results');
+const OUT = argv('--out') ? resolve(ROOT, argv('--out')) : join(ROOT, 'results', 'tmp', 'ui_smoke');
+const [VW, VH] = (argv('--viewport') || '1440x900').split('x').map(Number);
+const FULL = args.includes('--full');
 const WAIT_MS = Number(process.env.SMOKE_WAIT_MS || 2500);
 
 // Per-screen interactions (run in the page; `main`, `byText`, `wait` are in scope). Each returns
 // a short description of what it did. A missing control is not an error when the screen shows
 // "not available" instead (the control does not exist then).
 const INTERACT = {
-  plan: `const play = main.querySelector('.play-btn'); if (!play) return 'no play button';
+  schedule: `const play = main.querySelector('.play-btn'); if (!play) return 'no play button';
          play.click(); await wait(2200); play.click();
          const d = main.querySelector('.details-toggle'); if (d) { d.click(); await wait(400); }
          return 'played hours, opened details';`,
-  compare: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened details';`,
-  audit: `const edit = byText('button', /Edit this plan/); if (!edit) return 'no edit button';
+  'results/scoreboard': `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened details';`,
+  'replay/rules': `const edit = byText('button', /Edit this plan/); if (!edit) return 'no edit button';
           edit.click(); await wait(200);
           const cell = main.querySelector('button.pg-cell'); if (!cell) return 'interaction error: no editable cell';
           cell.click(); await wait(200);
           const rr = byText('button', /Round-robin/); if (rr) rr.click(); await wait(200);
           return 'edited a cell, switched example';`,
-  replay: `const play = main.querySelector('.btn--primary'); if (!play) return 'no play button';
+  'replay/watch': `const play = main.querySelector('.btn--primary'); if (!play) return 'no play button';
            play.click(); await wait(3500); play.click(); return 'played frames';`,
-  risk: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
-  forecast: `const all = byText('button', /All hours/); if (!all) return 'no period control';
+  'results/uncertainty': `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
+  'results/forecast': `const all = byText('button', /All hours/); if (!all) return 'no period control';
              all.click(); await wait(600); return 'switched to all hours';`,
 };
 
@@ -182,6 +187,7 @@ async function main() {
   await S('Log.enable');
   await S('Network.enable');
   await S('Page.enable');
+  await S('Emulation.setDeviceMetricsOverride', { width: VW, height: VH, deviceScaleFactor: 1, mobile: VW < 600 });
 
   const query = new URLSearchParams({ tiles: 'off' });
   if (resultsArg) query.set('results', resultsArg);
@@ -189,7 +195,7 @@ async function main() {
   console.log(`ui_smoke: ${browser}`);
   for (const screen of SCREENS) {
     events = [];
-    query.set('smoke', screen);  // unique query string forces a full load per screen
+    query.set('smoke', shotName(screen));  // unique query string forces a full load per screen
     const url = `http://127.0.0.1:${port}/ui/?${query}#/${screen}`;
     await S('Page.navigate', { url });
     // wait until the app has loaded results and mounted something in <main>
@@ -213,8 +219,8 @@ async function main() {
     const r2 = await S('Runtime.evaluate', { returnByValue: true, expression: `(() => { const m = document.getElementById('main');
       return { text: m ? m.innerText.length : 0, failedRender: !!(m && /This screen failed to render/.test(m.innerText)), na: m ? m.querySelectorAll('.na').length : 0 }; })()` });
     Object.assign(state || {}, r2.result.value);
-    const shot = await S('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
-    writeFileSync(join(OUT, `${screen}.png`), Buffer.from(shot.data, 'base64'));
+    const shot = await S('Page.captureScreenshot', { format: 'png', captureBeyondViewport: FULL });
+    writeFileSync(join(OUT, `${shotName(screen)}.png`), Buffer.from(shot.data, 'base64'));
 
     // exercise the main controls of the screen; any console error they cause fails the screen
     let interaction = '';
@@ -242,7 +248,7 @@ async function main() {
     problems.push(...fatal.map((e) => `${e.kind}: ${e.text}`));
     const ok = problems.length === 0;
     if (!ok) failed++;
-    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(9)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}${interaction ? `; ${interaction}` : ''}`);
+    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(20)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}${interaction ? `; ${interaction}` : ''}`);
     for (const p of problems) console.log(`        ${p}`);
   }
   if (resultsArg === null) {

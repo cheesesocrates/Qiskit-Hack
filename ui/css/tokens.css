@@ -1,46 +1,106 @@
-/* Design tokens. Colours here are read by ui/tests/contrast.py - keep them as 6-digit hex.
-   Rule: colour carries meaning only for feeder state (on / off / protected) and errors (danger).
-   Exactly one accent (iris) is used for interface chrome. */
+/* Design tokens. Every colour in the UI comes from here; scripts/ui_contrast.mjs reads this file
+   and fails the build if a text, control or chart colour misses its contrast target.
+   Keep colours as 6-digit hex. Light is the default; [data-theme="dark"] is the optional dark theme.
+   Feeder state colours (on, off, protected) are used only for feeder state, always with an icon
+   and a word. Charts use the Okabe-Ito palette, darkened where needed to reach 3:1 on the panel. */
 :root {
+  color-scheme: light;
   /* surfaces */
-  --bg: #0B1220;
-  --panel: #121A2B;
-  --raised: #182238;
-  --border: #1F2A40;
-  --border-strong: #66769A;
+  --bg: #F6F7F9;
+  --panel: #FFFFFF;
+  --raised: #EEF1F5;
+  --border: #D1D5DB;
+  --border-strong: #6B7280;
 
   /* text */
-  --text: #E6EAF2;
-  --text-dim: #B4BDCE;
-  --muted: #8A94A8;
+  --text: #111827;
+  --text-dim: #4B5563;
+  --muted: #4B5563;
 
-  /* feeder state (always paired with an icon and a text label) */
-  --on: #2DD4A7;
-  --off: #F5A524;
-  --protected: #4C9AFF;
-  --danger: #F26D6D;
+  /* primary action and links */
+  --accent: #1D4ED8;
+  --accent-tint: #E8EEFD;
+  --on-accent: #FFFFFF;
 
-  /* flat chip tints for the four state colours */
-  --on-tint: #0F2E2D;
-  --off-tint: #32250F;
-  --protected-tint: #112848;
-  --danger-tint: #3A1A24;
+  /* feeder state */
+  --on: #00705A;
+  --on-tint: #E0F2EC;
+  --off: #8F5300;
+  --off-tint: #FDEFD6;
+  --protected: #005A9C;
+  --protected-tint: #E1EDF8;
 
-  /* the single interface accent */
-  --accent: #A99CFF;
-  --accent-tint: #221F40;
+  /* status */
+  --pass: #166534;
+  --pass-tint: #E6F4EA;
+  --danger: #B42318;
+  --danger-tint: #FDECEC;
 
-  /* second data-series colour for charts (neutral, not a state colour) */
-  --series-b: #C9D2E3;
+  /* charts: Okabe-Ito order (blue, vermillion, bluish green, reddish purple, orange, sky blue, black) */
+  --c1: #0072B2;
+  --c2: #C24F00;
+  --c3: #00785A;
+  --c4: #A8467F;
+  --c5: #9A6A00;
+  --c6: #2E7FB0;
+  --c7: #111827;
+  --grid: #E5E7EB;
+  --series-b: #C24F00;
 
   /* type */
-  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ui: "Atkinson Hyperlegible", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --fs-body: 18px;
+  --fs-small: 16px;
+  --fs-min: 14px;
+  --fs-h1: 36px;
+  --fs-h2: 28px;
+  --fs-h3: 22px;
+  --fs-h4: 18px;
 
-  /* shape and rhythm */
+  /* shape and rhythm (8px grid) */
   --radius: 6px;
-  --gap: 16px;
-  --target: 40px;
-  --rail-w: 88px;
-  --top-h: 56px;
+  --gap: 24px;
+  --target: 44px;
+  --target-primary: 48px;
+  --top-h: 64px;
+  --measure: 70ch;
+  --shadow-1: 0 1px 2px rgba(17, 24, 39, 0.08);
+  --shadow-2: 0 8px 24px rgba(17, 24, 39, 0.16);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0F1115;
+  --panel: #181B21;
+  --raised: #23272F;
+  --border: #3A404B;
+  --border-strong: #9AA3B2;
+  --text: #F3F4F6;
+  --text-dim: #C9CED6;
+  --muted: #C9CED6;
+  --accent: #8AB4FF;
+  --accent-tint: #1E2A44;
+  --on-accent: #0F1115;
+  --on: #4FD1B0;
+  --on-tint: #12302A;
+  --off: #F2B44C;
+  --off-tint: #3A2A10;
+  --protected: #7DB8F0;
+  --protected-tint: #142B44;
+  --pass: #6EDB8F;
+  --pass-tint: #133021;
+  --danger: #FF8A80;
+  --danger-tint: #3E1C1C;
+  --c1: #56B4E9;
+  --c2: #F08A3C;
+  --c3: #3CC49A;
+  --c4: #E08BBE;
+  --c5: #E6B800;
+  --c6: #9ACDF0;
+  --c7: #F3F4F6;
+  --grid: #2C313A;
+  --series-b: #F08A3C;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.6);
 }

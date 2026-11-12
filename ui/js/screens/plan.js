@@ -1,15 +1,17 @@
 // Schedule: the working example, built for the people who live with a load-shedding schedule.
-// A full-screen map of tonight's areas. Floating over it: a title card (the current choices as pills,
-// the rule check, the key and "Find your area"), a player bar (Play, hour slider, quota) and three
-// slide-in panels: Plan settings (left), This hour (right) and Tonight's timetable (a sheet above the
-// player). The map keeps the areas clear of whatever is open. Every number comes from the results
-// files; nothing is re-optimised in the browser.
+// A full-screen map of tonight's areas with three small things floating over it:
+//   - a compact card: the question, one dropdown menu per choice (Evening, Priority, Plan made by),
+//     a one-line result, and "Find your area";
+//   - a slim player bar: Play, the hour slider, the quota, and buttons for the two slide-ins;
+//   - two slide-ins, closed until asked for: "This hour" (right) and the timetable (above the player).
+// The map keeps the areas clear of whatever is open. Every number comes from the results files;
+// nothing is re-optimised in the browser.
 import { el, fmt, fmtTrim, clock, clockRange, sum, KIND_LABEL, PROTECTED_WHY } from '../util.js';
 import { icon, STATE, stateOf, stateChip } from '../icons.js';
 import { createFeederMap } from '../components/map.js';
-import { naPanel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
+import { naPanel, panel, tickSlider, kpi, passChip } from '../components/common.js';
 import { debugBox } from '../components/planGrid.js';
-import { buildOptions, defaultMethod, versusRoundRobin, feederFacts, paretoApplies } from '../planModel.js';
+import { buildOptions, defaultMethod, versusRoundRobin, feederFacts, paretoApplies, scenarioInstance } from '../planModel.js';
 import { explainPanel, pageHeader } from '../explain.js';
 import { term } from '../glossary.js';
 import { RULES, checkPlan } from '../rules.js';
@@ -22,10 +24,16 @@ const METHOD_LABEL = {
   random_valid: 'One random valid plan (classical)',
 };
 const METHOD_SHORT = { quantum: 'FairShed', exact: 'Exact search', round_robin: 'Round-robin', random_valid: 'Random plan' };
+const METHOD_SUB = {
+  quantum: 'Our quantum planner: fair, follows the rules.',
+  exact: 'Checks every plan and keeps the best score.',
+  round_robin: 'Takes turns in a fixed order; ignores harm.',
+  random_valid: 'Any plan that meets the quota, drawn at random.',
+};
 const methodLabel = (o) => METHOD_LABEL[o.key] || `${o.label} (${o.kind})`;
 const STEP_MS = 1800;
-const NARROW_PX = 900;   // below this map width the card spans the top and panels cover the map
-const COMPACT_PX = 1100; // below this, one side panel at a time so the map keeps room
+const NARROW_PX = 900;   // below this map width the card spans the top and the side panel covers the map
+const COMPACT_PX = 1100; // below this, "This hour" steps aside when the map would get too narrow
 /** The reader's choices and open panels, kept for the session so a re-render (theme switch, leaving and coming back) does not reset them. */
 let memory = null;
 
@@ -35,9 +43,9 @@ function paretoStops(par) {
   const idx = pts.map((_, i) => i);
   const minBy = (f, tieHigh) => idx.reduce((a, b) => (f(pts[b]) < f(pts[a]) - 1e-12 || (Math.abs(f(pts[b]) - f(pts[a])) <= 1e-12 && tieHigh && pts[b].fairness_weight > pts[a].fairness_weight) ? b : a));
   return [
-    { key: 'harm', label: 'Least harm', sub: 'Cut where it hurts least, even if some areas lose more hours.', i: minBy((p) => p.hardship_total, false) },
-    { key: 'bal', label: 'Balanced', sub: 'The default: harm and an even spread of hours weigh the same.', i: par.default_index },
-    { key: 'even', label: 'Most even', sub: 'Spread outage hours as evenly as possible across areas.', i: minBy((p) => p.fairness_metric, true) },
+    { key: 'harm', label: 'Least harm', sub: 'Cut where it hurts least.', i: minBy((p) => p.hardship_total, false) },
+    { key: 'bal', label: 'Balanced', sub: 'Harm and fairness weigh the same.', i: par.default_index },
+    { key: 'even', label: 'Most even', sub: 'Spread outage hours most evenly.', i: minBy((p) => p.fairness_metric, true) },
   ];
 }
 
@@ -58,7 +66,7 @@ export default {
     // method: the plan on screen. want: the method the reader picked; kept when the evening changes and
     // used again as soon as it is available (the heatwave has no quantum plan).
     const S = { scenario: 'base', method: null, want: 'quantum', pIndex: 0, stop: 'bal', hour: 0, playing: false, pick: null, mine: null,
-      ui: { settings: false, hour: null, sheet: false } }; // hour: null = decide from the width once the map is on screen
+      ui: { hour: false, sheet: false } };
     const par0 = results.ok('pareto');
     if (par0) S.pIndex = par0.default_index;
     if (memory && scenarios.includes(memory.scenario)) {
@@ -82,66 +90,62 @@ export default {
     const cur = () => model.opts.find((o) => o.key === S.method) || model.opts[0];
     const inst = () => model.inst;
     const T = () => inst().n_hours;
+    const stops = par0 ? paretoStops(par0) : [];
 
     // ---------- DOM ----------
     const mapHost = el('div', { class: 'plan-map', role: 'application', 'aria-label': 'Map of areas. Select an area to see why it is on or off.' });
     const mapWrap = el('div', { class: 'plan-map-wrap' }, mapHost);
 
-    // title card
-    const pill = (k) => el('button', { type: 'button', class: 'sf-pill', 'aria-controls': 'sf-settings', 'aria-expanded': 'false' },
-      el('span', { class: 'sf-pill-k' }, k), el('span', { class: 'sf-pill-v' }), icon('arrowr', 18));
-    const pills = { ev: pill('Evening'), pr: pill('Priority'), me: pill('Plan made by') };
-    const lede = el('p', { class: 'sf-lede' });
+    // card: one dropdown menu per choice
+    const pill = (ic, name, menuId) => el('button', { type: 'button', class: 'sf-pill', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': menuId, title: name },
+      icon(ic, 18), el('span', { class: 'sf-pill-v' }), el('span', { class: 'sf-caret', 'aria-hidden': 'true' }));
+    const pills = { ev: pill('moon', 'Evening', 'sf-menu'), pr: pill('scale', 'Priority', 'sf-menu'), me: pill('atom', 'Plan made by', 'sf-menu') };
     const facts = el('div', { class: 'sf-facts', 'aria-live': 'polite' });
     const findSel = el('select', { class: 'select', id: 'sf-find' });
     const mineHost = el('div', { class: 'sf-mine', 'aria-live': 'polite' });
     const titleCard = el('section', { class: 'sf-card sf-title', 'aria-label': 'Tonight' },
-      el('h1', null, 'Who loses power tonight?'), lede,
+      el('h1', null, 'Who loses power tonight?'),
       el('div', { class: 'sf-pills' }, pills.ev, pills.pr, pills.me),
       facts,
-      el('div', { class: 'sf-find' }, el('label', { class: 'ctl-label', for: 'sf-find' }, 'Find your area'), el('div', { class: 'select-wrap' }, findSel)),
+      el('div', { class: 'sf-find' }, el('label', { for: 'sf-find' }, 'Your area'), el('div', { class: 'select-wrap' }, findSel)),
       mineHost,
       el('div', { class: 'sf-key', 'aria-label': 'Key' }, stateChip(STATE.on), stateChip(STATE.off), stateChip(STATE.protected)));
+    const menuEl = el('div', { class: 'sf-menu', id: 'sf-menu', role: 'menu', hidden: true });
 
-    // slide-in panels
+    // slide-ins
     const slide = (cls, id, title, ...body) => {
-      const close = el('button', { type: 'button', class: 'btn btn--icon', 'aria-label': `Close ${title}` }, icon('close', 20));
+      const close = el('button', { type: 'button', class: 'btn btn--icon', 'aria-label': `Close ${title}` }, icon('close', 18));
       const node = el(cls === 'sf-sheet' ? 'section' : 'aside', { class: cls, id, 'aria-label': title, 'data-open': 'false' },
         el('div', { class: 'sf-panel-h' }, el('h2', null, title), close), el('div', { class: 'sf-panel-b' }, ...body));
       return { node, close };
     };
-    const menuEvening = el('div', { class: 'ctl' });
-    const menuPriority = el('div', { class: 'ctl' });
-    const menuMethod = el('div', { class: 'ctl' });
-    const showing = el('div', { class: 'showing', 'aria-live': 'polite' });
-    const kpiHost = el('div', { class: 'kpis' });
-    const settings = slide('sf-panel sf-panel--left', 'sf-settings', 'Plan settings',
-      menuEvening, menuPriority, menuMethod, showing,
-      el('div', null, el('h3', { class: 'sf-h3' }, 'How this plan scores'), el('p', { class: 'ctl-help' }, 'The same score is used for every plan. Lower is better.')), kpiHost,
-      el('p', { class: 'ctl-help' }, 'Every plan was computed in advance; nothing is re-optimised in your browser.'));
     const nowHost = el('div', { class: 'now' });
     const hourPanel = slide('sf-panel sf-panel--right', 'sf-hour', 'This hour', nowHost);
     const ttHost = el('div');
     const ttWhy = el('div', { class: 'tt-why', 'aria-live': 'polite' });
-    const sheet = slide('sf-sheet', 'sf-sheet', 'Tonight\'s timetable', el('p', { class: 'ctl-help' }, 'Each row is one area. Click a cell to jump to that hour and see why.'), ttHost, ttWhy);
+    const sheet = slide('sf-sheet', 'sf-sheet', 'Tonight\'s timetable', ttHost, ttWhy);
 
     // player bar
-    const playBtn = el('button', { type: 'button', class: 'btn btn--primary play-btn', 'aria-label': 'Play the hours' }, icon('play', 22), el('span', null, 'Play'));
-    const hourTitle = el('div', { class: 'hour-title' });
-    const hourClock = el('div', { class: 'hour-clock' });
+    const playBtn = el('button', { type: 'button', class: 'btn sf-play play-btn', 'aria-label': 'Play the hours' }, icon('play', 20), el('span', null, 'Play'));
+    const hourClock = el('div', { class: 'sf-clock' });
+    const hourTitle = el('div', { class: 'sf-hourn' });
     let hourSlider = null;
-    const sliderHost = el('div', { class: 'hour-slider' });
-    const quotaEl = el('div', { class: 'quota' });
-    const toggle = (ic, label, controls) => el('button', { type: 'button', class: 'btn sf-toggle', 'aria-controls': controls, 'aria-expanded': 'false' }, icon(ic, 20), el('span', { class: 'btn-label' }, label));
+    const sliderHost = el('div', { class: 'sf-slider' });
+    const quotaEl = el('div', { class: 'sf-quota' });
+    const toggle = (ic, label, controls) => el('button', { type: 'button', class: 'btn sf-toggle', 'aria-controls': controls, 'aria-expanded': 'false' }, icon(ic, 18), el('span', { class: 'btn-label' }, label));
     const ttBtn = toggle('audit', 'Timetable', 'sf-sheet');
     const hourBtn = toggle('info', 'This hour', 'sf-hour');
     const dock = el('div', { class: 'dock sf-dock', role: 'group', 'aria-label': 'Hour control' }, el('div', { class: 'sf-dock-in' },
-      playBtn, el('div', { class: 'sf-dock-mid' }, el('div', { class: 'dock-top' }, hourTitle, hourClock), sliderHost), quotaEl,
-      el('div', { class: 'sf-dock-btns' }, ttBtn, hourBtn)));
+      playBtn, el('div', { class: 'sf-time' }, hourClock, hourTitle), sliderHost, quotaEl, el('div', { class: 'sf-dock-btns' }, ttBtn, hourBtn)));
     const debugHost = el('div', { class: 'plan-debug sf-debug' });
-    const fairExpert = el('div', { class: 'expert-only stack-s' });
 
-    sf = el('div', { class: 'sf' }, mapWrap, titleCard, settings.node, hourPanel.node, sheet.node, dock, debugHost);
+    // technical detail, shown in the Inner working drawer ("For specialists")
+    const kpiHost = el('div', { class: 'kpis' });
+    const fairExpert = el('div', { class: 'stack-s' });
+    const specialists = el('div', { class: 'expert-only stack' },
+      panel('How this plan scores', 'The same score is used for every plan. Lower is better.', kpiHost), fairExpert);
+
+    sf = el('div', { class: 'sf' }, mapWrap, titleCard, hourPanel.node, sheet.node, dock, menuEl, debugHost);
     const ins0 = model.inst;
     const prot = ins0.feeders.filter((f) => f.protected);
     root.append(sf,
@@ -153,61 +157,57 @@ export default {
           { kind: 'classical', text: 'The plan is audited against the rules and compared with the exact best plan. Nothing is re-optimised in your browser.' }],
         qa: [{ q: 'What does Priority change?', a: () => ['It moves along a ', term('pareto', 'trade-off'), ' between total harm and an even spread of outage hours. Each choice is a plan computed in advance by the same circuit with a different fairness weight.'] },
           { q: 'Why is an area off or on?', a: 'Click it on the map, or open "This hour" for a one-line reason for every area that is off: its harm this hour and its outage hours so far against the average, and whether it would be a back-to-back cut.' },
-          { q: 'How does a resident use it?', a: 'Pick your area under "Find your area". The map flies to it, rings it, and the card shows when your area is off tonight.' },
+          { q: 'How does a resident use it?', a: 'Pick your area under "Your area". The map flies to it, rings it, and the card shows when your area is off tonight.' },
           { q: 'What does "Plan made by" do?', a: 'It shows the plan the exact search, round-robin or a random draw would choose for the same evening, so you can see what FairShed changed. Try Heatwave with round-robin and open the timetable: the red cells are the rules it breaks.' }],
         what: [el('span', null, 'A full-screen map of the ', term('feeder', 'feeders'), ' (neighbourhood power lines, called areas here) and which are off in each hour of this evening\'s shortage.')],
-        how: ['The pills on the card open Plan settings: the evening, the priority and which method made the plan.',
-          'Press Play or drag the hour slider; the map and "This hour" follow.',
-          '"Timetable" slides up the whole evening at once: amber stripes are Off, teal is On, blue with a shield is Protected.',
-          'Esc closes the panel on top.'],
+        how: ['The three buttons on the card are menus: the evening, the priority and which method made the plan.',
+          'Press Play or drag the hour slider; the map follows.',
+          '"This hour" lists who is off now and why; "Timetable" shows the whole evening (amber stripes Off, teal On, blue shield Protected).',
+          'Esc closes the menu or panel on top.'],
         notice: [`${ins0.n_feeders} areas over ${ins0.n_hours} hours; ${prot.length} are protected (${prot.map((f) => f.name).join(', ')}).`,
           `Quotas per hour: ${ins0.quotas.join(', ')} areas off.`],
         not: ['Real feeders or real outages: everything is synthetic.', 'Live re-planning: the plans shown were computed in advance.'],
       }),
-      fairExpert);
+      specialists);
 
-    // ---------- panel layout: what is open decides where the map fits the areas ----------
+    // ---------- layout: what is open decides where the map fits the areas ----------
     function measure() {
-      const wide = !narrow();
-      sf.style.setProperty('--lw', wide && S.ui.settings ? `${settings.node.offsetWidth + 16}px` : '0px');
-      sf.style.setProperty('--rw', wide && S.ui.hour ? `${hourPanel.node.offsetWidth + 16}px` : '0px');
+      sf.style.setProperty('--rw', !narrow() && S.ui.hour ? `${hourPanel.node.offsetWidth + 16}px` : '0px');
       sf.style.setProperty('--dock-h', `${dock.offsetHeight}px`);
     }
-    /** Pixels the map must keep clear on each side, from the panels' layout boxes (not their slide animation). */
+    /** Pixels the map must keep clear on each side, from the layout boxes (not the slide animation). */
     function mapPadding() {
       const W = sf.clientWidth, H = sf.clientHeight;
       if (!W || !H) return { tl: [40, 40], br: [40, 40] };
-      const wide = !narrow();
       let left = 24, top = 24, right = 24;
       let bottom = H - dock.offsetTop + 16;
       if (S.ui.sheet) bottom = H - sheet.node.offsetTop + 16;
-      if (wide) left = titleCard.offsetLeft + titleCard.offsetWidth + 16; else top = titleCard.offsetTop + titleCard.offsetHeight + 16;
-      if (wide && S.ui.settings) left = Math.max(left, settings.node.offsetLeft + settings.node.offsetWidth + 16);
-      if (wide && S.ui.hour) right = W - hourPanel.node.offsetLeft + 16;
-      let tl = [left + 70, top + 40], br = [right + 90, bottom + 40]; // room for the labels beside each dot
+      if (!narrow()) left = titleCard.offsetLeft + titleCard.offsetWidth + 16; else top = titleCard.offsetTop + titleCard.offsetHeight + 16;
+      if (!narrow() && S.ui.hour) right = W - hourPanel.node.offsetLeft + 16;
+      const tl = [left + 60, top + 36], br = [right + 80, bottom + 56]; // room for the labels beside each dot
       const fitIn = (a, b, size) => { const room = size - 200; if (a + b > room && room > 0) { const k = room / (a + b); return [a * k, b * k]; } return [a, b]; };
       [tl[0], br[0]] = fitIn(tl[0], br[0], W);
       [tl[1], br[1]] = fitIn(tl[1], br[1], H);
       return { tl, br };
     }
 
-    const panels = { settings: { p: settings, btns: [pills.ev, pills.pr, pills.me] }, hour: { p: hourPanel, btns: [hourBtn] }, sheet: { p: sheet, btns: [ttBtn] } };
+    const panels = { hour: { p: hourPanel, btn: hourBtn }, sheet: { p: sheet, btn: ttBtn } };
     function paintPanel(name) {
-      const { p, btns } = panels[name];
+      const { p, btn } = panels[name];
       const open = !!S.ui[name];
       p.node.dataset.open = String(open);
       p.node.inert = !open;
-      btns.forEach((b) => b.setAttribute('aria-expanded', String(open)));
+      btn.setAttribute('aria-expanded', String(open));
     }
     let autoClosedHour = false; // "This hour" was closed for lack of room, not by the reader
     function setPanel(name, open, focusEl) {
+      closeMenu(false);
       if (name === 'hour') autoClosedHour = false;
-      if (open && compact()) for (const k of ['settings', 'hour']) if (k !== name && S.ui[k]) { S.ui[k] = false; paintPanel(k); }
       S.ui[name] = open;
       paintPanel(name);
-      const { p, btns } = panels[name];
+      const { p, btn } = panels[name];
       if (open && focusEl) setTimeout(() => focusEl.focus({ preventScroll: true }), 60);
-      if (!open && p.node.contains(document.activeElement)) btns[0].focus({ preventScroll: true });
+      if (!open && p.node.contains(document.activeElement)) btn.focus({ preventScroll: true });
       settle();
       remember();
     }
@@ -218,19 +218,93 @@ export default {
       clearTimeout(settleTimer);
       settleTimer = setTimeout(() => { measure(); fmap.refit(); setTimeout(() => fmap.relayout(), 500); }, 320);
     }
-    settings.close.addEventListener('click', () => setPanel('settings', false));
     hourPanel.close.addEventListener('click', () => setPanel('hour', false));
     sheet.close.addEventListener('click', () => setPanel('sheet', false));
     hourBtn.addEventListener('click', () => setPanel('hour', !S.ui.hour, nowHost.querySelector('h2')));
     ttBtn.addEventListener('click', () => setPanel('sheet', !S.ui.sheet, sheet.close));
+
+    // ---------- dropdown menus: one per choice, opened under its own button ----------
+    let menuFor = null;
+    const MENUS = {
+      ev: () => ({ title: 'Evening', items: scenarios.map((k) => {
+        const ins = scenarioInstance(results, k);
+        return { value: k, label: SCEN[k] || k, sub: ins ? `${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}, ${ins.quotas.join(', ')} areas off by hour` : '', checked: k === S.scenario };
+      }), pick: (k) => { if (k !== S.scenario) switchScenario(k); } }),
+      pr: () => {
+        const par = paretoApplies(results, S.scenario);
+        const { curStop } = stopNow();
+        return { title: 'Priority',
+          items: stops.map((s) => ({ value: s.key, label: s.label, sub: s.sub, disabled: !par, checked: !!par && S.method === 'quantum' && curStop && curStop.key === s.key })),
+          note: !par ? 'Priority choices were computed for the normal evening only.' : S.method !== 'quantum' ? 'Picking one switches back to FairShed\'s plan.' : null,
+          pick: (k) => { const s = stops.find((x) => x.key === k); S.stop = k; S.pIndex = s.i; S.method = S.want = 'quantum'; refreshAll(true); renderMenus(); } };
+      },
+      me: () => ({ title: 'Plan made by', items: model.opts.map((o) => ({ value: o.key, label: methodLabel(o), sub: METHOD_SUB[o.key] || '', checked: o.key === S.method })),
+        pick: (v) => { S.method = S.want = v; refreshAll(false); renderMenus(); } }),
+    };
+    function openMenu(kind) {
+      if (menuFor === kind) { closeMenu(true); return; } // the same button again closes its menu
+      closeMenu(false);
+      menuFor = kind;
+      const spec = MENUS[kind]();
+      const btn = pills[kind];
+      btn.setAttribute('aria-expanded', 'true');
+      menuEl.setAttribute('aria-label', spec.title);
+      menuEl.replaceChildren(...[el('div', { class: 'sf-menu-h' }, spec.title),
+        ...spec.items.map((it) => {
+          const b = el('button', { type: 'button', role: 'menuitemradio', class: 'sf-menu-item', 'aria-checked': String(!!it.checked), disabled: it.disabled || null },
+            el('span', { class: 'sf-menu-tick', 'aria-hidden': 'true' }, it.checked ? icon('pass', 16) : null),
+            el('span', { class: 'sf-menu-txt' }, el('span', { class: 'sf-menu-l' }, it.label), it.sub ? el('span', { class: 'sf-menu-s' }, it.sub) : null));
+          b.addEventListener('click', () => { closeMenu(true); spec.pick(it.value); });
+          return b;
+        }),
+        spec.note ? el('p', { class: 'sf-menu-note' }, spec.note) : null].filter(Boolean));
+      menuEl.hidden = false;
+      placeMenu();
+      const first = menuEl.querySelector('.sf-menu-item[aria-checked="true"]:not(:disabled)') || menuEl.querySelector('.sf-menu-item:not(:disabled)');
+      if (first) first.focus({ preventScroll: true });
+    }
+    /** Under its own button, kept inside the map area. */
+    function placeMenu() {
+      if (!menuFor) return;
+      const sr = sf.getBoundingClientRect(), r = pills[menuFor].getBoundingClientRect();
+      menuEl.style.left = `${Math.max(8, Math.min(r.left - sr.left, sf.clientWidth - menuEl.offsetWidth - 8))}px`;
+      menuEl.style.top = `${Math.max(8, Math.min(r.bottom - sr.top + 6, sf.clientHeight - menuEl.offsetHeight - 8))}px`;
+    }
+    function closeMenu(returnFocus) {
+      if (!menuFor) return;
+      const btn = pills[menuFor];
+      menuFor = null;
+      menuEl.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      if (returnFocus) btn.focus({ preventScroll: true });
+    }
+    pills.ev.addEventListener('click', () => openMenu('ev'));
+    pills.pr.addEventListener('click', () => openMenu('pr'));
+    pills.me.addEventListener('click', () => openMenu('me'));
+    menuEl.addEventListener('keydown', (e) => {
+      const items = [...menuEl.querySelectorAll('.sf-menu-item:not(:disabled)')];
+      const i = items.indexOf(document.activeElement);
+      const go = (n) => { e.preventDefault(); items[(n + items.length) % items.length].focus(); };
+      if (e.key === 'ArrowDown') go(i + 1);
+      else if (e.key === 'ArrowUp') go(i - 1);
+      else if (e.key === 'Home') go(0);
+      else if (e.key === 'End') go(items.length - 1);
+      else if (e.key === 'Escape') { e.preventDefault(); closeMenu(true); }
+      else if (e.key === 'Tab') closeMenu(false);
+    });
+    const onDown = (e) => { if (menuFor && !menuEl.contains(e.target) && !pills[menuFor].contains(e.target)) closeMenu(false); };
+    document.addEventListener('pointerdown', onDown);
+    titleCard.addEventListener('scroll', () => closeMenu(false));
+
     const onKey = (e) => {
-      if (e.defaultPrevented || e.key !== 'Escape') return; // a glossary card, the tour or the Inner working panel went first
-      const top = ['sheet', 'settings', 'hour'].find((k) => S.ui[k]);
+      if (e.defaultPrevented || e.key !== 'Escape') return; // a glossary card, the tour, a menu or Inner working went first
+      const top = ['sheet', 'hour'].find((k) => S.ui[k]);
       if (top) { e.preventDefault(); setPanel(top, false); }
     };
     document.addEventListener('keydown', onKey);
     let wasCompact = null;
     const onResize = () => {
+      placeMenu();
       const c = compact();
       if (wasCompact !== null && c !== wasCompact) {
         if (c && S.ui.hour) { S.ui.hour = false; autoClosedHour = true; paintPanel('hour'); } // no room: step aside
@@ -291,42 +365,13 @@ export default {
 
     const fmap = createFeederMap(mapHost, { feeders: inst().feeders, debug: params.debug, tiles: params.tiles, buildPopup,
       padding: mapPadding, zoomPosition: 'bottomright', tileOpacity: 0.62,
-      obstacles: () => [titleCard, dock, S.ui.settings && settings.node, S.ui.hour && hourPanel.node, S.ui.sheet && sheet.node,
-        mapHost.querySelector('.leaflet-bottom.leaflet-right')] });
+      obstacles: () => [titleCard, dock, S.ui.hour && hourPanel.node, S.ui.sheet && sheet.node, mapHost.querySelector('.leaflet-bottom.leaflet-right')] });
 
-    // ---------- menus: built once, then updated in place (no flicker, focus stays where it was) ----------
-    const evHelp = el('p', { class: 'ctl-help' });
-    const evSeg = scenarios.length > 1
-      ? segmented({ label: 'Evening', options: scenarios.map((k) => ({ value: k, label: SCEN[k] || k })), value: S.scenario, onChange: switchScenario })
-      : null;
-    const evStatic = evSeg ? null : el('div', { class: 'ctl-static' });
-    menuEvening.append(el('span', { class: 'ctl-label' }, 'Evening'), evSeg ? evSeg.root : evStatic, evHelp);
-
-    const stops = par0 ? paretoStops(par0) : [];
-    const prHelp = el('p', { class: 'ctl-help' });
-    const prSeg = stops.length
-      ? segmented({ label: 'Priority', value: null, options: stops.map((s) => ({ value: s.key, label: s.label, title: s.sub })),
-        onChange: (k) => { const s = stops.find((x) => x.key === k); S.stop = k; S.pIndex = s.i; S.method = S.want = 'quantum'; refreshAll(true); renderMenus(); } })
-      : null;
-    menuPriority.append(el('span', { class: 'ctl-label' }, 'Priority'), prSeg ? prSeg.root : el('div', { class: 'ctl-static' }, 'Not available'), prHelp);
-
-    // fairness weight slider for specialists (shown in the Inner working drawer); built once so dragging it is never interrupted
+    // fairness weight slider for specialists (in the Inner working drawer); built once so dragging it is never interrupted
     const fsText = el('p', { class: 'subtle mono' });
     const fs = par0 ? tickSlider({ label: 'Fairness weight', ticks: par0.points.map((p) => fmtTrim(p.fairness_weight, 3)), value: S.pIndex,
       onInput: (i) => { if (i === S.pIndex && S.method === 'quantum') return; S.pIndex = i; S.stop = null; S.method = S.want = 'quantum'; refreshAll(true); renderMenus(); } }) : null;
     if (fs) fairExpert.append(el('span', { class: 'field-label' }, 'Fairness weight (for specialists)'), fs.root, fsText);
-
-    const sel = el('select', { class: 'select', id: 'plan-method' });
-    const mHelp = el('p', { class: 'ctl-help' });
-    let selFor = null;
-    sel.addEventListener('change', () => { S.method = S.want = sel.value; refreshAll(false); renderMenus(); });
-    menuMethod.append(el('label', { class: 'ctl-label', for: 'plan-method' }, 'Plan made by'), el('div', { class: 'select-wrap' }, sel), mHelp);
-
-    // the pills open Plan settings at the matching control
-    const checkedIn = (seg) => (seg ? seg.root.querySelector('[aria-checked="true"]') || seg.root.querySelector('button:not(:disabled)') : null);
-    pills.ev.addEventListener('click', () => setPanel('settings', true, checkedIn(evSeg) || sel));
-    pills.pr.addEventListener('click', () => setPanel('settings', true, checkedIn(prSeg) || sel));
-    pills.me.addEventListener('click', () => setPanel('settings', true, sel));
 
     let findFor = null;
     findSel.addEventListener('change', () => {
@@ -347,56 +392,39 @@ export default {
 
     function renderMenus() {
       const ins = inst();
-      if (evSeg) evSeg.set(S.scenario); else evStatic.textContent = SCEN[S.scenario] || S.scenario;
-      evHelp.textContent = `${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}, ${ins.quotas.join(', ')} areas off by hour.`;
-      const { par, curStop } = stopNow();
-      if (prSeg) stops.forEach((s) => prSeg.setDisabled(s.key, !par));
-      if (!prSeg) prHelp.textContent = 'The quantum plans are missing (results/pareto.json).';
-      else if (!par) { prSeg.set(null); prHelp.textContent = 'Priority choices were computed for the normal evening only.'; }
-      else if (S.method !== 'quantum') { prSeg.set(null); prHelp.textContent = 'Showing a normal method. Pick a priority to go back to FairShed\'s plan.'; }
-      else { prSeg.set(curStop ? curStop.key : null); prHelp.textContent = curStop ? curStop.sub : 'A custom fairness weight, set under "For specialists" in Inner working.'; }
+      const { par } = stopNow();
+      pills.ev.querySelector('.sf-pill-v').textContent = SCEN[S.scenario] || S.scenario;
+      const prOn = !!par && S.method === 'quantum';
+      pills.pr.querySelector('.sf-pill-v').textContent = prOn ? S.stopLabel : 'No priority';
+      pills.pr.classList.toggle('is-muted', !prOn); // a normal method, or the heatwave: no priority choice applies
+      pills.me.querySelector('.sf-pill-v').textContent = METHOD_SHORT[S.method] || cur().label;
+      pills.ev.setAttribute('aria-label', `Evening: ${SCEN[S.scenario] || S.scenario}. Change`);
+      pills.pr.setAttribute('aria-label', `Priority: ${pills.pr.querySelector('.sf-pill-v').textContent}. Change`);
+      pills.me.setAttribute('aria-label', `Plan made by: ${methodLabel(cur())}. Change`);
       if (fs) {
         fairExpert.hidden = !par;
         fs.set(S.pIndex);
         const pt = par0.points[S.pIndex];
         fsText.textContent = `w_f ${fmtTrim(pt.fairness_weight, 3)} | score at this weight ${fmt(pt.cost, 2)} | exact ${fmt(pt.exact_cost, 2)} | P(optimal) per try ${fmt(pt.p_optimal, 4)}`;
       }
-      if (selFor !== S.scenario) {
-        sel.replaceChildren(...model.opts.map((o) => el('option', { value: o.key }, methodLabel(o))));
-        selFor = S.scenario;
-      }
-      sel.value = S.method;
-      mHelp.textContent = S.method === 'quantum' ? 'Or pick a normal method to compare.' : 'A normal method, shown for comparison.';
       if (findFor !== S.scenario) {
         findSel.replaceChildren(el('option', { value: '' }, 'All areas'), ...ins.feeders.map((fd, f) => el('option', { value: String(f) }, fd.name)));
         findFor = S.scenario;
       }
       findSel.value = S.mine === null ? '' : String(S.mine);
-      // pills: the current choices at a glance
-      pills.ev.querySelector('.sf-pill-v').textContent = SCEN[S.scenario] || S.scenario;
-      pills.pr.querySelector('.sf-pill-v').textContent = S.method === 'quantum' && S.stopLabel ? S.stopLabel : 'Not used';
-      pills.me.querySelector('.sf-pill-v').textContent = METHOD_SHORT[S.method] || cur().label;
     }
 
     // ---------- views ----------
-    function planName(c) {
-      if (c.key === 'quantum') return `${S.stopLabel || 'Selected'} plan, made by FairShed's quantum planner (simulated)`;
-      return `Plan made by ${methodLabel(c)}`;
-    }
-
-    function renderShowing() {
+    function renderFacts() {
       const c = cur();
       const v = versusRoundRobin(model.opts, c);
-      const rule = () => passChip(c.auditPassed, 'Follows every rule', `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken`);
-      const turns = () => (v && !v.isRR ? el('span', { class: 'chip chip--neutral' }, Math.abs(v.pct) < 0.05 ? 'Same score as taking turns'
-        : `${fmt(Math.abs(v.pct), Math.abs(v.pct) < 1 ? 1 : 0)}% ${v.pct > 0 ? 'better' : 'worse'} than taking turns`) : null);
-      const list = [rule(), turns()];
-      if (c.key === 'quantum' && c.point) {
-        list.push(el('span', { class: 'chip chip--neutral' }, c.point.matches_exact ? 'Same score as the exact best plan'
-          : `Exact best plan scores ${fmt(c.point.exact_cost, 2)}; this one ${fmt(c.point.cost, 2)}`));
-      }
-      showing.replaceChildren(el('div', { class: 'showing-t' }, el('span', { class: 'showing-k' }, 'Showing'), el('span', null, planName(c))), el('div', { class: 'showing-f' }, list.filter(Boolean)));
-      facts.replaceChildren(...[rule(), turns()].filter(Boolean));
+      const line1 = c.auditPassed
+        ? el('div', { class: 'sf-fact sf-fact--ok' }, icon('pass', 16), 'Follows every rule')
+        : el('div', { class: 'sf-fact sf-fact--bad' }, icon('fail', 16), `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken: open the timetable`);
+      const bits = [`Score ${fmt(c.cost, 2)}`];
+      if (v && !v.isRR) bits.push(Math.abs(v.pct) < 0.05 ? 'same as taking turns' : `${fmt(Math.abs(v.pct), Math.abs(v.pct) < 1 ? 1 : 0)}% ${v.pct > 0 ? 'better' : 'worse'} than taking turns`);
+      if (c.key === 'quantum' && c.point) bits.push(c.point.matches_exact ? 'the exact best' : `best possible ${fmt(c.point.exact_cost, 2)}`);
+      facts.replaceChildren(line1, el('div', { class: 'sf-fact' }, bits.join(' · ')));
     }
 
     function renderNow() {
@@ -406,7 +434,7 @@ export default {
       ins.feeders.forEach((fd, f) => (fd.protected ? pr : row[f] ? off : on).push(f));
       const item = (f, st, why) => {
         const b = el('button', { type: 'button', class: `now-item now-item--${st.key}${f === S.mine ? ' is-mine' : ''}`, 'aria-label': `${ins.feeders[f].name}: ${st.label}. Show on the map.` },
-          stateChip(st), el('span', { class: 'now-txt' }, el('span', { class: 'now-name' }, ins.feeders[f].name), why ? el('span', { class: 'now-why' }, why) : null));
+          icon(st.icon, 16), el('span', { class: 'now-txt' }, el('span', { class: 'now-name' }, ins.feeders[f].name), why ? el('span', { class: 'now-why' }, why) : null));
         b.addEventListener('click', () => fmap.open(f));
         return b;
       };
@@ -419,29 +447,29 @@ export default {
       };
       nowHost.replaceChildren(
         el('div', { class: 'now-head' }, el('h2', { tabindex: '-1' }, clockRange(ins.start_hour, t)),
-          el('p', { class: off.length === ins.quotas[t] ? 'subtle' : 'subtle warn-text' }, `${off.length} of ${ins.n_feeders} areas off; the quota is ${ins.quotas[t]}.`)),
+          el('p', { class: off.length === ins.quotas[t] ? 'subtle' : 'subtle warn-text' }, `${off.length} of ${ins.n_feeders} areas off; quota ${ins.quotas[t]}.`)),
         el('h3', { class: 'now-h' }, `Off now (${off.length})`), el('div', { class: 'now-list' }, off.map((f) => item(f, STATE.off, offWhy(f)))),
-        el('h3', { class: 'now-h' }, `Never cut (${pr.length})`), el('div', { class: 'now-list' }, pr.map((f) => item(f, STATE.protected, cap(PROTECTED_WHY[ins.feeders[f].kind] || ins.feeders[f].kind)))),
+        el('h3', { class: 'now-h' }, `Never cut (${pr.length})`), el('div', { class: 'now-list now-list--grid' }, pr.map((f) => item(f, STATE.protected, cap(PROTECTED_WHY[ins.feeders[f].kind] || ins.feeders[f].kind)))),
         el('h3', { class: 'now-h' }, `On now (${on.length})`), el('div', { class: 'now-list now-list--grid' }, on.map((f) => item(f, STATE.on, null))));
     }
 
-    /** "Find your area": the reader's own area for the whole evening. */
+    /** "Your area": the reader's own area for the whole evening. */
     function renderMine() {
       if (S.mine === null) { mineHost.replaceChildren(); return; }
       const ins = inst(); const c = cur(); const f = S.mine; const fd = ins.feeders[f];
       const hours = Array.from({ length: ins.n_hours }, (_, t) => t);
       const offH = hours.filter((t) => c.matrix[t][f] === 1);
-      const said = fd.protected ? `Never cut: protected (${PROTECTED_WHY[fd.kind] || fd.kind}).`
-        : offH.length ? `Off ${runs(offH).map((r) => `${clock(ins.start_hour, r[0])} to ${clock(ins.start_hour, r[r.length - 1] + 1)}`).join(' and ')} (${offH.length} hour${offH.length === 1 ? '' : 's'}).`
-          : 'On all evening.';
+      const said = fd.protected ? `never cut: protected (${PROTECTED_WHY[fd.kind] || fd.kind}).`
+        : offH.length ? `off ${runs(offH).map((r) => `${clock(ins.start_hour, r[0])} to ${clock(ins.start_hour, r[r.length - 1] + 1)}`).join(' and ')} (${offH.length} hour${offH.length === 1 ? '' : 's'}).`
+          : 'on all evening.';
       const strip = el('div', { class: 'sf-mine-strip' }, hours.map((t) => {
         const st = stateOf(fd, f, c.matrix[t]);
         const b = el('button', { type: 'button', class: `tt-cell tt-cell--${st.key}${t === S.hour ? ' is-now' : ''}`, 'aria-label': `${fd.name}, ${clockRange(ins.start_hour, t)}: ${st.label}` },
-          el('span', { class: 'sf-mine-t' }, clock(ins.start_hour, t)), icon(st.icon, 16), el('span', null, st.label));
+          el('span', { class: 'sf-mine-t' }, clock(ins.start_hour, t)), icon(st.icon, 14));
         b.addEventListener('click', () => { setHour(t, true); fmap.open(f); });
         return b;
       }));
-      mineHost.replaceChildren(el('p', { class: 'sf-mine-say' }, el('b', null, `${fd.name}: `), said), strip);
+      mineHost.replaceChildren(el('p', { class: 'sf-mine-say' }, el('b', null, 'Tonight: '), said), strip);
     }
 
     function renderTable() {
@@ -463,7 +491,7 @@ export default {
           const bad = cellViol(f, t);
           const b = el('button', { type: 'button', dataset: { cell: `${f}-${t}` }, class: `tt-cell tt-cell--${st.key}${bad.length ? ' tt-cell--bad' : ''}`, title: bad.length ? `Breaks: ${bad.map((v) => ruleName(v.rule)).join(', ')}` : null,
             'aria-label': `${fd.name}, ${clockRange(ins.start_hour, t)}: ${st.label}${bad.length ? `, breaks ${bad.map((v) => ruleName(v.rule)).join(', ')}` : ''}` },
-          icon(bad.length ? 'warn' : st.icon, 18), el('span', null, st.label));
+          icon(bad.length ? 'warn' : st.icon, 16), el('span', null, st.label));
           b.addEventListener('click', () => {
             S.pick = f; setHour(t, true); explainCell(f, t);
             const again = ttHost.querySelector(`[data-cell="${f}-${t}"]`); // the table was redrawn: keep focus on the same cell
@@ -497,18 +525,19 @@ export default {
       const ins = inst(); const c = cur();
       const off = sum(c.matrix[S.hour]);
       const quota = ins.quotas[S.hour];
-      hourTitle.textContent = `Hour ${S.hour + 1} of ${ins.n_hours}`;
       hourClock.textContent = clockRange(ins.start_hour, S.hour);
-      quotaEl.replaceChildren(
-        el('div', { class: 'quota-main' }, el('span', { class: 'q-num' }, String(off)), ` of ${ins.n_feeders} areas off`),
-        el('div', { class: off !== quota ? 'quota-sub warn-text' : 'quota-sub' }, off !== quota ? `The quota for this hour is ${quota}` : `Quota met: exactly ${quota} must be off`));
+      hourTitle.textContent = `Hour ${S.hour + 1} of ${ins.n_hours}`;
+      quotaEl.replaceChildren(el('div', { class: 'sf-quota-v' }, el('b', null, String(off)), ` of ${ins.n_feeders} off`),
+        el('div', { class: off !== quota ? 'sf-quota-s warn-text' : 'sf-quota-s' }, off !== quota ? `quota is ${quota}` : 'quota met'));
       hourSlider.set(S.hour);
     }
 
     function buildHourSlider() {
       const ins = inst();
-      hourSlider = tickSlider({ label: 'Hour of the plan', ticks: Array.from({ length: ins.n_hours }, (_, t) => clock(ins.start_hour, t)), value: S.hour, onInput: (t) => setHour(t, true) });
-      sliderHost.replaceChildren(hourSlider.root);
+      const labels = Array.from({ length: ins.n_hours }, (_, t) => clock(ins.start_hour, t));
+      hourSlider = tickSlider({ label: 'Hour of the plan', ticks: labels, value: S.hour, onInput: (t) => setHour(t, true) });
+      // compact: plain hour labels under the slider instead of the tall tick buttons
+      sliderHost.replaceChildren(hourSlider.root, el('div', { class: 'sf-hours', 'aria-hidden': 'true' }, labels.map((l) => el('span', null, l))));
     }
 
     function renderKpis() {
@@ -526,11 +555,6 @@ export default {
       if (params.debug) debugHost.append(debugBox(cur().bits, inst().n_feeders, `Plan "${cur().label}"`));
     }
 
-    function renderLede() {
-      const ins = inst();
-      lede.textContent = `${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}. FairShed picks who loses power each hour, fairly, and never cuts hospitals or water pumps.`;
-    }
-
     function setHour(t, user = false) {
       S.hour = Math.max(0, Math.min(T() - 1, t));
       if (user) stopPlay();
@@ -541,12 +565,12 @@ export default {
     let timer = null;
     function stopPlay() {
       S.playing = false; clearInterval(timer); timer = null;
-      playBtn.replaceChildren(icon('play', 22), el('span', null, 'Play')); playBtn.setAttribute('aria-label', 'Play the hours');
+      playBtn.replaceChildren(icon('play', 20), el('span', null, 'Play')); playBtn.setAttribute('aria-label', 'Play the hours');
     }
     function startPlay() {
       if (S.hour >= T() - 1) setHour(0);
       S.playing = true;
-      playBtn.replaceChildren(icon('pause', 22), el('span', null, 'Pause')); playBtn.setAttribute('aria-label', 'Pause');
+      playBtn.replaceChildren(icon('pause', 20), el('span', null, 'Pause')); playBtn.setAttribute('aria-label', 'Pause');
       timer = setInterval(() => { if (S.hour >= T() - 1) { stopPlay(); return; } setHour(S.hour + 1); if (S.hour >= T() - 1) stopPlay(); }, STEP_MS);
     }
     playBtn.addEventListener('click', () => (S.playing ? stopPlay() : startPlay()));
@@ -566,13 +590,14 @@ export default {
       buildHourSlider();
       renderMenus();
       refreshAll(false, true);
+      settle();
     }
 
     function refreshAll(rebuild = true, full = false) {
       if (rebuild) model = buildOptions(results, S.scenario, S.pIndex);
       if (!model.opts.some((o) => o.key === S.method)) S.method = defaultMethod(model.opts);
       stopNow();
-      renderLede(); renderMap(!full); renderDock(); renderShowing(); renderNow(); renderTable(); renderKpis(); renderMine(); renderDebug();
+      renderMap(!full); renderDock(); renderFacts(); renderNow(); renderTable(); renderKpis(); renderMine(); renderDebug();
       if (S.pick !== null && ttWhy.firstChild) explainCell(S.pick, S.hour);
       remember();
     }
@@ -580,12 +605,16 @@ export default {
     buildHourSlider();
     renderMenus();
     refreshAll(false, true);
-    if (S.ui.hour === null) S.ui.hour = width() >= COMPACT_PX;
+    if (compact() && S.ui.hour) { S.ui.hour = false; autoClosedHour = true; }
     wasCompact = compact();
-    ['settings', 'hour', 'sheet'].forEach(paintPanel);
+    ['hour', 'sheet'].forEach(paintPanel);
     fmap.focus(S.mine);
     measure();
     requestAnimationFrame(() => { measure(); fmap.refit(); fmap.relayout(); });
-    return { destroy() { stopPlay(); clearTimeout(settleTimer); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); fmap.destroy(); } };
+    return { destroy() {
+      stopPlay(); clearTimeout(settleTimer);
+      document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDown); window.removeEventListener('resize', onResize);
+      fmap.destroy();
+    } };
   },
 };

@@ -56,22 +56,21 @@ button, **Inner working**, so the pages stay clean and a judge can open the deta
 ![Schedule](../media/screenshots/schedule.png)
 
 The working example, built for the people who live with the schedule: the map fills the whole
-tab and everything else floats over it or slides in.
+tab, with a small card, a slim player bar and two slide-ins that stay closed until asked for.
 
-- **Title card (top left):** the current choices as three pills (Evening, Priority, Plan made by;
-  each opens Plan settings), whether the plan follows every rule, how it compares with taking turns,
-  the key, and **Find your area**: pick an area and the map flies to it, rings it, opens its reason,
-  and the card shows when it is off tonight ("Off 18:00 to 19:00 and 20:00 to 21:00").
-- **Plan settings (slides in from the left):** Evening (Normal evening, Heatwave), Priority (Least
-  harm, Balanced, Most even: plans computed in advance along the harm and evenness trade-off), Plan
-  made by (FairShed, or the exact search, round-robin or a random plan for comparison), and the
-  plan's scores. Nothing is re-optimised in the browser.
-- **This hour (slides in from the right):** who is off now and why, one line each. Open by default on
-  wide screens; it steps aside when the map gets narrow (for example when Inner working is open).
-- **Player bar (bottom):** Play or drag the hour slider; the quota; buttons for Timetable and This hour.
+- **Card (top left):** three buttons, each its own small menu: **Evening** (Normal evening,
+  Heatwave), **Priority** (Least harm, Balanced, Most even: plans computed in advance along the harm
+  and evenness trade-off) and **Plan made by** (FairShed, or the exact search, round-robin or a
+  random plan for comparison). Under them: whether the plan follows every rule, its score against
+  taking turns and the best possible, and **Your area**: pick one and the map flies to it, rings it,
+  opens its reason, and the card shows when it is off tonight.
+- **Player bar (bottom):** Play or drag the hour slider; the quota; buttons for the two slide-ins.
+- **This hour (slides in on the right):** who is off now and why, one line each. It steps aside when
+  the map gets narrow (for example when Inner working is open) and comes back after.
 - **Timetable (slides up above the player):** areas by hours, the hours each area is off tonight,
   and red cells where a plan breaks a rule (try Heatwave with round-robin). Press Play with it open.
-- The map keeps the areas and their labels clear of whatever is open. Esc closes the panel on top.
+- The map keeps the areas and their labels clear of whatever is open. Esc closes the menu or panel on
+  top. The plan's score tiles and the fairness-weight slider are under "For specialists" in Inner working.
 - **Say to a judge:** "The quota comes from the forecast; the choice of which areas comes from the
   circuit, and we show when that choice is not the exact best one. Switch to Heatwave and
   round-robin, open the timetable, and you see the rules it breaks."

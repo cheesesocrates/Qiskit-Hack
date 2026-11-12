@@ -10,7 +10,7 @@ const STEPS = [
   { hash: '#/home', sel: '.problem', title: 'The problem in one line',
     text: 'The shortage sets how many feeders must be off each hour. FairShed picks which ones, never cuts a hospital, water pump or telecom tower, and spreads the hours fairly.' },
   { hash: '#/schedule', sel: '.plan-map-wrap', title: 'Who loses power',
-    text: 'The whole screen is the map of tonight. Each box is an area (a neighbourhood power line): teal is On, amber stripes are Off, a blue shield is Protected. Click a box for the reason, or use "Find your area" on the card.' },
+    text: 'The whole screen is the map of tonight. Each box is an area (a neighbourhood power line): teal is On, amber stripes are Off, a blue shield is Protected. Click a box for the reason, or pick "Your area" on the card.' },
   { hash: '#/schedule', sel: '.dock', title: 'Step through the hours',
     text: 'Press Play or drag the slider to move hour by hour. The quota says how many areas must be off; "Timetable" and "This hour" slide in the details.' },
   { hash: '#/replay/watch', sel: '[data-tour="replay"]', title: 'Re-planning every hour',

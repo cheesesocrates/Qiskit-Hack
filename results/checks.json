@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T15:56:16Z",
+  "generated_at": "2026-11-12T17:57:21Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -273,7 +273,7 @@
       "id": "U01",
       "name": "Every screen loads with no console errors, readable text, large targets and keyboard focus",
       "passed": true,
-      "detail": "13 screens and flows pass at 1440x900 (console, 14px text, 44px targets, keyboard, modes, glossary, tour)",
+      "detail": "14 screens and flows pass at 1440x900 (console, 14px text, 44px targets, keyboard, Inner working drawer, glossary, tour)",
       "area": "ui",
       "test": "tests/ui/test_ui_smoke.py::test_every_screen_loads"
     },

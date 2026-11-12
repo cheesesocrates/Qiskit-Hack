@@ -2,18 +2,18 @@
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
 .topbar { position: sticky; top: 0; z-index: 900; background: var(--panel); border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-1); display: flex; align-items: center; gap: 16px; padding: 8px 24px; flex-wrap: wrap; }
-.brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none;
-  min-height: var(--target); padding-right: 8px; }
+  box-shadow: var(--shadow-1); display: flex; align-items: center; gap: 8px; padding: 8px 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none;
+  min-height: var(--target); padding-right: 4px; }
 .brand svg { color: var(--accent); }
 .nav { display: flex; gap: 4px; flex-wrap: wrap; }
-.nav-item { display: inline-flex; align-items: center; gap: 8px; min-height: var(--target-primary); padding: 0 16px;
+.nav-item { display: inline-flex; align-items: center; gap: 6px; min-height: var(--target-primary); padding: 0 12px;
   border-radius: var(--radius); color: var(--text); text-decoration: none; font-size: var(--fs-small); font-weight: 700;
   border: 2px solid transparent; }
 .nav-item:hover { background: var(--raised); }
 .nav-item[aria-current="page"] { background: var(--accent-tint); color: var(--accent); border-color: var(--accent); }
 .tb-spacer { flex: 1; }
-.tb-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tb-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
 .badge { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px;
   border: 2px solid var(--off); border-radius: var(--radius); background: var(--off-tint);
@@ -75,7 +75,7 @@
 }
 @media (max-width: 760px) {
   :root { --fs-body: 18px; --fs-h1: 28px; --fs-h2: 24px; --fs-h3: 20px; --gap: 16px; }
-  .topbar { padding: 8px 12px; gap: 8px; }
+  .topbar { padding: 8px 12px; gap: 8px; position: static; }
   .nav { order: 3; width: 100%; flex-wrap: nowrap; overflow-x: auto; }
   .nav-item { padding: 0 12px; white-space: nowrap; }
   .crumbs { padding: 8px 12px; }

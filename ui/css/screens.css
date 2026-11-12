@@ -2,14 +2,14 @@
 .sched { display: grid; grid-template-columns: minmax(0, 62fr) minmax(320px, 38fr); gap: var(--gap); padding: 24px; max-width: 1600px; margin: 0 auto; width: 100%; }
 .sched-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .sched-side { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
-.plan-map-wrap { position: relative; height: min(62vh, 640px); min-height: 360px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-1); }
+.plan-map-wrap { position: relative; height: min(52vh, 600px); min-height: 340px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-1); }
 .plan-map { position: absolute; inset: 0; }
 .map-legend { position: absolute; left: 12px; bottom: 12px; z-index: 650; background: var(--panel); border: 1px solid var(--border-strong);
   border-radius: var(--radius); padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-width: calc(100% - 24px); }
 .map-legend .ml-h { font-size: var(--fs-min); font-weight: 700; }
 .map-caption { font-size: var(--fs-min); color: var(--text-dim); }
 .dock { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 16px 20px 8px;
-  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); position: sticky; bottom: 0; z-index: 700; box-shadow: var(--shadow-1); }
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); position: sticky; bottom: 0; z-index: 1001; box-shadow: var(--shadow-2); }
 .play-btn { min-width: 112px; }
 .dock-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 .hour-title { font-size: var(--fs-h4); font-weight: 700; }
@@ -27,7 +27,7 @@
 @media (max-width: 1100px) {
   .sched { grid-template-columns: minmax(0, 1fr); padding: 16px 12px; }
   .plan-map-wrap { height: 56vh; min-height: 320px; }
-  .dock { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .dock { grid-template-columns: minmax(0, 1fr); gap: 12px; position: static; }
   .quota { text-align: left; }
 }
 
@@ -36,7 +36,7 @@
 :root[data-theme="dark"] .osm-tiles { filter: invert(1) hue-rotate(185deg) brightness(0.75) saturate(0.45); }
 .osm-tiles { filter: saturate(0.3) brightness(1.05); }
 .leaflet-bar { border: 2px solid var(--border-strong) !important; box-shadow: none !important; border-radius: var(--radius) !important; overflow: hidden; }
-.leaflet-bar a, .leaflet-bar a:hover { background: var(--panel); color: var(--text); width: 44px; height: 44px; line-height: 42px; font-size: 22px; border-bottom: 1px solid var(--border-strong); }
+.leaflet-bar a, .leaflet-bar a:hover, .leaflet-touch .leaflet-bar a { background: var(--panel); color: var(--text); width: 44px; height: 44px; line-height: 42px; font-size: 22px; border-bottom: 1px solid var(--border-strong); }
 .leaflet-bar a:hover { background: var(--raised); }
 .leaflet-bar a:last-child { border-bottom: 0; }
 .leaflet-control-attribution { background: var(--panel) !important; color: var(--text) !important; font-size: var(--fs-min); }
@@ -183,3 +183,4 @@ button.pg-cell:hover { box-shadow: var(--shadow-2); }
 .gloss-item dd { margin: 0; font-size: var(--fs-small); max-width: var(--measure); }
 @media (max-width: 760px) { .gloss-item dl { grid-template-columns: minmax(0, 1fr); } }
 .formula { font-family: var(--font-mono); font-size: var(--fs-min); background: var(--raised); padding: 12px 16px; border-radius: var(--radius); white-space: pre-wrap; }
+.sched-side .explain-b { grid-template-columns: minmax(0, 1fr); }

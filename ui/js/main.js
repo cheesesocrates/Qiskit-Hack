@@ -104,7 +104,8 @@ function drawNav() {
   tourBtn.addEventListener('click', () => startTour());
   const reload = el('button', { type: 'button', class: 'btn', id: 'reload', title: 'Read the results files again' }, icon('reload', 20), el('span', { class: 'btn-label' }, 'Reload'));
   reload.addEventListener('click', async () => { await load(); await showRoute(); });
-  controls.prepend(modeGroup, themeBtn, tourBtn, reload);
+  controls.prepend(modeGroup, tourBtn);
+  document.getElementById('crumbs').append(el('div', { class: 'row', style: 'gap:8px' }, reload, themeBtn));
   if (params.mock) {
     document.getElementById('badge-mock-slot').append(el('span', { class: 'badge badge--mock', role: 'alert' }, icon('warn', 18), 'Mock fixtures, not real results'));
   }

@@ -7,7 +7,7 @@ so on Windows without `make` you can run the same targets directly:
   python scripts/tasks.py ui         serve the dashboard at http://localhost:8000/ui/
   python scripts/tasks.py report     rebuild the report tables from results/*.json
   python scripts/tasks.py validate   validate results/*.json against schemas/
-  python scripts/tasks.py ui-smoke   load every dashboard screen in headless Chrome/Edge (Node 22+)
+  python scripts/tasks.py ui-smoke   contrast check + every dashboard screen in headless Chrome/Edge (Node 22+)
   python scripts/tasks.py status     regenerate docs/STATUS.md (files, schema checks, test counts)
   python scripts/tasks.py classical | quantum | replay     one area's stages only
 
@@ -101,7 +101,8 @@ def ui_smoke() -> None:
     if not node:
         print("node is not installed: the UI smoke test needs Node 22+ and Chrome, Chromium or Edge")
         sys.exit(2)
-    sh(node, "scripts/ui_smoke.mjs")
+    sh(node, "scripts/ui_contrast.mjs")
+    sh(node, "scripts/ui_smoke.mjs", "--viewport", "1440x900")
 
 
 def status() -> None:

@@ -139,7 +139,8 @@ details.disc[open] > summary::before { transform: rotate(45deg); }
   font-size: var(--fs-body); font-weight: 700; color: var(--accent); }
 .explain > summary::-webkit-details-marker { display: none; }
 .explain > summary .ex-state { margin-left: auto; font-size: var(--fs-min); color: var(--text-dim); font-weight: 400; }
-.explain-b { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; padding: 0 20px 20px; }
+.explain-b { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 24px; padding: 0 20px 20px; }
+@media (max-width: 1100px) { .explain-b { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .explain-b h3 { font-size: var(--fs-h4); margin-bottom: 4px; }
 .explain-b p, .explain-b li { font-size: var(--fs-small); }
 .explain-b ul { display: flex; flex-direction: column; gap: 6px; padding-left: 20px; list-style: disc; }

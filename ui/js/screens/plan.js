@@ -1,71 +1,107 @@
-// Screen 1: Plan. First view shows only the map, the hour control and one headline number.
-// Everything else (method, scenario, KPIs, fairness slider, debug) sits behind the Details toggle.
+// Schedule (was Plan): who loses power tonight? Map (at least 60% of the width) with an on-map legend,
+// a large Play button and the hour slider directly under it, a three-stop plan choice built from
+// results/pareto.json, and KPIs with plain translations. Every number comes from the results files.
 import { el, fmt, fmtTrim, clock, clockRange, sum, KIND_LABEL, PROTECTED_WHY } from '../util.js';
-import { icon, stateOf, stateChip } from '../icons.js';
+import { icon, STATE, stateOf, stateChip } from '../icons.js';
 import { createFeederMap } from '../components/map.js';
-import { naPanel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
+import { naPanel, panel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
 import { debugBox } from '../components/planGrid.js';
 import { buildOptions, defaultMethod, versusRoundRobin, feederFacts, paretoApplies } from '../planModel.js';
+import { explainPanel, pageHeader } from '../explain.js';
+import { term } from '../glossary.js';
 import * as motion from '../motion.js';
 
-const SCENARIO_LABEL = (k) => (k === 'base' ? 'Base' : k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' '));
+const SCEN = { base: 'Normal evening', heatwave_cap: 'Heatwave' };
 const STEP_MS = 1800;
 
+/** Three plain stops on the Pareto sweep, chosen from the data. */
+function paretoStops(par) {
+  const pts = par.points;
+  const idx = pts.map((_, i) => i);
+  const minBy = (f, tieHigh) => idx.reduce((a, b) => (f(pts[b]) < f(pts[a]) - 1e-12 || (Math.abs(f(pts[b]) - f(pts[a])) <= 1e-12 && tieHigh && pts[b].fairness_weight > pts[a].fairness_weight) ? b : a));
+  return [
+    { key: 'harm', label: 'Least total harm', sub: 'cuts where it hurts least', i: minBy((p) => p.hardship_total, false) },
+    { key: 'bal', label: 'Balanced', sub: 'the default weights', i: par.default_index },
+    { key: 'even', label: 'Most even', sub: 'spreads hours most evenly', i: minBy((p) => p.fairness_metric, true) },
+  ];
+}
+
 export default {
-  id: 'plan',
-  title: 'Plan',
   async mount({ root, results, params }) {
-    const scenarios = ['base', 'heatwave_cap'];
-    const S = { scenario: 'base', method: null, pIndex: 0, hour: 0, playing: false, detailsOpen: false };
+    const scenarios = ['base', 'heatwave_cap'].filter((k) => results.ok('plans/' + k) || (k === 'base' && results.ok('instance')));
+    const S = { scenario: 'base', method: null, pIndex: 0, stop: 'bal', hour: 0, playing: false };
     const par0 = results.ok('pareto');
     if (par0) S.pIndex = par0.default_index;
 
-    // The map needs an instance (feeders) and at least one plan to show.
     let model = buildOptions(results, S.scenario, S.pIndex);
     if (!model.inst || !model.opts.length) {
       const why = !model.inst ? [results.get('plans/base'), results.get('instance')] : [results.get('plans/base'), results.get('pareto')];
-      root.append(el('div', { class: 'page' }, el('h1', { class: 'sr-only' }, 'Plan'),
-        el('p', { class: 'lede' }, 'The Plan screen needs the base instance and at least one plan.'), naPanel(why.filter((e) => e.status !== 'ok'))));
+      root.append(el('div', { class: 'page' }, pageHeader('Who loses power tonight?', 'Schedule (was Plan)'),
+        explainPanel('schedule', { what: 'A map of which feeders are off in each hour.', how: 'Not available.', notice: null, not: 'Not available.' }),
+        naPanel(why.filter((e) => e.status !== 'ok'))));
       return { destroy() {} };
     }
     S.method = defaultMethod(model.opts);
 
-    // ---------- DOM skeleton ----------
-    const mapHost = el('div', { class: 'plan-map', role: 'application', 'aria-label': 'Map of feeders. Select a feeder for details.' });
-    const hlVal = el('span', { class: 'hl-val num' }, '');
-    const hlUnit = el('span', { class: 'hl-unit' }, '%');
-    const hlText = el('div', { class: 'hl-text' });
-    const hlSub = el('div', { class: 'hl-sub' });
-    const hlSrc = el('div', { class: 'hl-src' });
-    const headline = el('div', { class: 'headline', role: 'group', 'aria-label': 'Headline' }, el('div', { class: 'hl-num' }, hlVal, hlUnit), hlText, hlSub, hlSrc);
-
-    const toggle = el('button', { type: 'button', class: 'btn details-toggle', 'aria-expanded': 'false', 'aria-controls': 'plan-details' }, icon('panel', 18), 'Details');
-    const caption = el('p', { class: 'map-caption' }, 'Illustrative Karachi zones - synthetic feeders, not real network data');
-
-    // hour dock
-    const playBtn = el('button', { type: 'button', class: 'btn btn--primary btn--icon play-btn', 'aria-label': 'Play' }, icon('play', 22));
+    // ---------- DOM ----------
+    const mapHost = el('div', { class: 'plan-map', role: 'application', 'aria-label': 'Map of feeders. Select a feeder to see why it is on or off.' });
+    const legend = el('div', { class: 'map-legend', 'aria-label': 'Legend' }, el('span', { class: 'ml-h' }, 'Legend:'),
+      stateChip(STATE.on), stateChip(STATE.off), stateChip(STATE.protected));
+    const playBtn = el('button', { type: 'button', class: 'btn btn--primary play-btn', 'aria-label': 'Play the hours' }, icon('play', 22), el('span', null, 'Play'));
     const hourTitle = el('div', { class: 'hour-title' });
-    const hourClock = el('div', { class: 'hour-clock mono' });
+    const hourClock = el('div', { class: 'hour-clock' });
     let hourSlider = null;
     const sliderHost = el('div', { class: 'hour-slider' });
     const quotaEl = el('div', { class: 'quota' });
     const dock = el('div', { class: 'dock', role: 'group', 'aria-label': 'Hour control' },
-      playBtn, el('div', { class: 'dock-mid' }, el('div', { class: 'dock-top' }, hourTitle, hourClock), sliderHost), quotaEl);
+      playBtn, el('div', null, el('div', { class: 'dock-top' }, hourTitle, hourClock), sliderHost), quotaEl);
     const debugHost = el('div', { class: 'plan-debug' });
+    const headline = el('div', { class: 'headline', 'aria-live': 'polite' });
+    const choiceHost = el('div');
+    const kpiHost = el('div', { class: 'kpis' });
+    const scenHost = el('div');
+    const methodHost = el('div', { class: 'expert-only' });
+    const fairExpert = el('div', { class: 'expert-only' });
 
-    const details = el('aside', { class: 'details', id: 'plan-details', 'aria-label': 'Plan details', hidden: true });
-    const stage = el('div', { class: 'plan', dataset: { details: 'closed' } },
-      el('h1', { class: 'sr-only' }, 'Plan'),
-      el('div', { class: 'plan-main' },
-        el('div', { class: 'plan-map-wrap' }, mapHost, headline, toggle),
-        caption, dock, debugHost),
-      details);
+    const ins0 = model.inst;
+    const prot = ins0.feeders.filter((f) => f.protected);
+    const stage = el('div', { class: 'sched' },
+      el('div', { class: 'sched-main' },
+        pageHeader('Who loses power tonight?', 'Schedule (was Plan)'),
+        el('div', { class: 'plan-map-wrap' }, mapHost, legend),
+        el('p', { class: 'map-caption' }, 'Illustrative Karachi zones. Synthetic feeders, not real network data. Click any feeder to see why.'),
+        dock, debugHost),
+      el('aside', { class: 'sched-side', 'aria-label': 'Plan details' },
+        panel(null, null, headline),
+        explainPanel('schedule', {
+          what: [el('span', null, 'Which ', term('feeder', 'feeders'), ' (neighbourhood power lines) are off in each hour of this evening\'s shortage.')],
+          how: ['Use Play or the slider to move through the hours.', 'Teal with a check is On, amber with stripes is Off, blue with a shield is Protected.', 'Click a feeder for the plain reason.'],
+          notice: [`${ins0.n_feeders} feeders over ${ins0.n_hours} hours; ${prot.length} are protected (${prot.map((f) => f.name).join(', ')}).`,
+            `Quotas per hour: ${ins0.quotas.join(', ')} feeders off.`],
+          not: ['Real feeders or real outages: everything is synthetic.', 'Live re-planning: the plans shown were computed in advance.'],
+        }),
+        panel('Which plan?', null, el('div', { class: 'stack' }, scenHost, choiceHost, methodHost, fairExpert)),
+        panel('How this plan scores', 'Lower scores are better. Each number has a plain meaning under it.', kpiHost)));
     root.append(stage);
 
-    // ---------- helpers ----------
     const cur = () => model.opts.find((o) => o.key === S.method) || model.opts[0];
     const inst = () => model.inst;
     const T = () => inst().n_hours;
+
+    function reasonOf(fa) {
+      if (fa.protected) return `On this hour because it is protected (${PROTECTED_WHY[fa.fd.kind] || fa.fd.kind}). Protected feeders are never cut.`;
+      const bits = [];
+      if (fa.off) {
+        if (fa.hardDiffPct < -0.5) bits.push('cutting it now causes less harm than average');
+        if (fa.ledger < fa.ledgerMean) bits.push('it has had fewer outage hours than most');
+        if (!fa.prevOff) bits.push('it was on in the previous hour, so this is not a back-to-back cut');
+        return `Off this hour because: ${bits.length ? bits.join('; ') : 'the quota must be met, and this choice gave the lowest total score'}.`;
+      }
+      if (fa.hardDiffPct > 0.5) bits.push('cutting it now would cause more harm than average');
+      if (fa.ledger > fa.ledgerMean) bits.push('it has already had more outage hours than most');
+      if (fa.prevOff) bits.push('it was off in the previous hour');
+      return `On this hour because: ${bits.length ? bits.join('; ') : 'other feeders gave a lower total score'}.`;
+    }
 
     function buildPopup(i) {
       const c = cur(); const ins = inst();
@@ -73,67 +109,49 @@ export default {
       const st = stateOf(fa.fd, i, c.matrix[S.hour]);
       const dl = el('dl', { class: 'pop-list' });
       const row = (k, v) => dl.append(el('dt', null, k), el('dd', null, v));
-      row('Kind', `${KIND_LABEL[fa.fd.kind] || fa.fd.kind} in ${fa.fd.zone}`);
-      row('Protected', fa.protected ? `Yes - ${PROTECTED_WHY[fa.fd.kind] || fa.fd.kind}, never shed` : 'No, can be shed');
-      const dir = Math.abs(fa.hardDiffPct) < 0.5 ? 'equal to the average' : `${fmt(Math.abs(fa.hardDiffPct), 0)}% ${fa.hardDiffPct < 0 ? 'below' : 'above'} the average`;
-      row('Hardship this hour', el('span', null, el('b', { class: 'num' }, fmt(fa.hardHere, 1)), ' vs ', el('b', { class: 'num' }, fmt(fa.hardAvg, 1)), ` average of the ${fa.nFree} sheddable feeders (${dir})`));
+      row('Area', `${KIND_LABEL[fa.fd.kind] || fa.fd.kind} in ${fa.fd.zone} (synthetic)`);
       if (!fa.protected) {
-        row('Outage hours before this hour', el('span', null, el('b', { class: 'num' }, fmtTrim(fa.ledger)), ' h vs fleet mean ', el('b', { class: 'num' }, fmtTrim(fa.ledgerMean, 2)), ' h'));
-        row('Adjacent hours', `${fa.prevIsWindowStart ? 'Hour before the window' : 'Previous hour'}: ${fa.prevOff ? 'off' : 'on'}. Next hour: ${fa.nextOff === null ? 'beyond the window' : fa.nextOff ? 'off' : 'on'}.`);
-      }
-      const facts = [];
-      if (!fa.protected) {
-        facts.push(fa.hardDiffPct < -0.5 ? 'Harm from an outage now is lower than for the average feeder.' : fa.hardDiffPct > 0.5 ? 'Harm from an outage now is higher than for the average feeder.' : 'Harm from an outage now is about average.');
-        facts.push(fa.ledger < fa.ledgerMean ? 'It has served fewer outage hours than the fleet mean.' : fa.ledger > fa.ledgerMean ? 'It has served more outage hours than the fleet mean.' : 'It has served about the fleet mean of outage hours.');
-        if (fa.off && fa.prevOff) facts.push('It was also off in the previous hour (a consecutive outage).');
-        if (fa.off && !fa.prevOff) facts.push('It was on in the previous hour, so this is not a consecutive outage.');
-      } else {
-        facts.push(`Protected feeders (${PROTECTED_WHY[fa.fd.kind] || fa.fd.kind}) are excluded from every shedding hour.`);
+        row('Harm of a cut this hour', `${fmt(fa.hardHere, 1)}, against an average of ${fmt(fa.hardAvg, 1)} for feeders that can be cut`);
+        row('Outage hours before this hour', `${fmtTrim(fa.ledger)} h, against an average of ${fmtTrim(fa.ledgerMean, 2)} h`);
+        row('Neighbouring hours', `${fa.prevIsWindowStart ? 'Hour before tonight' : 'Previous hour'}: ${fa.prevOff ? 'off' : 'on'}. Next hour: ${fa.nextOff === null ? 'after tonight\'s plan' : fa.nextOff ? 'off' : 'on'}.`);
       }
       return el('div', { class: 'pop' },
-        el('div', { class: 'pop-h' }, el('div', null, el('div', { class: 'pop-name' }, fa.fd.name), el('div', { class: 'subtle' }, `${clockRange(ins.start_hour, S.hour)}`)), stateChip(st)),
-        dl,
-        el('div', { class: 'pop-facts' }, el('div', { class: 'pop-facts-h' }, fa.off ? 'What the plan sees (this feeder is off)' : 'What the plan sees'), el('ul', null, facts.map((x) => el('li', null, x)))));
+        el('div', { class: 'pop-h' }, el('div', null, el('div', { class: 'pop-name' }, fa.fd.name), el('div', { class: 'subtle' }, clockRange(ins.start_hour, S.hour))), stateChip(st)),
+        el('p', { class: 'pop-why' }, reasonOf(fa)), dl);
     }
 
     const fmap = createFeederMap(mapHost, { feeders: inst().feeders, debug: params.debug, tiles: params.tiles, buildPopup });
 
-    // ---------- renderers ----------
     function renderMap(animate = true) {
       const c = cur(); const ins = inst();
       const row = c.matrix[S.hour];
-      const states = ins.feeders.map((fd, f) => stateOf(fd, f, row));
-      fmap.setStates(states, { hour: S.hour, N: ins.n_feeders, bits: c.bits }, animate);
+      fmap.setStates(ins.feeders.map((fd, f) => stateOf(fd, f, row)), { hour: S.hour, N: ins.n_feeders, bits: c.bits }, animate);
       fmap.refreshPopup();
     }
 
+    function planName(c) {
+      if (c.key === 'quantum') {
+        const stop = S.stopLabel || 'Selected';
+        return `${stop} plan, chosen by the quantum circuit (simulated)`;
+      }
+      return `${c.label} plan (${c.kind === 'classical' ? 'classical' : 'quantum'})`;
+    }
+
     function renderHeadline() {
-      const c = cur(); const ins = inst();
+      const c = cur();
       const v = versusRoundRobin(model.opts, c);
-      hlSrc.replaceChildren();
+      const lines = [el('div', { class: 'subtle' }, 'Showing'), el('div', { class: 'hl-sentence' }, planName(c))];
       if (v && !v.isRR) {
         const abs = Math.abs(v.pct);
-        const eq = abs < 0.05;
-        hlUnit.style.display = '';
-        motion.countTo(hlVal, eq ? 0 : abs, (x) => fmt(x, abs < 1 && !eq ? 1 : 0));
-        hlText.textContent = eq ? 'same cost as round-robin' : `${v.pct > 0 ? 'lower' : 'higher'} cost than round-robin`;
-        const rrFail = v.rr.nViolations > 0 || v.rr.auditPassed === false;
-        hlSub.textContent = `Total cost, same scenario and weights.${rrFail ? ` Round-robin breaks ${v.rr.nViolations} audit ${v.rr.nViolations === 1 ? 'rule' : 'rules'} here.` : ''}`;
-      } else if (v && v.isRR) {
-        hlVal.textContent = '0'; hlUnit.style.display = ''; hlVal._cv = 0;
-        hlText.textContent = 'This is the round-robin plan';
-        hlSub.textContent = 'The reference every other plan is compared with.';
-      } else {
-        hlUnit.style.display = 'none';
-        motion.countTo(hlVal, ins.quotas[S.hour], (x) => fmt(x, 0));
-        hlText.textContent = `feeders off this hour (quota, of ${ins.n_feeders})`;
-        hlSub.textContent = 'Round-robin plan not available, so no cost comparison.';
+        lines.push(el('p', { class: 'hl-sub' }, abs < 0.05 ? 'Its total score equals the take-turns plan (round-robin).'
+          : `Its total score is ${fmt(abs, abs < 1 ? 1 : 0)}% ${v.pct > 0 ? 'lower (better)' : 'higher (worse)'} than the take-turns plan (round-robin).`,
+          v.rr.nViolations > 0 ? ` Round-robin breaks ${v.rr.nViolations} rule${v.rr.nViolations === 1 ? '' : 's'} in this scenario.` : ''));
       }
-      const hasQ = model.opts.some((o) => o.key === 'quantum');
-      const src = c.key === 'quantum' ? `quantum Pareto plan (${c.note})`
-        : `${c.label.toLowerCase()}${c.kind === 'classical' ? ' classical plan' : ''}`;
-      hlSrc.textContent = c.key === 'quantum' ? `Showing: ${src}`
-        : (!hasQ && /exact/i.test(c.key + c.label) ? 'Showing: exact classical plan - quantum results not available' : `Showing: ${c.label}`);
+      if (c.key === 'quantum' && c.point) {
+        lines.push(el('p', { class: 'hl-sub' }, c.point.matches_exact ? 'This is also the best possible plan for these weights (checked by exact search).'
+          : `This is not the best possible plan for these weights: exact search finds a score of ${fmt(c.point.exact_cost, 2)} against ${fmt(c.point.cost, 2)}.`));
+      }
+      headline.replaceChildren(...lines);
     }
 
     function renderDock() {
@@ -143,127 +161,90 @@ export default {
       hourTitle.textContent = `Hour ${S.hour + 1} of ${ins.n_hours}`;
       hourClock.textContent = clockRange(ins.start_hour, S.hour);
       quotaEl.replaceChildren(
-        el('div', { class: 'quota-main' }, el('span', { class: 'num q-num' }, String(off)), ` of ${ins.n_feeders} feeders off`),
-        off !== quota ? el('div', { class: 'quota-sub warn-text' }, `Quota for this hour is ${quota}`) : el('div', { class: 'quota-sub' }, `Quota m_t = ${quota}`));
+        el('div', { class: 'quota-main' }, el('span', { class: 'q-num' }, String(off)), ` of ${ins.n_feeders} feeders off`),
+        el('div', { class: off !== quota ? 'quota-sub warn-text' : 'quota-sub' }, off !== quota ? `The quota for this hour is ${quota}` : `Quota met: exactly ${quota} must be off`));
       hourSlider.set(S.hour);
     }
 
     function buildHourSlider() {
       const ins = inst();
-      hourSlider = tickSlider({ label: 'Hour of the plan', ticks: Array.from({ length: ins.n_hours }, (_, t) => clock(ins.start_hour, t)), value: S.hour,
-        onInput: (t) => { setHour(t, true); } });
+      hourSlider = tickSlider({ label: 'Hour of the plan', ticks: Array.from({ length: ins.n_hours }, (_, t) => clock(ins.start_hour, t)), value: S.hour, onInput: (t) => setHour(t, true) });
       sliderHost.replaceChildren(hourSlider.root);
     }
 
     function renderDebug() {
       debugHost.replaceChildren();
       if (!params.debug) return;
-      const c = cur();
-      debugHost.append(debugBox(c.bits, inst().n_feeders, `Plan "${c.label}"`));
+      debugHost.append(debugBox(cur().bits, inst().n_feeders, `Plan "${cur().label}"`));
     }
 
     function setHour(t, user = false) {
       S.hour = Math.max(0, Math.min(T() - 1, t));
       if (user) stopPlay();
-      renderMap(); renderDock(); renderHeadlineQuotaOnly();
+      renderMap(); renderDock();
     }
-    function renderHeadlineQuotaOnly() { renderHeadline(); }
 
-    // ---------- play ----------
     let timer = null;
     function stopPlay() {
       S.playing = false; clearInterval(timer); timer = null;
-      playBtn.replaceChildren(icon('play', 22)); playBtn.setAttribute('aria-label', 'Play');
+      playBtn.replaceChildren(icon('play', 22), el('span', null, 'Play')); playBtn.setAttribute('aria-label', 'Play the hours');
     }
     function startPlay() {
       if (S.hour >= T() - 1) setHour(0);
       S.playing = true;
-      playBtn.replaceChildren(icon('pause', 22)); playBtn.setAttribute('aria-label', 'Pause');
-      timer = setInterval(() => {
-        if (S.hour >= T() - 1) { stopPlay(); return; }
-        setHour(S.hour + 1);
-        if (S.hour >= T() - 1) stopPlay();
-      }, STEP_MS);
+      playBtn.replaceChildren(icon('pause', 22), el('span', null, 'Pause')); playBtn.setAttribute('aria-label', 'Pause');
+      timer = setInterval(() => { if (S.hour >= T() - 1) { stopPlay(); return; } setHour(S.hour + 1); if (S.hour >= T() - 1) stopPlay(); }, STEP_MS);
     }
     playBtn.addEventListener('click', () => (S.playing ? stopPlay() : startPlay()));
 
-    // ---------- details panel ----------
-    let methodSeg = null, scenSeg = null, fairSlider = null;
-    const kpiHost = el('div', { class: 'kpis' });
-    const methodHost = el('div'); const scenHost = el('div'); const fairHost = el('div'); const noteHost = el('div', { class: 'subtle' });
-
     function renderKpis() {
-      const c = cur(); const ins = inst();
-      const costNode = el('span', { class: 'num' });
-      const items = [
-        kpi('Total cost', null, c.key === 'quantum' && Math.abs(c.costAtPoint - c.cost) > 1e-6 ? `at base weights; ${fmt(c.costAtPoint, 2)} at this fairness weight` : 'weighted, base weights', costNode),
-        kpi('Hardship', fmt(c.breakdown.hardship, 1), 'sum over off feeders'),
-        kpi('Fairness spread', `${fmt(c.fairness, 2)}`, 'std of outage hours, lower is more even'),
-        kpi('Consecutive outages', fmt(c.breakdown.consecutive, 0), 'same feeder off in adjacent hours'),
-        kpi('Audit', null, c.auditSource === 'browser re-check' ? 'browser re-check of the four rules' : `${c.nViolations} violation${c.nViolations === 1 ? '' : 's'}`, passChip(c.auditPassed, 'Pass', 'Fail')),
-      ];
-      kpiHost.replaceChildren(...items);
-      motion.countTo(costNode, c.cost, (x) => fmt(x, 2));
-      costNode._cv = c.cost;
-    }
-
-    function renderMethod() {
-      const opts = model.opts.map((o) => ({ value: o.key, label: o.label, title: o.note || '' }));
-      methodSeg = segmented({ label: 'Method', options: opts, value: S.method, onChange: (v) => { S.method = v; refreshAll(false); } });
-      methodHost.replaceChildren(el('span', { class: 'field-label' }, 'Method'), methodSeg.root);
-      if (!model.opts.some((o) => o.key === 'quantum')) {
-        noteHost.textContent = 'Quantum Pareto plans are not available for this scenario' + (paretoApplies(results, S.scenario) ? '' : ' (they are precomputed for the base case only).');
-      } else noteHost.textContent = '';
+      const c = cur();
+      kpiHost.replaceChildren(
+        kpi('Total score', fmt(c.cost, 2), 'Harm plus unfairness plus back-to-back cuts, with the base weights. Lower is better.'),
+        kpi('Harm', fmt(c.breakdown.hardship, 1), el('span', null, 'Sum of the ', term('hardship'), ' of every cut in this plan.')),
+        kpi('Unevenness', `${fmt(c.fairness, 2)} h`, 'How far total outage hours differ between feeders (standard deviation). 0 would be perfectly even.'),
+        kpi('Back-to-back cuts', fmt(c.breakdown.consecutive, 0), 'Times the same feeder is off two hours in a row.'),
+        kpi('Rules check', null, c.nViolations ? `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken` : 'Quota, protected feeders, back-to-back and daily limits all met', passChip(c.auditPassed, 'Passes', 'Fails')));
     }
 
     function renderScenario() {
-      const opts = scenarios.map((k) => ({ value: k, label: SCENARIO_LABEL(k), disabled: !results.ok('plans/' + k) && !(k === 'base' && results.ok('instance')), title: results.ok('plans/' + k) ? results.ok('plans/' + k).description : `${results.get('plans/' + k).path} is not available` }));
-      scenSeg = segmented({ label: 'Scenario', options: opts, value: S.scenario, onChange: switchScenario });
+      if (scenarios.length < 2) { scenHost.replaceChildren(); return; }
+      const seg = segmented({ label: 'Scenario', options: scenarios.map((k) => ({ value: k, label: SCEN[k] || k })), value: S.scenario, onChange: switchScenario });
       const d = results.ok('plans/' + S.scenario);
-      scenHost.replaceChildren(el('span', { class: 'field-label' }, 'Scenario'), scenSeg.root, d ? el('p', { class: 'subtle sc-desc' }, d.description) : null);
+      scenHost.replaceChildren(el('span', { class: 'field-label' }, 'Scenario'), seg.root, d ? el('p', { class: 'subtle', style: 'margin-top:8px' }, d.description) : null);
     }
 
-    function renderFairness() {
+    function renderChoice() {
       const par = paretoApplies(results, S.scenario);
-      fairHost.replaceChildren();
-      const head = el('span', { class: 'field-label' }, 'Fairness weight');
       if (!par) {
-        fairHost.append(head, el('p', { class: 'subtle' }, 'The fairness slider needs results/pareto.json for the base scenario.'));
-        fairSlider = null; return;
+        S.stopLabel = null;
+        const opts = model.opts.map((o) => ({ value: o.key, label: o.label }));
+        const seg = segmented({ label: 'Plan', options: opts, value: S.method, onChange: (v) => { S.method = v; refreshAll(false); } });
+        choiceHost.replaceChildren(el('span', { class: 'field-label' }, 'Plan'), seg.root,
+          el('p', { class: 'subtle', style: 'margin-top:8px' }, S.scenario === 'base' ? 'The quantum plans are not available (results/pareto.json is missing).' : 'Quantum plans with the fairness choice were computed for the normal evening only.'));
+        methodHost.replaceChildren();
+        fairExpert.replaceChildren();
+        return;
       }
-      fairSlider = tickSlider({ label: 'Fairness weight', ticks: par.points.map((p) => fmtTrim(p.fairness_weight, 3)), value: S.pIndex, id: 'fair-slider',
-        onInput: (i) => { S.pIndex = i; S.method = 'quantum'; refreshAll(true); } });
-      fairHost.append(head, fairSlider.root,
-        el('p', { class: 'fair-note' }, 'Switches between precomputed plans - nothing is re-optimised in the browser'),
-        el('p', { class: 'subtle' }, 'Left: cost matters most. Right: an even spread of outage hours matters more.'));
+      const stops = paretoStops(par);
+      const curStop = stops.find((s) => s.i === S.pIndex && s.key === S.stop) || stops.find((s) => s.i === S.pIndex);
+      S.stopLabel = curStop ? curStop.label : `Fairness weight ${fmtTrim(par.points[S.pIndex].fairness_weight, 3)}`;
+      const seg = segmented({ label: 'Fairness choice', value: curStop ? curStop.key : null,
+        options: stops.map((s) => ({ value: s.key, label: el('span', null, el('span', null, s.label), el('br'), el('span', { class: 'seg-sub' }, s.sub)) })),
+        onChange: (k) => { const s = stops.find((x) => x.key === k); S.stop = k; S.pIndex = s.i; S.method = 'quantum'; refreshAll(true); renderChoice(); } });
+      seg.root.classList.add('seg--stops');
+      choiceHost.replaceChildren(el('span', { class: 'field-label' }, 'Fairness choice'), seg.root,
+        el('p', { class: 'fair-note', style: 'margin-top:8px' }, 'This switches between plans that were computed in advance. Nothing is re-optimised in your browser.'),
+        el('p', { class: 'subtle' }, el('span', null, 'Each stop is one point of a ', term('pareto', 'trade-off'), ' between total harm and an even spread of outage hours.')));
+      const mseg = segmented({ label: 'Method', options: model.opts.map((o) => ({ value: o.key, label: o.label })), value: S.method, onChange: (v) => { S.method = v; refreshAll(false); } });
+      methodHost.replaceChildren(el('span', { class: 'field-label' }, 'Method (Expert)'), mseg.root);
+      const fs = tickSlider({ label: 'Fairness weight', ticks: par.points.map((p) => fmtTrim(p.fairness_weight, 3)), value: S.pIndex,
+        onInput: (i) => { S.pIndex = i; S.stop = null; S.method = 'quantum'; refreshAll(true); renderChoice(); } });
       const pt = par.points[S.pIndex];
-      fairHost.append(el('p', { class: 'subtle mono' }, `weight ${fmtTrim(pt.fairness_weight, 3)} | cost at this weight ${fmt(pt.cost, 2)} | ${pt.matches_exact ? 'matches the exact optimum' : 'differs from the exact optimum'} | P(optimal) ${fmt(pt.p_optimal, 3)}`));
+      fairExpert.replaceChildren(el('span', { class: 'field-label' }, 'Fairness weight w_f (Expert)'), fs.root,
+        el('p', { class: 'subtle mono' }, `w_f ${fmtTrim(pt.fairness_weight, 3)} | score at this weight ${fmt(pt.cost, 2)} | exact ${fmt(pt.exact_cost, 2)} | P(optimal) per try ${fmt(pt.p_optimal, 4)}`));
     }
 
-    function buildDetails() {
-      details.replaceChildren(
-        el('div', { class: 'details-h' }, el('h2', null, 'Details'), el('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Close details', onclick: () => setDetails(false) }, icon('close', 18))),
-        el('div', { class: 'details-b' }, scenHost, methodHost, noteHost, kpiHost, fairHost));
-    }
-
-    function setDetails(open) {
-      S.detailsOpen = open;
-      stage.dataset.details = open ? 'open' : 'closed';
-      toggle.setAttribute('aria-expanded', String(open));
-      if (open) {
-        details.hidden = false;
-        motion.set(details, { opacity: 0, x: 16 });
-        motion.to(details, { opacity: 1, x: 0, duration: 0.25 });
-      } else {
-        details.hidden = true;
-        toggle.focus();
-      }
-      setTimeout(() => fmap.map.invalidateSize({ pan: false }), 30);
-    }
-    toggle.addEventListener('click', () => setDetails(!S.detailsOpen));
-    stage.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.detailsOpen && !document.querySelector('.leaflet-popup')) setDetails(false); });
-
-    // ---------- scenario / refresh ----------
     function switchScenario(k) {
       stopPlay();
       S.scenario = k;
@@ -273,26 +254,21 @@ export default {
       S.hour = Math.min(S.hour, T() - 1);
       fmap.setFeeders(inst().feeders);
       buildHourSlider();
+      renderScenario(); renderChoice();
       refreshAll(true, true);
     }
 
-    function refreshAll(rebuildModel = true, full = false) {
-      if (rebuildModel) model = buildOptions(results, S.scenario, S.pIndex);
+    function refreshAll(rebuild = true, full = false) {
+      if (rebuild) model = buildOptions(results, S.scenario, S.pIndex);
       if (!model.opts.some((o) => o.key === S.method)) S.method = defaultMethod(model.opts);
       renderMap(!full); renderDock(); renderHeadline(); renderKpis(); renderDebug();
-      if (full) { renderMethod(); renderFairness(); renderScenario(); }
-      else if (methodSeg) methodSeg.set(S.method);
-      if (fairSlider) fairSlider.set(S.pIndex);
     }
 
     buildHourSlider();
-    buildDetails();
-    renderScenario(); renderMethod(); renderFairness();
+    renderScenario(); renderChoice();
     refreshAll(false, true);
     requestAnimationFrame(() => fmap.relayout());
-
-    return {
-      destroy() { stopPlay(); fmap.destroy(); },
-    };
+    void motion;
+    return { destroy() { stopPlay(); fmap.destroy(); } };
   },
 };

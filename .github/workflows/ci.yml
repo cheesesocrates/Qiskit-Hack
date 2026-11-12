@@ -34,8 +34,8 @@ jobs:
       - name: Tests
         run: make test
 
-      - name: UI smoke test
-        run: node scripts/ui_smoke.mjs
+      - name: UI contrast check
+        run: node scripts/ui_contrast.mjs
 
       - name: Schema validation
         run: python scripts/validate_results.py

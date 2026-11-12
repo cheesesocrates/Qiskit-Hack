@@ -19,7 +19,7 @@ telecom towers, and lets anyone audit a published schedule against the rules.
   (equal-cost plans get equal probability, so ties are a fair lottery), penalty QAOA as a weak
   baseline, quantum counting of valid plans by iterative amplitude estimation, tail risk
   (expected loss, VaR, CVaR) by amplitude estimation, Grover Adaptive Search, and an MPS
-  simulator scaling curve up to 36 qubits.
+  simulator scaling curve on larger instances (sizes in Key results below).
 - **Classical side** (`src/`): seeded synthetic instances, a QUBO cost model, exact brute force
   and MILP, round-robin and random baselines, a ridge-regression shortfall forecast, an audit
   mode that scores any schedule, and a receding-horizon replay that re-plans every hour with the
@@ -109,9 +109,9 @@ tables are in `docs/report/FairShed_Report.md`.
 - Quantum counting of valid plans: exact 9, estimate 9.07 (95% interval 8.90 to 9.23).
 - Tail risk by amplitude estimation: CVaR 95% exact 0.906 MW, estimate 0.911 MW; P(unplanned cut) exact 0.125, estimate 0.125.
 - Replay with the quantum window solver: 12 hourly frames, 12 solved by the quantum solver, 9 matched the exact optimum, every committed plan passed the audit.
-- MPS scaling: 39 of 40 points ran, up to 36 qubits; at 36 qubits and bond dimension 64 the ratio is 0.732.
+- MPS scaling: 52 of 52 points ran, up to 72 qubits; at 72 qubits and bond dimension 64 the ratio is 0.599.
 - Where simple rules fail (scenario heatwave_cap): round-robin breaks the rules 4 times; 99.6% of random valid plans break the consecutive-hour cap.
-- Proof checks passing: 30 of 30.
+- Proof checks passing: 36 of 36.
 - The exact classical answer is better or equal on every instance; no speed-up is claimed.
 <!-- RESULTS:END -->
 

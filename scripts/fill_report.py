@@ -3,11 +3,13 @@
 Usage:  python scripts/fill_report.py
 
 Writes:
-  docs/report/FairShed_Report.md      markdown report (renders on GitHub, Mermaid diagram inline)
-  docs/report/FairShed_Report.docx    the same content as a Word document (python-docx)
+  docs/report/FairShed_Report.md      the short report (about 4 pages) as markdown
+  docs/report/FairShed_Report.docx    the same report as Word (Times New Roman, A4, black and white)
+  docs/report/FairShed_Report.pdf     PDF copy (LibreOffice, or Microsoft Word on Windows, when present)
   docs/report/architecture.mmd        Mermaid source of the architecture diagram
-  docs/report/architecture.png        the same diagram drawn with matplotlib (embedded in both)
-  docs/report/figures/*.png           charts generated from the results files
+  docs/report/architecture.png        the same diagram, black and white, 300 dpi (Figure 1)
+  docs/report/figures/mps_memory.png  exact vs MPS memory by instance size (Figure 2)
+  README.md key-results block and docs/demo_script.md
 
 Every number in the report is read from results/*.json at build time, from the installed
 package versions, or quoted from docs/SPEC.md (problem context). Limitations are parsed from
@@ -18,6 +20,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import math
 import re
 import subprocess
 import sys
@@ -30,16 +33,105 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # noqa: E402
 
+NA = "not available"
+# Team details and figure widths as set by the team in Word (kept so a rebuild does not undo them)
+TEAM_LINE = ("Team: Hello Child. Members: Raahim Babar, Zarrar Nadeem, Ahmed Ayan Arsalan. "
+             "Domain: Energy and Smart Infrastructure.")
+FIG1_WIDTH_IN, FIG2_WIDTH_IN = 7.03, 6.53
+CONTEXT_SOURCE = ("Dunya News, 6 October 2026",
+                  "https://dunyanews.tv/en/Business/976376-electricity-shortfall-in-pakistan-exceeds-4000mw")
+
+# Glossary (section 10). In report text, [[shown words|key]] links to the entry `key`;
+# [[shown words|https://...]] is a web link.
+GLOSSARY = [
+    ("amplitude_estimation", "Amplitude estimation", "A quantum method that estimates a probability built into a "
+     "circuit, such as the share of valid plans. We use the iterative version in Qiskit and check every estimate "
+     "against the exact value."),
+    ("approx_ratio", "Approximation ratio", "How close a plan is to the best one: 1 is the best valid plan, 0 the "
+     "worst valid plan, and an invalid plan scores 0. A circuit's ratio is the average over its tries."),
+    ("bond_dimension", "Bond dimension", "The setting that controls how much an [[MPS|mps]] simulation keeps of the "
+     "links ([[entanglement|entanglement]]) between neighbouring qubits. Higher is more accurate, slower and uses "
+     "more memory."),
+    ("cobyla", "COBYLA", "A classical optimisation routine. It adjusts the circuit's angles step by step to lower the "
+     "average cost of the plans the circuit produces."),
+    ("dicke", "Dicke state", "An equal mix of every way to switch on exactly k of n qubits. Here: every way to cut "
+     "exactly the required number of feeders in one hour, all with the same weight."),
+    ("entanglement", "Entanglement", "Quantum correlation between qubits. It is what makes a quantum state hard to "
+     "store on a normal computer."),
+    ("exact", "Exact solver (brute force, MILP)", "Classical methods that are guaranteed to find the best plan. Brute "
+     "force checks every valid plan; MILP (mixed-integer linear programming) is a standard solver used for the "
+     "larger instances."),
+    ("feeder", "Feeder and express feeder", "A feeder is a power line that supplies one neighbourhood; load shedding "
+     "switches whole feeders off. An express feeder is a dedicated line kept out of load shedding, used for "
+     "hospitals and water pumps."),
+    ("fidelity", "Fidelity", "How much a simulated quantum state overlaps the exact one: 1 means identical, 0 means "
+     "nothing in common."),
+    ("gas", "Grover Adaptive Search", "A quantum search method that repeatedly looks for a plan cheaper than the best "
+     "one found so far."),
+    ("grover_mixer", "Grover mixer", "A [[mixer|mixer]] that treats every valid plan the same way, so plans with "
+     "equal cost always get exactly equal probability: a fair lottery among tied plans."),
+    ("ising", "Ising form (Z and ZZ terms)", "The cost rewritten for qubits. Each 0/1 variable x is replaced by "
+     "(1 - Z)/2, where Z is +1 or -1 depending on the qubit. Terms with one variable become Z terms; terms with a "
+     "pair of variables become ZZ terms."),
+    ("json", "JSON results files and schemas", "Every part of the project writes its results to JSON files; a schema "
+     "is a rule sheet that checks each file's structure before it is used."),
+    ("mixer", "Mixer (XY mixer)", "The [[QAOA|qaoa]] step that moves probability between plans. The XY mixer swaps "
+     "which feeders are off within an hour, so the number of feeders off never changes."),
+    ("mps", "MPS (matrix product state)", "A way to simulate a quantum circuit on a normal computer by storing the "
+     "state as a chain of small blocks, one per qubit, instead of one number per possible on/off pattern. It uses "
+     "far less memory but becomes approximate when the [[bond dimension|bond_dimension]] is capped."),
+    ("penalty_qaoa", "Penalty QAOA", "The textbook version of [[QAOA|qaoa]]: the rules are only a cost penalty and a "
+     "standard mixer is used, so the circuit can still produce invalid plans."),
+    ("qaoa", "QAOA", "Quantum Approximate Optimisation Algorithm: a short circuit that alternates a cost step and a "
+     "[[mixer|mixer]] step. A classical optimiser tunes its angles; each measurement gives one candidate plan."),
+    ("qubit", "Qubit", "A quantum bit. Here each qubit is one yes/no switch: is this feeder off in this hour?"),
+    ("qubo", "QUBO", "Quadratic unconstrained binary optimisation: a cost written as a sum of terms on 0/1 variables "
+     "and on pairs of them. It is the standard input form for quantum optimisers."),
+    ("replay", "Receding-horizon replay", "Re-planning every hour for the next three hours with the latest "
+     "forecast, then committing only the first hour."),
+    ("ridge", "Ridge regression", "A simple classical forecasting model (a regularised straight-line fit). Here it "
+     "predicts the electricity shortfall from weather and time of day."),
+    ("round_robin", "Round-robin", "A simple take-turns rule that cuts feeders in a fixed rotation, with no "
+     "optimisation."),
+    ("rule_preserving", "Rule-preserving circuit", "A circuit built so that every measurement is a valid plan: it "
+     "starts in a [[Dicke state|dicke]] and uses an XY or [[Grover mixer|grover_mixer]], which never change how "
+     "many feeders are off."),
+    ("rz", "RZ and RZZ gates", "Rotation gates that add a phase depending on one qubit (RZ) or on a pair of qubits "
+     "(RZZ). They put the [[Z and ZZ terms|ising]] of the cost into the circuit."),
+    ("shot", "Shot (try, measurement)", "One run of the circuit followed by a measurement, which gives one plan."),
+    ("simulator", "Simulator (Qiskit Aer)", "A program on a normal computer that computes exactly what an ideal, "
+     "noise-free quantum computer would do. No quantum hardware was used."),
+    ("cvar", "Tail risk (VaR and CVaR)", "How bad the bad hours get. VaR 95% is the loss exceeded only 5% of the "
+     "time; CVaR 95% is the average loss in that worst 5%. Here the loss is the shortfall (MW) that the plan does "
+     "not cover."),
+    ("valid", "Valid plan", "A plan that meets every hourly quota and never cuts a protected feeder."),
+]
+GLOSSARY.sort(key=lambda g: g[1].lower())
+LINK = re.compile(r"\[\[([^|\]]+)\|([^\]]+)\]\]")
+
+
+def segments(text: str) -> list:
+    """[(shown text, link target or None)]; a target is a glossary key or an http(s) URL."""
+    out, pos = [], 0
+    for m in LINK.finditer(text):
+        if m.start() > pos:
+            out.append((text[pos:m.start()], None))
+        out.append((m.group(1), m.group(2)))
+        pos = m.end()
+    if pos < len(text):
+        out.append((text[pos:], None))
+    return out
+
+
+def plain(text: str) -> str:
+    return LINK.sub(lambda m: m.group(1), text)
+
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "results"
 OUT = ROOT / "docs" / "report"
 FIG = OUT / "figures"
 REPO_URL = "https://github.com/cheesesocrates/Qiskit-Hack"
 
-# reference palette, light mode (dataviz skill): slot 1 blue, slot 2 orange, ink and grid
-BLUE, ORANGE = "#2a78d6", "#eb6834"
-INK, INK2, MUTED, GRID = "#0b0b0b", "#52514e", "#8a8984", "#e4e3df"
-BLUE_RAMP = ["#b7d3f2", "#8cb9ea", "#5f9de0", "#2a78d6", "#1f5fae", "#164682"]
 
 
 # ------------------------------------------------------------------------------------------
@@ -108,625 +200,715 @@ def known_issues() -> list:
     return rows
 
 
+
+
 # ------------------------------------------------------------------------------------------
-# figures
+# figures (black and white, 300 dpi)
 # ------------------------------------------------------------------------------------------
-def _style(ax):
-    ax.spines[["top", "right"]].set_visible(False)
-    for s in ("left", "bottom"):
-        ax.spines[s].set_color(MUTED)
-    ax.tick_params(colors=INK2, labelsize=9)
-    ax.grid(color=GRID, linewidth=0.8)
-    ax.set_axisbelow(True)
-
-
-def fig_ablation(abl) -> Path | None:
-    rows = [r for r in abl["rows"] if r["instance"] == abl["instance_name"]]
-    if not rows:
-        return None
-    rows = rows[::-1]
-    fig, ax = plt.subplots(figsize=(7.2, 0.42 * len(rows) + 1.0), dpi=200)
-    colors = [BLUE if r["kind"] == "quantum" else ORANGE for r in rows]
-    y = range(len(rows))
-    ax.barh(list(y), [r["approx_ratio"] for r in rows], color=colors, height=0.55, edgecolor="white", linewidth=1)
-    for i, r in enumerate(rows):
-        ax.text(r["approx_ratio"] + 0.01, i, f"{r['approx_ratio']:.3f}", va="center", fontsize=8.5, color=INK)
-    ax.set_yticks(list(y), [r["label"] for r in rows], fontsize=8.5, color=INK)
-    ax.set_xlim(0, 1.12)
-    ax.set_xlabel("Approximation ratio (1.0 = exact optimum, invalid samples score 0)", fontsize=9, color=INK2)
-    _style(ax)
-    ax.grid(axis="y", visible=False)
-    from matplotlib.patches import Patch
-    ax.legend(handles=[Patch(color=BLUE, label="Quantum (simulated)"), Patch(color=ORANGE, label="Classical")],
-              loc="lower right", fontsize=8.5, frameon=False)
-    fig.tight_layout()
-    p = FIG / "ablation.png"
-    fig.savefig(p, facecolor="white")
-    plt.close(fig)
-    return p
-
-
-def fig_scaling(sc) -> Path | None:
-    pts = [p for p in sc["points"] if p["bond_dim"] is not None]
-    sizes = sorted({p["n_qubits"] for p in pts})
-    if not sizes:
-        return None
-    fig, ax = plt.subplots(figsize=(7.2, 3.8), dpi=200)
-    for k, n in enumerate(sizes):
-        ser = sorted((p for p in pts if p["n_qubits"] == n), key=lambda p: p["bond_dim"])
-        xs = [p["bond_dim"] for p in ser if p["status"] == "ok"]
-        ys = [p["approx_ratio"] for p in ser if p["status"] == "ok"]
-        lab = next(f"{p['n_feeders']}x{p['n_hours']} ({n} qubits)" for p in ser)
-        ax.plot(xs, ys, color=BLUE_RAMP[k % len(BLUE_RAMP)], linewidth=2, marker="o", markersize=4, label=lab)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(sorted({p["bond_dim"] for p in pts}), [str(d) for d in sorted({p["bond_dim"] for p in pts})])
-    ax.set_ylim(0, 1)
-    ax.set_xlabel("Maximum MPS bond dimension (chi)", fontsize=9, color=INK2)
-    ax.set_ylabel("Approximation ratio", fontsize=9, color=INK2)
-    _style(ax)
-    ax.legend(fontsize=8, frameon=False, loc="lower right", title="Instance (lighter = smaller)", title_fontsize=8)
-    fig.tight_layout()
-    p = FIG / "scaling.png"
-    fig.savefig(p, facecolor="white")
-    plt.close(fig)
-    return p
-
-
-def fig_replay(rep) -> Path | None:
-    fr = rep["frames"]
-    if not fr:
-        return None
-    x = list(range(len(fr)))
-    fig, ax = plt.subplots(figsize=(7.2, 3.2), dpi=200)
-    ax.plot(x, [f["shortfall_mw"] for f in fr], color=BLUE, linewidth=2, marker="o", markersize=4, label="Actual shortfall")
-    ax.plot(x, [f["forecast_mw"] for f in fr], color=ORANGE, linewidth=2, linestyle="--", label="Ridge forecast")
-    bad = [i for i, f in enumerate(fr) if not f["matches_exact"]]
-    if bad:
-        ax.scatter(bad, [fr[i]["shortfall_mw"] for i in bad], s=90, facecolors="none", edgecolors=INK, linewidths=1.5,
-                   zorder=5, label="Committed plan costlier than exact")
-    ax.set_xticks(x, [f"{f['hour']:02d}:00" for f in fr], fontsize=8)
-    ax.set_ylabel("MW", fontsize=9, color=INK2)
-    ax.set_ylim(bottom=0)
-    _style(ax)
-    ax.legend(fontsize=8, frameon=False, loc="upper left")
-    fig.tight_layout()
-    p = FIG / "replay.png"
-    fig.savefig(p, facecolor="white")
-    plt.close(fig)
-    return p
-
+plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "Liberation Serif", "DejaVu Serif"]})
 
 MERMAID = """flowchart LR
-  subgraph A2["Area 2: data, classical, report"]
-    GEN["Synthetic generator + cost model<br/>(QUBO export)"]
-    BASE["Exact, MILP, round-robin,<br/>random-valid baselines"]
-    FC["Ridge forecast<br/>(classical)"]
-    AUD["Audit mode"]
-    REP["Receding-horizon replay"]
-    RPT["fill_report.py"]
-  end
-  subgraph C["Contract"]
-    RES[("results/*.json<br/>+ schemas/")]
-  end
-  subgraph A1["Area 1: quantum (Qiskit, Aer simulator)"]
-    QAOA["QAOA: Dicke + XY mixer,<br/>Grover mixer, penalty"]
-    GAS["Grover Adaptive Search"]
-    CNT["Counting (IAE)"]
-    RSK["Risk: VaR / CVaR (IAE)"]
-    MPS["MPS scaling"]
-    WIN["solve-window"]
-  end
-  subgraph A3["Area 3: dashboard"]
-    UI["Static dashboard,<br/>7 screens, offline"]
-  end
-  GEN --> RES
-  BASE --> RES
-  FC --> RES
-  AUD --> RES
-  REP --> RES
-  RES --> QAOA & GAS & CNT & RSK & MPS
-  QAOA & GAS & CNT & RSK & MPS --> RES
-  REP -- "window_in.json" --> WIN
-  WIN -- "window_out.json" --> REP
-  RES --> UI
-  RES --> RPT
+  W["Weather snapshot (real) + synthetic demand"] --> F["Ridge forecast (classical): hourly quotas"]
+  F --> I["Instance and cost model (feeders, rules, QUBO)"]
+  I --> R[("results/*.json, checked by schemas")]
+  X["Exact reference: brute force, MILP, simple baselines"] <--> R
+  R <--> Q["Quantum (Qiskit, Aer simulator): QAOA, counting, risk, Grover search, MPS"]
+  R <--> P["Hour-by-hour replay (exact fallback)"]
+  P <-- "window files" --> Q
+  R --> A["Audit (rule checker)"]
+  R --> D["Dashboard and report"]
 """
 
 
 def fig_architecture() -> Path:
-    fig, ax = plt.subplots(figsize=(10, 6.0), dpi=200)
+    fig, ax = plt.subplots(figsize=(7.0, 2.8), dpi=300)
     ax.set_xlim(0, 100)
-    ax.set_ylim(0, 65)
+    ax.set_ylim(0, 41)
     ax.axis("off")
 
-    def box(x, y, w, h, text, fc="white", ec=MUTED, size=8.5, weight="normal"):
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.4,rounding_size=1.2", fc=fc, ec=ec, lw=1.2))
-        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=size, color=INK, weight=weight, wrap=True)
+    def box(x, y, w, h, text, lw=0.9, size=7.4, weight="normal"):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.3,rounding_size=0.8", fc="white", ec="black",
+                                    lw=lw))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=size, color="black", weight=weight)
 
-    def group(x, y, w, h, title):
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.6,rounding_size=2", fc="#f6f6f4", ec=GRID, lw=1))
-        ax.text(x + 1, y + h - 1.2, title, ha="left", va="top", fontsize=9.5, color=INK2, weight="bold")
-
-    def arrow(x1, y1, x2, y2, color=INK2, text=None, rad=0.0):
-        ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>", mutation_scale=11, color=color, lw=1.1,
-                                     connectionstyle=f"arc3,rad={rad}"))
+    def arrow(x1, y1, x2, y2, both=False, text=None, dy=1.2):
+        ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="<|-|>" if both else "-|>", mutation_scale=8,
+                                     color="black", lw=0.8))
         if text:
-            ax.text((x1 + x2) / 2, (y1 + y2) / 2 + 1.2, text, ha="center", fontsize=7.5, color=INK2)
+            ax.text((x1 + x2) / 2, (y1 + y2) / 2 + dy, text, ha="center", va="center", fontsize=6.6, style="italic")
 
-    group(1, 12, 30, 47, "Area 2: data, classical, report")
-    a2 = ["Synthetic generator + cost model\n(QUBO export)", "Exact, MILP, round-robin,\nrandom-valid baselines",
-          "Ridge forecast (classical)", "Audit mode", "Receding-horizon replay"]
-    for i, t in enumerate(a2):
-        box(3, 49 - i * 8.2, 26, 5.6, t)
-    group(69, 12, 30, 47, "Area 1: quantum (Qiskit, Aer simulator)")
-    a1 = ["QAOA: Dicke + XY mixer,\nGrover mixer, penalty", "Grover Adaptive Search", "Counting (IAE)",
-          "Risk: VaR and CVaR (IAE)", "MPS scaling", "solve-window (called by replay)"]
-    for i, t in enumerate(a1):
-        box(71, 50 - i * 7.0, 26, 4.8, t)
-    box(38, 28, 24, 12, "results/*.json\n+ schemas/\n(the only interface)", fc="#eaf2fc", ec=BLUE, size=9.5, weight="bold")
-    box(36, 3, 13, 6, "Dashboard (Area 3)\n7 screens, offline", fc="white")
-    box(51, 3, 13, 6, "fill_report.py\nreport .md + .docx")
-    box(3, 3, 26, 6, "pytest proof checks\n-> results/checks.json")
-    for i in range(5):
-        arrow(29.4, 51.8 - i * 8.2, 38, 36 - i * 1.2)
-    arrow(62, 37, 68.6, 42, color=BLUE, text="reads plans")
-    arrow(68.6, 27, 62, 31, color=BLUE)
-    ax.text(65.3, 26.0, "writes results", ha="center", fontsize=7.5, color=INK2)
-    ax.add_patch(FancyArrowPatch((29.4, 18.4), (70.6, 17.4), arrowstyle="<|-|>", mutation_scale=11, color=BLUE, lw=1.1))
-    ax.text(50, 21.2, "window_in.json /\nwindow_out.json\n(files, not imports)", ha="center", va="center", fontsize=7.5,
-            color=INK2, bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="none"))
-    arrow(41, 28, 42.5, 9.4)
-    arrow(59, 28, 57.5, 9.4)
-    arrow(29.4, 6, 35.6, 6)
-    ax.text(50, 63, "FairShed architecture: three areas that talk only through results files", ha="center",
-            fontsize=11, color=INK, weight="bold")
-    fig.tight_layout()
+    # classical inputs (left)
+    box(1, 33, 25, 7, "Weather snapshot (real)\n+ synthetic demand")
+    box(1, 23, 25, 7, "Ridge forecast (classical)\nsets the hourly quotas")
+    box(1, 13, 25, 7, "Instance + cost model\nfeeders, rules, QUBO")
+    box(1, 1, 25, 8, "Exact reference\nbrute force, MILP,\nround-robin, random")
+    arrow(13.5, 33, 13.5, 30.4)
+    arrow(13.5, 23, 13.5, 20.4)
+    # hub and consumers (middle)
+    box(36, 15, 28, 11, "results/*.json\nchecked by schemas\n(the only link between parts)", lw=1.8, size=7.8,
+        weight="bold")
+    box(36, 31, 28, 9, "Hour-by-hour replay\nre-plans every hour,\nexact fallback")
+    box(36, 1, 13, 8, "Audit\n(rule checker)")
+    box(51, 1, 13, 8, "Dashboard\nand report")
+    arrow(26.4, 16.5, 35.6, 19)
+    arrow(26.4, 5, 35.6, 17, both=True)
+    arrow(50, 26.4, 50, 30.6, both=True)
+    arrow(42, 14.6, 42, 9.4)
+    arrow(58, 14.6, 58, 9.4)
+    # quantum group (right)
+    ax.add_patch(FancyBboxPatch((72, 1), 27, 39, boxstyle="round,pad=0.3,rounding_size=1.2", fc="white", ec="black",
+                                lw=0.9, ls="--"))
+    ax.text(85.5, 38.3, "Quantum (Qiskit, Aer simulator)", ha="center", va="center", fontsize=7.6, weight="bold")
+    q = ["QAOA: Dicke + XY mixer,\nGrover mixer, penalty", "Counting valid plans\n(amplitude estimation)",
+         "Tail risk\n(amplitude estimation)", "Grover Adaptive Search", "MPS scaling study"]
+    for t, y, h in zip(q, [29, 21.5, 14, 8, 2], [6.5, 6, 6, 4.3, 4.3]):
+        box(74, y, 23, h, t, size=7.0)
+    arrow(64.4, 20.5, 71.6, 20.5, both=True, text="instance in,\nresults out", dy=3.0)
+    arrow(64.4, 36, 71.6, 33, both=True, text="window files", dy=2.0)
+    fig.tight_layout(pad=0.2)
     p = OUT / "architecture.png"
     fig.savefig(p, facecolor="white")
     plt.close(fig)
     return p
 
 
+def _mps_rows(sca) -> list:
+    """Per instance size: the MPS point with the largest bond dimension that ran (needs mps_memory_mb)."""
+    if not sca:
+        return []
+    out = []
+    for n in sorted({p["n_qubits"] for p in sca["points"]}):
+        pts = [p for p in sca["points"] if p["n_qubits"] == n and p["bond_dim"] is not None and p["status"] == "ok"
+               and p.get("mps_memory_mb") is not None]
+        if pts:
+            out.append(max(pts, key=lambda p: p["bond_dim"]))
+    return out
+
+
+def fig_mps_memory(sca) -> Path | None:
+    rows = _mps_rows(sca)
+    if not rows:
+        return None
+    n = [p["n_qubits"] for p in rows]
+    exact = [16.0 * 2.0 ** q for q in n]
+    mps = [p["mps_memory_mb"] * 2 ** 20 for p in rows]
+    fig, ax = plt.subplots(figsize=(6.0, 2.5), dpi=300)
+    ax.semilogy(n, exact, color="black", ls="-", marker="s", ms=4, lw=1.1, label="Exact simulation (16 bytes per basis state)")
+    ax.semilogy(n, mps, color="black", ls="--", marker="o", ms=4, mfc="white", lw=1.1,
+                label="MPS, largest bond dimension that ran (measured)")
+    ticks = [10.0 ** k for k in range(3, 25, 3) if min(mps) / 10 <= 10.0 ** k <= max(exact) * 10]
+    names = {3: "1 KB", 6: "1 MB", 9: "1 GB", 12: "1 TB", 15: "1 PB", 18: "1 EB", 21: "1 ZB", 24: "1 YB"}
+    ax.set_yticks(ticks, [names[int(round(math.log10(t)))] for t in ticks])
+    ax.minorticks_off()
+    ax.set_xticks(n)
+    ax.set_xlabel("Qubits in the circuit", fontsize=9)
+    ax.set_ylabel("Memory (log scale)", fontsize=9)
+    ax.tick_params(labelsize=8, colors="black")
+    ax.grid(color="#bbbbbb", lw=0.4, ls=":")
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    ax.legend(fontsize=7.5, frameon=False, loc="upper left")
+    fig.tight_layout(pad=0.3)
+    p = FIG / "mps_memory.png"
+    fig.savefig(p, facecolor="white")
+    plt.close(fig)
+    return p
+
+
 # ------------------------------------------------------------------------------------------
-# content
+# content: a short report, every number read from results/*.json
 # ------------------------------------------------------------------------------------------
+def pinned_versions() -> dict:
+    out = {}
+    for line in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^([A-Za-z0-9_.-]+)==([^\s#]+)", line.strip())
+        if m:
+            out[m.group(1).lower()] = m.group(2)
+    return out
+
+
+def _bytes(b: float) -> str:
+    units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    i = 0
+    while b >= 1000 and i < len(units) - 1:
+        b /= 1000
+        i += 1
+    return f"{b:.0f} {units[i]}" if b >= 10 else f"{b:.1f} {units[i]}"
+
+
+def nodash(s: str) -> str:
+    return s.replace("—", ", ").replace("–", " to ")
+
+
+def context_with_source() -> str:
+    """The SPEC context facts, with the news source linked after the sentence it supports (the shortfall)."""
+    sentences = re.split(r"(?<=\.)\s+", nodash(spec_context()))
+    name, url = CONTEXT_SOURCE
+    sentences[0] = sentences[0].rstrip(".") + f" (source: [[{name}|{url}]])."
+    return " ".join(sentences)
+
+
 def build() -> list:
     abl, lot, par = load("ablation.json"), load("lottery.json"), load("pareto.json")
     cnt, rsk, sca = load("counting.json"), load("risk.json"), load("scaling.json")
-    rep, fc, aud = load("replay.json"), load("forecast.json"), load("audit_example.json")
-    chk, base, heat = load("checks.json"), load("plans/base.json"), load("plans/heatwave_cap.json")
+    rep, chk = load("replay.json"), load("checks.json")
+    base, heat = load("plans/base.json"), load("plans/heatwave_cap.json")
     B = []
-    now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-    B += [("title", "FairShed: a fair, auditable load-shedding planner with Qiskit"),
-          ("p", f"Qiskit hackathon, Energy and Smart Infrastructure. Repository: {REPO_URL}. "
-                f"Report generated {now} from commit {git_commit()} by scripts/fill_report.py."),
-          ("callout", "Simulator only. Every feeder, demand figure and outage ledger in this report is synthetic, "
-                      "on illustrative Karachi zones. Weather in the forecast is a real Open-Meteo snapshot. No "
-                      "quantum speed-up is claimed: every instance here is also solved exactly by classical brute "
-                      "force or MILP, and that exact answer is the yardstick for every quantum number.")]
-
-    # 1. problem
     inst = base["instance"] if base else None
-    B += [("h1", "1. Problem")]
-    ctx = spec_context()
-    if ctx:
-        B += [("p", "Context, quoted from the project brief (docs/SPEC.md); these are not results of this code: "
-                    f"\"{ctx}\"")]
-    B += [("p", "When supply falls short, a utility switches whole feeders off for an hour at a time. The quota (how "
-                "many feeders go off each hour) follows from the shortfall. The open question is which feeders. A "
-                "fair plan spreads the outage hours evenly, avoids cutting the same area hour after hour, spares "
-                "the areas where an outage hurts most, and never cuts hospitals, water pumps or telecom towers. It "
-                "must also be auditable: anyone should be able to check a published schedule against the rules.")]
+    ex = base["exact"] if base else None
+    rows = [r for r in abl["rows"] if r["instance"] == abl["instance_name"]] if abl else []
+    by = {r["method"]: r for r in rows}
+    q_rows = [r for r in rows if r["kind"] == "quantum"]
+    xy, gr, pen = by.get("xy_qaoa_p3"), by.get("grover_qaoa_p3"), by.get("penalty_qaoa_p3")
+    best_q = max(q_rows, key=lambda r: r["approx_ratio"]) if q_rows else None
+    rr = by.get("round_robin")
+    gas = next((r for r in abl["rows"] if r["method"] == "grover_adaptive_search"), None) if abl else None
+    tie = lot["tie_groups"][0] if lot and lot.get("tie_groups") else None
+    n_q = best_q["n_qubits"] if best_q else None
+    shots = best_q["shots"] if best_q else None
+    ok_scale = [p for p in sca["points"] if p["status"] == "ok"] if sca else []
+    big_n = max((p["n_qubits"] for p in ok_scale), default=None)
+    checks = f"{chk['summary']['passed']} of {chk['summary']['total']}" if chk else NA
+    nq_rep = sum(1 for fr in rep["frames"] if "quantum" in fr["solver_used"]) if rep else None
+    pass_rep = sum(1 for fr in rep["frames"] if fr["audit_passed"]) if rep else None
+    par_ok = sum(1 for p in par["points"] if p["matches_exact"]) if par else None
+    V = pinned_versions()
+
+    # ---------------------------------------------------------------- 1. summary
+    B += [("title", "FairShed: fair and auditable load-shedding with Qiskit"),
+          ("meta", TEAM_LINE),
+          ("meta", f"Repository: {REPO_URL}.")]
+    B += [("h1", "1. Summary"),
+          ("p", "When there is not enough electricity, a utility switches whole [[feeders|feeder]] (the power lines that supply "
+                "one neighbourhood) off for an hour at a time. FairShed decides which feeders go off in each hour. "
+                "Hospitals, water pumps and telecom towers are never cut, outage hours are shared fairly, and no area "
+                "is cut hour after hour. We solve this optimisation problem with Qiskit quantum circuits, run on a "
+                "[[simulator|simulator]], that only ever produce [[valid plans|valid]]. "
+                "Every quantum result is checked against an exact classical answer, and at this size the classical "
+                "answer is better, so we claim no speed-up.")]
+    heads = []
+    if xy and gr and pen:
+        heads.append(("Every plan is valid. ", f"Both [[rule-preserving circuits|rule_preserving]] gave a valid plan in "
+                      f"{min(xy['feasibility_pct'], gr['feasibility_pct']):.0f}% of {shots} [[tries|shot]]; the standard "
+                      f"[[penalty circuit|penalty_qaoa]] managed only {pen['feasibility_pct']:.1f}%."))
+    if tie:
+        heads.append(("A fair lottery. ", f"The {tie['n_plans']} tied best plans got equal chances (largest "
+                      f"difference {tie['prob_spread']:.1e})."))
+    if cnt and rsk:
+        heads.append(("Quantum estimates match exact values. ", f"Counting valid plans: {cnt['estimated_count']:.2f} "
+                      f"against exactly {cnt['exact_count']}. [[Tail risk (CVaR)|cvar]]: {rsk['estimated']['cvar']:.3f} MW "
+                      f"against {rsk['exact']['cvar']:.3f} MW."))
+    if best_q and rr:
+        heads.append(("Where quantum loses. ", f"The best circuit gets {best_q['approx_ratio'] * 100:.0f}% of the way "
+                      f"to the best plan on average and finds it in {best_q['p_optimal'] * 100:.2f}% of single tries. "
+                      f"Simple [[round-robin|round_robin]] gets {rr['approx_ratio'] * 100:.0f}%; the [[exact solver|exact]] gets 100%."))
+    B += [("bullets", heads)]
+    B += [("table", ["Requirement (hackathon brief)", "Rubric line", "Section"], [
+        ["Identify the problem and its users", "A. Problem validity", "2"],
+        ["Formulate variables, objective, constraints, test instance", "A. Problem validity", "2, 3"],
+        ["Justify the quantum algorithm and the mapping", "B. Quantum use", "3, 4"],
+        ["Implement a working, reproducible Qiskit component", "C. Implementation", "4, 9"],
+        ["Evaluate against an exact reference", "C. Validation", "6"],
+        ["Reflect on correctness, limits and trade-offs", "B. Awareness of limits", "8"],
+        ["Architecture diagram", "C. Implementation", "5"],
+        ["Originality", "D. Innovation", "7"],
+        ["Glossary of terms (linked from the text)", "E. Presentation", "10"]],
+        "Table 1. Where to find each requirement.", None)]
+
+    # ---------------------------------------------------------------- 2. problem statement
+    B += [("h1", "2. Problem statement"), ("h2", "2.1 Context and users"),
+          ("p", context_with_source()),
+          ("bullets", [("Utility planner: ", "needs a cut schedule for the next hours that meets the shortfall."),
+                       ("Regulator or public: ", "need to check that a published schedule follows the rules.")])]
+    B += [("h2", "2.2 Objective and rules"),
+          ("p", "Objective: choose which feeders are off in each hour so the total cost (harm + unfairness + "
+                "back-to-back cuts) is as low as possible."),
+          ("bullets", [("Quota: ", "exactly the required number of feeders is off in each hour."),
+                       ("Protection: ", "hospitals, water pumps and telecom towers are never off.")])]
     if inst:
-        prot = [ft["name"] for ft in inst["feeders"] if ft["protected"]]
-        ex = base["exact"]
-        B += [("p", f"Base instance: {inst['n_feeders']} synthetic feeders over {inst['n_hours']} hours starting at "
-                    f"{inst['start_hour']:02d}:00, quotas {', '.join(map(str, inst['quotas']))}, protected feeders "
-                    f"{', '.join(prot)}. It has {ex['n_valid']} valid plans; {ex['n_optimal']} tie for the optimum at "
-                    f"cost {f(ex['cost_min'], 2)} (worst valid plan {f(ex['cost_max'], 2)}).")]
-    B += [("h2", "Formulation"),
-          ("p", "Variable x[t,f] = 1 means feeder f is off in hour t; the qubit index is q = t*N + f. Hard "
-                "constraints: exactly m_t feeders off in hour t, and protected feeders never off. The cost is a QUBO:"),
-          ("code", "C(x) = w_h * sum_t,f hardship[t][f] x[t,f]\n"
-                   "     + w_f * sum_f (ledger[f] + sum_t x[t,f] - mu)^2\n"
-                   "     + w_c * (sum_f sum_t x[t,f] x[t+1,f] + sum_f prev_off[f] x[0,f])"),
-          ("p", "Hardship weighs heat and population, the fairness term pulls every feeder's total outage hours "
-                "(including hours already served, the ledger) towards the mean, and the consecutive term penalises "
-                "cutting the same feeder in adjacent hours. Sums run over non-protected feeders. The exact contract "
-                "is in docs/CONTRACT.md.")]
-    if inst:
-        w = inst["weights"]
-        B += [("p", f"Weights in the base instance: hardship {w['hardship']}, fairness {w['fairness']}, consecutive "
-                    f"{w['consecutive']}.")]
+        prot = ", ".join(f"feeder {fd['id']} ({fd['kind'].replace('_', ' ')})" for fd in inst["feeders"] if fd["protected"])
+        B += [("h2", "2.3 Test instance"),
+              ("bullets", [f"{inst['n_feeders']} synthetic feeders on illustrative Karachi zones, {inst['n_hours']} hours.",
+                           f"Feeders off per hour: {', '.join(map(str, inst['quotas']))}. Protected: {prot}.",
+                           f"{n_q} [[qubits|qubit]]; {ex['n_valid']} [[valid plans|valid]] out of {2 ** n_q if n_q else NA} on/off patterns; "
+                           f"{ex['n_optimal']} plans tie for the best cost ({ex['cost_min']:.2f})."])]
+    B += [("h2", "2.4 How success is measured"),
+          ("p", "Cost (lower is better), the share of tries that are valid plans, the [[approximation ratio|approx_ratio]] "
+                "(how close a plan is to the best one: 0 is the worst valid plan, 1 the best, invalid plans score 0) "
+                "and the chance that one try ([[one measurement|shot]]) is a best plan.")]
 
-    # 2. architecture
-    B += [("h1", "2. Architecture"),
-          ("p", "The repository is split into three areas that never import each other's code. They exchange only "
-                "JSON files in results/, each validated against a JSON Schema in schemas/. Area 2 generates the "
-                "synthetic instances, the exact reference, the forecast, the audit and the replay. Area 1 reads "
-                "the QUBO from the plans files and runs every quantum stage on the Aer simulator. Area 3 is a "
-                "static dashboard that reads the same files. The replay asks Area 1 to solve each window through "
-                "files (window_in.json, window_out.json), and falls back to the exact solver per frame if needed."),
-          ("image", "architecture.png", "Figure 1. Architecture (Mermaid source: docs/report/architecture.mmd).", 6.5),
-          ("mermaid", MERMAID)]
+    # ---------------------------------------------------------------- 3. formulation
+    w = inst["weights"] if inst else {}
+    B += [("h1", "3. Formulation"),
+          ("bullets", [("Decision variables: ", "x[t][f] = 1 if feeder f is off in hour t, else 0."),
+                       ("Cost: ", f"{f(w.get('hardship'), 1)} x harm + {f(w.get('fairness'), 1)} x unfairness + "
+                                  f"{f(w.get('consecutive'), 1)} x back-to-back cuts. Harm sums a per-feeder, per-hour "
+                                  "score over the feeders that are off. Unfairness sums, over feeders, the squared gap "
+                                  "between total outage hours (past + new) and the average. Back-to-back counts "
+                                  "feeders off in two adjacent hours."),
+                       ("Hard rules: ", "the hourly quota and the protected feeders.")]),
+          ("h2", "3.1 From plan to qubits"),
+          ("bullets", ["One [[qubit|qubit]] per (hour, feeder) switch, qubit q = t x N + f; protected feeders get no "
+                       "qubit, so they can never be switched off.",
+                       "The cost is a [[QUBO|qubo]] (a quadratic function of 0/1 variables). Writing x = (1 - Z)/2 "
+                       "turns it into [[Z and ZZ terms|ising]], which become [[RZ and RZZ rotation gates|rz]].",
+                       "The quota is not a penalty: it is built into the circuit (Section 4)."])]
 
-    # 3. methods
-    B += [("h1", "3. Methods"),
-          ("bullets", [
-              "Dicke + XY-mixer QAOA: each hour block starts in a Dicke state (uniform over plans with exactly m_t "
-              "feeders off) and an XY ring mixer keeps the Hamming weight, so every sample meets the quota and "
-              "protected feeders have no qubit at all.",
-              "Grover-mixer QAOA: reuses the Dicke preparation U_S and mixes with U_S (I - (1 - e^{-i beta}) |0><0|) "
-              "U_S^dagger. Plans with equal cost always get equal amplitude, so a tie between optimal plans is "
-              "broken by a fair lottery rather than by circuit bias.",
-              "Penalty QAOA with the standard X mixer: the quota is a soft penalty; this is the weak baseline.",
-              "Quantum counting: iterative amplitude estimation over a reversible validity oracle counts the valid "
-              "plans (the planner's flexibility), checked against enumeration.",
-              "Risk: the forecast's residual distribution is loaded into qubits and amplitude estimation gives "
-              "expected loss, tail probability, VaR and CVaR of the shortfall a plan leaves uncovered.",
-              "Grover Adaptive Search (qiskit-optimization GroverOptimizer) on an 8-variable block as a second "
-              "quantum comparator.",
-              "MPS scaling: the Dicke + XY circuit on larger instances (up to 36 qubits) with the Aer matrix "
-              "product state simulator at bounded bond dimension, against the exact classical optimum.",
-              "Classical side: brute force and MILP for the exact optimum, round-robin and uniform random valid "
-              "plans as baselines, a ridge-regression shortfall forecast, an audit that scores any schedule "
-              "against four rules, and a receding-horizon replay that re-plans every hour with a warm start."]),
-          ("p", "Decision rule: when a QAOA run must produce one plan, it takes the lowest-cost valid sample among "
-                "256 shots; ties go to the plan closest to the previous one, then to a seeded draw.")]
+    # ---------------------------------------------------------------- 4. quantum approach
+    B += [("h1", "4. Quantum approach and why"), ("h2", "4.1 Key idea"),
+          ("p", "We use [[QAOA|qaoa]]: a short quantum circuit that alternates a cost step and a mixing step, with "
+                "its angles tuned by a classical optimiser. Each hour starts in a [[Dicke state|dicke]], an equal mix of "
+                "every way to switch off exactly the required number of feeders. The [[mixer|mixer]] (the step that "
+                "moves probability between plans) never changes how many feeders are off. So every measured plan is "
+                "valid by construction. The standard [[penalty version|penalty_qaoa]] only discourages invalid plans "
+                "and wastes most of its tries on them."),
+          ("table", ["Component", "What it does", "Why this one"], [
+              ["[[Dicke|dicke]] + [[XY mixer|mixer]] QAOA", "Swaps which feeders are off, never how many",
+               "Rules hold in every sample"],
+              ["[[Grover mixer|grover_mixer]] QAOA", "Treats all valid plans alike", "Equal chances for tied plans; picks the "
+                                                                     "dashboard and replay plans"],
+              ["[[Penalty QAOA|penalty_qaoa]]", "Rules only as a cost penalty", "Weak baseline"],
+              ["Counting ([[amplitude estimation|amplitude_estimation]])", "Estimates the share of valid plans", "Planner freedom, checkable"],
+              ["[[Tail risk|cvar]] (amplitude estimation)", "Estimates expected loss and CVaR from forecast errors",
+               "Exact check available"],
+              ["[[Grover Adaptive Search|gas]]", "Repeated search for a better plan", "Second method to compare"],
+              ["[[MPS|mps]] scaling", "Same circuit, larger cities, compressed simulator", "Behaviour beyond exact "
+                                                                                    "simulation"]],
+           "Table 2. Quantum components.", None),
+          ("h2", "4.2 Implementation and assumptions"),
+          ("p", f"Qiskit {V.get('qiskit', NA)} circuits in src/quantum/ run with scripts/run_quantum.py on the "
+                f"Qiskit Aer {V.get('qiskit-aer', NA)} [[simulator|simulator]]. Assumptions: an ideal simulator (no noise, no "
+                "hardware), results from a finite number of [[measurements|shot]], angles tuned by the classical "
+                "optimiser [[COBYLA|cobyla]], and a plan is the best valid result of 256 measurements.")]
 
-    # 4. results
-    B += [("h1", "4. Results")]
-    B += [("h2", "4.1 Quantum methods against the exact answer")]
-    if abl:
-        ref = abl["reference"]
-        B += [("p", f"All rows use the same instance and the same exact reference: {ref['n_valid']} valid plans, "
-                    f"cost {f(ref['cost_min'], 2)} to {f(ref['cost_max'], 2)}, {ref['n_optimal']} optimal. "
-                    "Approximation ratio is the mean over all samples with invalid samples scored 0, so infeasible "
-                    "output is penalised rather than filtered away. P(optimal) is the share of samples that are "
-                    "valid and optimal.")]
-        hdr = ["Method", "Instance", "Qubits", "Layers", "Shots", "Feasible", "P(optimal)", "Approx. ratio",
-               "Fairness entropy", "Runtime (s)"]
-        rows = [[r["label"], r["instance"], f(r["n_qubits"]), f(r["layers"]), f(r["shots"]), pct(r["feasibility_pct"]),
-                 f(r["p_optimal"], 4), f(r["approx_ratio"]), f(r["fairness_entropy"]), f(r["runtime_s"], 2)]
-                for r in abl["rows"]]
-        B += [("table", hdr, rows, "Table 1. Ablation (results/ablation.json).")]
-        p = fig_ablation(abl)
-        if p:
-            B += [("image", "figures/ablation.png", f"Figure 2. Approximation ratio on the {abl['instance_name']} instance.", 6.3)]
-        q = [r for r in abl["rows"] if r["kind"] == "quantum" and r["instance"] == abl["instance_name"]]
-        rr = next((r for r in abl["rows"] if r["method"] == "round_robin" and r["instance"] == abl["instance_name"]), None)
-        rv = next((r for r in abl["rows"] if r["method"] == "random_valid" and r["instance"] == abl["instance_name"]), None)
-        dk = next((r for r in q if r["method"] == "dicke_uniform"), None)
-        if q:
-            best = max(q, key=lambda r: r["approx_ratio"])
-            bestp = max(q, key=lambda r: r["p_optimal"])
-            pen = [r for r in q if r["method"].startswith("penalty")]
-            txt = (f"Best quantum row by approximation ratio: {best['label']} at {f(best['approx_ratio'])}. "
-                   f"Highest sampled P(optimal): {bestp['label']} at {f(bestp['p_optimal'], 4)}")
-            if dk:
-                txt += (f", against {f(dk['p_optimal'], 4)} for sampling the Dicke state alone (uniform over valid plans)")
-            txt += ". "
-            if rr:
-                txt += (f"The single deterministic round-robin plan scores {f(rr['approx_ratio'])}, higher than the "
-                        f"mean QAOA sample; it is one plan, while the QAOA rows average over thousands of samples. ")
-            if rv:
-                txt += f"A uniformly random valid plan averages {f(rv['approx_ratio'])}. "
-            if pen:
-                txt += (f"Penalty QAOA with the X mixer produces valid plans in only "
-                        f"{' and '.join(pct(r['feasibility_pct']) for r in pen)} of samples, which is why the constraint-"
-                        "preserving mixers matter. ")
-            txt += ("The honest reading: the constraint-preserving circuits always produce valid plans and shift "
-                    f"probability towards cheap ones, but at {best['n_qubits']} qubits classical brute force over all "
-                    f"valid plans gives the exact answer, and per-shot P(optimal) is at most "
-                    f"{100 * max(r['p_optimal'] for r in q):.2f}%.")
-            B += [("p", txt)]
+    # ---------------------------------------------------------------- 5. architecture
+    B += [("h1", "5. Architecture"),
+          ("image", "architecture.png", "Figure 1. Architecture: all parts exchange only JSON files.", FIG1_WIDTH_IN,
+           "Diagram: weather and demand feed a classical forecast, which sets quotas for the instance and cost model. "
+           "All parts read and write results JSON files: the exact reference, the quantum solvers, the replay, the "
+           "audit, the dashboard and the report."),
+          ("p", "How to read Figure 1:"),
+          ("bullets", [("Left, inputs: ", "a real weather snapshot and synthetic demand feed a classical "
+                                          "[[ridge regression|ridge]] forecast, which sets how many feeders must be off "
+                                          "each hour. The instance and its cost ([[QUBO|qubo]]) are then written out."),
+                       ("Centre, the hub: ", "every part reads and writes [[JSON results files|json]], each checked "
+                                            "against a schema. The quantum and classical code never call each other."),
+                       ("Right, quantum: ", "the Qiskit circuits read the instance and write their results back."),
+                       ("Bottom left, the answer key: ", "the [[exact solver|exact]] and simple baselines write the "
+                                                        "reference every quantum number is compared with."),
+                       ("Top and bottom centre: ", "the [[hour-by-hour replay|replay]] asks the quantum solver for each "
+                                                   "hour's plan through files and falls back to the exact solver; the "
+                                                   "rule checker, dashboard and report only read results.")])]
+
+    # ---------------------------------------------------------------- 6. results
+    B += [("h1", "6. Results against the classical reference")]
+    if rows:
+        def row(r, label):
+            return [label, f"{r['feasibility_pct']:.1f}", f"{r['p_optimal']:.4f}", f"{r['approx_ratio']:.3f}"]
+        milp_ok = bool(chk) and any(c["id"] == "C03" and c["passed"] for c in chk["checks"])
+        t3 = [row(by["exact"], "[[Exact|exact]] (brute force; MILP agrees)" if milp_ok else "[[Exact|exact]] (brute force)")] \
+            if "exact" in by else []
+        for key, label in (("round_robin", "[[Round-robin|round_robin]] (take turns)"), ("random_valid", "Random valid plan"),
+                           ("xy_qaoa_p3", "Dicke + XY mixer QAOA"), ("grover_qaoa_p3", "Grover mixer QAOA"),
+                           ("penalty_qaoa_p3", "Penalty QAOA")):
+            if key in by:
+                t3.append(row(by[key], label))
+        take = (f"Both rule-preserving circuits are always valid; the penalty circuit is valid in "
+                f"{pen['feasibility_pct']:.1f}% of tries. On average quality, round-robin ({rr['approx_ratio']:.3f}) "
+                f"and the exact solver (1.000) beat the best circuit ({best_q['approx_ratio']:.3f}).") if (pen and rr and best_q) else None
+        B += [("h2", "6.1 Base instance"),
+              ("table", ["Method", "Valid plans (%)", "Chance one try is best", "[[Approximation ratio|approx_ratio]]"], t3,
+               f"Table 3. Base instance, {n_q} qubits. Circuits: 3 layers, {shots} measurements each.", take)]
+        rr_plan = next((r for r in base["plans"] if r["method"] == "round_robin"), None) if base else None
+        rules = inst["rules"] if inst else {}
+        if best_q and rr_plan and ex:
+            chance = ex["n_optimal"] / ex["n_valid"]
+            B += [("p", f"How to compare: a random valid plan is a best plan {ex['n_optimal']} times in "
+                        f"{ex['n_valid']} ({chance * 100:.2f}%), so the best circuit ({best_q['p_optimal'] * 100:.2f}% per "
+                        f"try) is about {best_q['p_optimal'] / chance:.0f} times better than chance, but it still needs many "
+                        f"tries. Round-robin scores well here because the base case allows "
+                        f"{rules.get('max_consecutive', NA)} back-to-back hours: its plan passes every rule and costs "
+                        f"{rr_plan['cost']:.1f} against the best {ex['cost_min']:.1f}. With a stricter limit it breaks the "
+                        f"rules (Section 6.3).")]
     else:
         B += [na("ablation.json")]
-
-    B += [("h2", "4.2 Fair lottery among tied optima")]
-    if lot:
-        hdr = ["Plan cost", "Plans with this cost", "Least likely plan", "Most likely plan", "Spread"]
-        rows = [[f(g["cost"], 2), f(g["n_plans"]), f"{g['prob_min']:.6g}", f"{g['prob_max']:.6g}", f"{g['prob_spread']:.2g}"]
-                for g in lot["tie_groups"]]
-        B += [("p", f"{lot['method']} on {lot['n_qubits']} qubits. In the exact simulated state, plans with equal cost "
-                    "receive equal probability, so choosing among tied optimal plans is an unbiased lottery. "
-                    f"All sampled plans valid: {f(lot['all_feasible'])}."),
-              ("table", hdr, rows, "Table 2. Equal-cost groups (results/lottery.json).")]
-    else:
-        B += [na("lottery.json")]
-
-    B += [("h2", "4.3 Fairness trade-off (Pareto sweep)")]
-    if par:
-        hdr = ["Fairness weight", "QAOA plan cost", "Exact optimum", "Matches exact", "Std-dev of outage hours",
-               "Hardship", "P(optimal) per shot"]
-        rows = [[f(p["fairness_weight"], 2), f(p["cost"], 3), f(p["exact_cost"], 3), f(p["matches_exact"]),
-                 f(p["fairness_metric"], 3), f(p["hardship_total"], 2), f(p["p_optimal"], 4)] for p in par["points"]]
-        n_match = sum(1 for p in par["points"] if p["matches_exact"])
-        B += [("p", f"{par['method']}, re-optimised at each fairness weight and warm-started from the previous one. "
-                    f"The chosen plan matches the exact optimum at {n_match} of {len(par['points'])} weights."),
-              ("table", hdr, rows, "Table 3. Pareto sweep (results/pareto.json).")]
-    else:
-        B += [na("pareto.json")]
-
-    B += [("h2", "4.4 Counting the valid plans")]
+    t4 = []
     if cnt:
-        i = cnt["instance"]
-        B += [("table", ["Quantity", "Value"], [
-            ["Block", f"{i['n_feeders']} feeders x {i['n_hours']} hours, quotas {', '.join(map(str, i['quotas']))}"],
-            ["Search space", f(cnt["search_space"])],
-            ["Exact count (enumeration)", f(cnt["exact_count"])],
-            ["IAE estimate", f(cnt["estimated_count"], 3)],
-            ["95% confidence interval", f"{f(cnt['ci'][0], 3)} to {f(cnt['ci'][1], 3)}"],
-            ["Within tolerance", f(cnt["within_tolerance"])],
-            ["Oracle queries", f(cnt["oracle_queries"])],
-            ["Qubits (search / total)", f"{cnt['n_qubits_search']} / {cnt['n_qubits_total']}"]],
-            "Table 4. Quantum counting (results/counting.json).")]
-    else:
-        B += [na("counting.json")]
-
-    B += [("h2", "4.5 Tail risk by amplitude estimation")]
+        t4.append(["Counting (4x2 block)", f"{cnt['estimated_count']:.2f} ({cnt['ci'][0]:.2f} to "
+                   f"{cnt['ci'][1]:.2f})", str(cnt["exact_count"]), "yes" if cnt["within_tolerance"] else "no"])
     if rsk:
-        e, s = rsk["exact"], rsk["estimated"]
-        B += [("p", rsk["block"]["description"] + f" Loss unit: {rsk['loss_unit']}."),
-              ("table", ["Measure", "Exact", "Amplitude estimation", "95% interval"], [
-                  ["Expected loss (MW)", f(e["expected_loss"], 4), f(s["expected_loss"], 4), f"{f(s['expected_loss_ci'][0], 4)} to {f(s['expected_loss_ci'][1], 4)}"],
-                  ["P(loss > 0)", f(e["tail_prob"], 4), f(s["tail_prob"], 4), f"{f(s['tail_prob_ci'][0], 4)} to {f(s['tail_prob_ci'][1], 4)}"],
-                  [f"VaR at {f(rsk['alpha'] * 100, 0)}% (MW)", f(e["var"], 4), f(s["var"], 4), "found by search"],
-                  [f"CVaR at {f(rsk['alpha'] * 100, 0)}% (MW)", f(e["cvar"], 4), f(s["cvar"], 4), f"{f(s['cvar_ci'][0], 4)} to {f(s['cvar_ci'][1], 4)}"]],
-               f"Table 5. Risk (results/risk.json). {rsk['n_qubits']} qubits, {rsk['oracle_queries']} oracle queries, "
-               f"all within tolerance: {f(rsk['within_tolerance'])}.")]
-    else:
-        B += [na("risk.json")]
-
-    B += [("h2", "4.6 Where round-robin and random plans fail")]
-    if heat:
-        st = heat["random_valid_stats"]
-        hdr = ["Plan", "Cost", "Approx. ratio", "Audit passes", "Violations"]
-        rows = [[p["label"], f(p["cost"], 2), f(p["approx_ratio"]), f(p["audit_passed"]), f(p["n_violations"])]
-                for p in heat["plans"]]
-        B += [("p", heat.get("description", "")),
-              ("table", hdr, rows, "Table 6. Scenario heatwave_cap (results/plans/heatwave_cap.json)."),
-              ("p", f"Over {st['n_samples']} uniform random valid plans, {pct(st['cap_violation_pct'])} break the "
-                    f"consecutive-hour cap and the mean approximation ratio is {f(st['mean_approx_ratio'])}.")]
-    else:
-        B += [na("plans/heatwave_cap.json")]
-    if aud:
-        rows = [[e["label"], f(e["passed"]), pct(e["score"]), f(len(e["violations"]))] for e in aud["examples"]]
-        B += [("table", ["Schedule", "Passes", "Audit score", "Violations"], rows,
-               f"Table 7. Audit mode on scenario {aud['scenario']} (results/audit_example.json).")]
-
-    B += [("h2", "4.7 Receding-horizon replay with the quantum window solver")]
+        t4.append([f"Tail risk, CVaR {rsk['alpha'] * 100:.0f}%", f"{rsk['estimated']['cvar']:.3f} MW",
+                   f"{rsk['exact']['cvar']:.3f} MW", "yes" if rsk["within_tolerance"] else "no"])
+    if tie:
+        t4.append([f"{tie['n_plans']} tied best plans", f"spread {tie['prob_spread']:.1e}", "equal", "yes"])
+    if gas:
+        t4.append(["Grover search (4x2 block)", f"{gas['feasibility_pct']:.0f}% valid, "
+                   f"{gas['p_optimal'] * 100:.0f}% best", "100% best", "worse"])
+    if par:
+        t4.append(["Fairness-weight sweep", f"{par_ok} of {len(par['points'])} at best cost",
+                   f"{len(par['points'])} of {len(par['points'])}", "yes" if par_ok == len(par["points"]) else "mostly"])
     if rep:
-        sm = rep["summary"]
-        solvers = {}
-        for fr in rep["frames"]:
-            solvers[fr["solver_used"]] = solvers.get(fr["solver_used"], 0) + 1
-        B += [("p", f"Solver requested: {rep['solver_requested']}. {sm['n_frames']} hourly frames; "
-                    f"{sm['matches_exact_count']} of {sm['n_frames']} committed windows match the exact optimum; "
-                    f"{sm['n_changed']} feeder state changes; total hardship {f(sm['total_hardship'], 1)}; fairness "
-                    f"spread {f(sm['fairness_spread_hours'], 1)} hours. Solvers used: "
-                    + "; ".join(f"{k}: {v} frames" for k, v in solvers.items()) + "."),
-              ("table", ["Hour", "Actual MW", "Forecast MW", "Quota", "Window cost", "Exact cost", "Matches", "Audit"],
-               [[f"{fr['hour']:02d}:00", f(fr["shortfall_mw"], 2), f(fr["forecast_mw"], 2), f(fr["quota"]), f(fr["cost"], 2),
-                 f(fr["exact_cost"], 2), f(fr["matches_exact"]), "pass" if fr["audit_passed"] else "fail"] for fr in rep["frames"]],
-               "Table 8. Replay frames (results/replay.json).")]
-        if fig_replay(rep):
-            B += [("image", "figures/replay.png", "Figure 3. Replay: actual and forecast shortfall; circled frames committed a plan costlier than the exact optimum.", 6.3)]
-    else:
-        B += [na("replay.json")]
-
-    B += [("h2", "4.8 Forecast (classical)")]
-    if fc:
-        m = fc["metrics"]
-        B += [("table", ["Quantity", "Value"], [
-            ["Model", f"{fc['model']['type']}, alpha {fc['model']['alpha']}"],
-            ["Training / test hours", f"{fc['model']['n_train']} / {fc['model']['n_test']}"],
-            ["MAE (MW)", f(m["mae_mw"], 3)], ["RMSE (MW)", f(m["rmse_mw"], 3)], ["R squared", f(m["r2"], 3)],
-            ["Weather", f"{fc['weather_provenance']} ({fc['weather_source']})"],
-            ["Demand and shortfall", fc["demand_provenance"]]], "Table 9. Forecast (results/forecast.json).")]
-    else:
-        B += [na("forecast.json")]
-
-    # 5. scale
-    B += [("h1", "5. Scale")]
+        s = rep["summary"]
+        t4.append([f"Replay ({nq_rep} of {s['n_frames']} hours by circuit)", f"{s['matches_exact_count']} best, "
+                   f"{pass_rep} pass rules", f"{s['n_frames']} best", "yes" if s["matches_exact_count"] == s["n_frames"]
+                   else "mostly"])
     if sca:
-        pts = sca["points"]
-        ok = [p for p in pts if p["status"] == "ok"]
-        sizes = sorted({p["n_qubits"] for p in pts})
-        dims = sorted({p["bond_dim"] for p in pts if p["bond_dim"] is not None})
-        hdr = ["Instance", "Statevector"] + [f"chi {d}" for d in dims]
+        t4.append(["MPS scaling", f"{len(ok_scale)} of {len(sca['points'])} runs, up to {big_n} qubits",
+                   "MILP", "see 6.3"])
+    if t4:
+        B += [("h2", "6.2 Other quantum components"),
+              ("table", ["Component", "Quantum result", "Exact value", "Agrees"], t4,
+               "Table 4. Other quantum components against their exact value.",
+               "The [[amplitude-estimation|amplitude_estimation]] results agree with the exact values; the search "
+               "and planning results reach the best plan only part of the time.")]
+        extra = []
+        if cnt:
+            extra.append(f"Counting and tail risk are estimates, so each has an error bar; both exact values fall inside "
+                         f"the stated tolerance (counting tolerance {cnt['tolerance']:.1f} plans).")
+        if gas:
+            extra.append(f"[[Grover Adaptive Search|gas]] found a valid plan in {gas['feasibility_pct']:.0f}% of its "
+                         f"runs and the best plan in {gas['p_optimal'] * 100:.0f}%; the exact solver always finds it.")
+        if rep:
+            s_ = rep["summary"]
+            extra.append(f"In the [[replay|replay]] the circuit planned every hour it was asked to; in "
+                         f"{s_['n_frames'] - s_['matches_exact_count']} of {s_['n_frames']} hours its plan followed every "
+                         f"rule but was not the cheapest.")
+        if extra:
+            B += [("p", " ".join(extra))]
+    if heat:
+        hr = {p["method"]: p for p in heat["plans"]}
+        st = heat["random_valid_stats"]
+        cap = heat["instance"]["rules"]["max_consecutive"]
+        B += [("h2", "6.3 Rules under stress and larger cities"),
+              ("p", f"Heatwave scenario (no feeder off more than {cap} hour in a row): round-robin breaks the rules "
+                    f"{hr['round_robin']['n_violations']} times and {st['cap_violation_pct']:.1f}% of random valid "
+                    f"plans break the back-to-back limit. The exact plan passes every rule.")]
+    mps_rows = _mps_rows(sca)
+    if mps_rows and fig_mps_memory(sca):
+        top = mps_rows[-1]
+        two_h = [p for p in mps_rows if p["n_hours"] == 2]
+        mid = two_h[-1] if two_h else top
+        fid = [p for p in ok_scale if p.get("fidelity") is not None and p["bond_dim"] is not None]
+        fmax = max(fid, key=lambda p: (p["n_qubits"], p["bond_dim"])) if fid else None
+        best_big = max((p for p in ok_scale if p["n_qubits"] == top["n_qubits"] and p["bond_dim"] is not None),
+                       key=lambda p: p["approx_ratio"])
+        txt = (f"An [[MPS (matrix product state)|mps]] simulator compresses the quantum state; the "
+               f"[[bond dimension|bond_dimension]] sets how much it keeps. At {mid['n_qubits']} qubits, bond dimension {mid['bond_dim']} gave "
+               f"{mid['feasibility_pct']:.0f}% valid plans (ratio {mid['approx_ratio']:.2f}) in "
+               f"{_bytes(mid['mps_memory_mb'] * 2 ** 20)}, where exact simulation needs "
+               f"{_bytes(2 ** mid['n_qubits'] * 16)}. At {top['n_qubits']} qubits the best run (bond dimension "
+               f"{best_big['bond_dim']}) gave {best_big['feasibility_pct']:.1f}% valid plans (ratio "
+               f"{best_big['approx_ratio']:.2f}) but bond dimension {top['bond_dim']} gave "
+               f"{top['feasibility_pct']:.0f}%, so the result has not settled.")
+        if fmax:
+            txt += (f" [[Fidelity|fidelity]] (overlap with the exact state) is measurable only up to {fmax['n_qubits']} qubits: "
+                    f"{fmax['fidelity']:.2f} at bond dimension {fmax['bond_dim']}.")
+        txt += " This is a classical simulation, not a quantum advantage."
+        B += [("p", txt),
+              ("image", "figures/mps_memory.png", "Figure 2. Memory for exact simulation (computed) and for the MPS "
+               "simulation (measured).", FIG2_WIDTH_IN,
+               "Line chart, log scale: exact simulation memory grows from kilobytes to zettabytes as qubits rise "
+               "from 10 to 72, while the MPS memory stays at a few megabytes.")]
+    elif sca:
+        big = max(ok_scale, key=lambda p: (p["n_qubits"], p["bond_dim"] or 0)) if ok_scale else None
+        if big:
+            B += [("p", f"MPS scaling: {len(ok_scale)} of {len(sca['points'])} runs, up to {big['n_qubits']} qubits; "
+                        f"at bond dimension {big['bond_dim']} the ratio is {big['approx_ratio']:.2f}. This is a "
+                        "classical simulation, not a quantum advantage.")]
 
-        def cell(n, d):
-            p = next((p for p in pts if p["n_qubits"] == n and p["bond_dim"] == d), None)
-            if p is None:
-                return "not run"
-            return f(p["approx_ratio"]) if p["status"] == "ok" else p["status"]
-        rows = []
-        for n in sizes:
-            p0 = next(p for p in pts if p["n_qubits"] == n)
-            rows.append([f"{p0['n_feeders']}x{p0['n_hours']} ({n} q)", cell(n, None)] + [cell(n, d) for d in dims])
-        B += [("p", f"{sca['method']}. {len(ok)} of {len(pts)} points ran; {sca['shots']} shots each. The matrix "
-                    "product state simulator is a classical method: this curve shows how much bond dimension a "
-                    "faithful simulation of the circuit needs as the instance grows, not a quantum advantage."),
-              ("table", hdr, rows, "Table 10. Approximation ratio by bond dimension (results/scaling.json)."),
-              ("p", "Angles: " + sca["parameter_source"])]
-        if fig_scaling(sca):
-            B += [("image", "figures/scaling.png", "Figure 4. Approximation ratio against bond dimension.", 6.3)]
-    else:
-        B += [na("scaling.json")]
+    # ---------------------------------------------------------------- 7. originality
+    B += [("h1", "7. What is original"),
+          ("bullets", [("Fairness in the model: ", "past outage hours and back-to-back cuts count, and solutions with "
+                                                     "them are heavily penalized."),
+                       ("Rules in the circuit: ", "every sample is a valid plan, with no penalty tuning."),
+                       ("A fair lottery: ", "tied best plans get exactly equal chances ([[Grover mixer|grover_mixer]])."),
+                       ("Audit and replay: ", "any schedule can be checked; the replay re-plans hourly with an exact "
+                                              "fallback.")])]
 
-    # 6. validation
-    B += [("h1", "6. Validation")]
-    if chk:
-        s = chk["summary"]
-        B += [("p", f"{s['passed']} of {s['total']} proof checks pass in the last test run (results/checks.json, "
-                    f"written {chk['generated_at']}). Each is a pytest test."),
-              ("table", ["ID", "Check", "Passed", "Detail"],
-               [[c["id"], c["name"], f(c["passed"]), str(c.get("detail") or "")[:140]] for c in sorted(chk["checks"], key=lambda c: c["id"])],
-               "Table 11. Proof checks.")]
-    else:
-        B += [na("checks.json")]
+    # ---------------------------------------------------------------- 8. limitations
+    lim = [("Simulator and synthetic data: ", "an ideal, noise-free simulator, no hardware; feeders, demand and "
+                                               "outage history are made up, only the weather snapshot is real."),
+           ("Classical wins at this size: ", "the exact solver is better and faster; no speed-up is claimed.")]
+    if best_q:
+        miss = []
+        if par and par_ok is not None:
+            miss.append(f"{len(par['points']) - par_ok} of {len(par['points'])} fairness weights")
+        if rep:
+            miss.append(f"{rep['summary']['n_frames'] - rep['summary']['matches_exact_count']} of "
+                        f"{rep['summary']['n_frames']} replay hours")
+        lim.append(("Low single-try chance: ", f"one try is a best plan only {best_q['p_optimal'] * 100:.2f}% of the "
+                    f"time, so a plan is the best of 256 tries; this still missed the best plan at "
+                    f"{' and '.join(miss)}."))
+    if sca:
+        n_fb = sum(1 for p in ok_scale if "first attempt" in p["notes"])
+        lim.append(("MPS limits: ", f"Aer crashed on Windows on some circuits at bond dimension 2 or 4 ({n_fb} "
+                    f"run retried); fidelity is measurable only up to 20 qubits; angles from small instances are reused; "
+                    f"the largest instances do not settle."))
+    lim += [("Risk block: ", "8 feeders, not 4 to 6, because smaller blocks have zero loss in every scenario.")]
+    B += [("h1", "8. Limitations and trade-offs"), ("bullets", lim)]
 
-    # 7. limits
-    B += [("h1", "7. Honest limitations"),
-          ("bullets", [
-              "Simulator only. Nothing ran on quantum hardware, and there is no noise model.",
-              "No speed-up claim. Every instance is also solved exactly by brute force or MILP; the quantum "
-              "methods are measured against that exact answer, and the classical answer is better.",
-              "Real feeder maps are not public, so the feeders are synthetic and placed on illustrative Karachi "
-              "zones; nothing here describes a real network.",
-              "Per-shot P(optimal) of the QAOA variants is low on the base instance (Table 1); the plan comes "
-              "from the best of 256 shots, which can still miss the optimum (see the Pareto and replay rows).",
-              "All feeders, demand, supply, shortfall and ledger values are synthetic. Weather is real but only "
-              "used as a forecast input.",
-              "Counting and risk use 8 and 3 search qubits; they show that the estimators are correct, not that "
-              "they are useful at this size."]),
-          ("p", "Specific issues from docs/KNOWN_ISSUES.md:")]
-    ki = known_issues()
-    if ki:
-        B += [("table", ["Item", "Status", "Detail"], [list(r) for r in ki], "Table 12. Known issues.")]
-
-    # 8. reproduce
-    B += [("h1", "8. Reproducibility"),
-          ("code", "git clone " + REPO_URL + "\ncd Qiskit-Hack\npython scripts/tasks.py setup      # .venv + pinned requirements\n"
-                   ".venv/Scripts/python.exe scripts/tasks.py demo   # Windows; Linux/macOS: .venv/bin/python\n"
-                   ".venv/Scripts/python.exe scripts/tasks.py test\n.venv/Scripts/python.exe scripts/tasks.py ui   # http://localhost:8000/ui/"),
-          ("table", ["Package", "Version"], [[p, version(p)] for p in
-                                             ("qiskit", "qiskit-aer", "qiskit-algorithms", "qiskit-optimization", "numpy", "scipy",
-                                              "jsonschema", "pytest", "matplotlib", "python-docx")] + [["Python", sys.version.split()[0]]],
-           "Table 13. Versions used to build this report."),
-          ("p", "Seeds: every results file records its seed (7 by default). Results reproduce exactly on one "
-                "machine; optimiser angles can differ in the fourth decimal across machines.")]
+    # ---------------------------------------------------------------- 9. reproducibility
+    B += [("h1", "9. Reproducibility"),
+          ("bullets", [f"Python 3.11, qiskit {V.get('qiskit', NA)}, qiskit-aer {V.get('qiskit-aer', NA)}, "
+                       f"qiskit-algorithms {V.get('qiskit-algorithms', NA)}, qiskit-optimization "
+                       f"{V.get('qiskit-optimization', NA)} (requirements.txt); seed 7.",
+                       f"Commands: python scripts/tasks.py setup, then test, demo and ui (the dashboard). Code and "
+                       f"results: {REPO_URL}.",
+                       f"{checks} proof checks pass (results/checks.json); scripts/validate_results.py checks every "
+                       "results file against its schema. Optimiser angles differ slightly between machines, so "
+                       "sampled counts reproduce on one machine."])]
+    B += [("h1", "10. Glossary"), ("glossary", GLOSSARY)]
     return B
 
 
 # ------------------------------------------------------------------------------------------
 # renderers
 # ------------------------------------------------------------------------------------------
+def md(text: str) -> str:
+    out = []
+    for t, target in segments(str(text)):
+        if target is None:
+            out.append(t)
+        elif target.startswith("http"):
+            out.append(f"[{t}]({target})")
+        else:
+            out.append(f"[{t}](#g-{target.replace('_', '-')})")
+    return "".join(out)
+
+
 def to_markdown(blocks: list) -> str:
     out = []
     for b in blocks:
         k = b[0]
         if k == "title":
             out += [f"# {b[1]}", ""]
+        elif k == "meta":
+            out += [md(b[1]), ""]
+        elif k == "glossary":
+            out += [f'- <a id="g-{key.replace("_", "-")}"></a>**{term}:** {md(text)}' for key, term, text in b[1]] + [""]
         elif k == "h1":
             out += [f"## {b[1]}", ""]
         elif k == "h2":
             out += [f"### {b[1]}", ""]
         elif k == "p":
-            out += [b[1], ""]
-        elif k == "callout":
-            out += [f"> {b[1]}", ""]
+            out += [md(b[1]), ""]
         elif k == "bullets":
-            out += [f"- {x}" for x in b[1]] + [""]
-        elif k == "code":
-            out += ["```", b[1], "```", ""]
-        elif k == "mermaid":
-            out += ["```mermaid", b[1].rstrip(), "```", ""]
+            out += [f"- **{x[0].strip()}** {md(x[1])}" if not isinstance(x, str) else f"- {md(x)}" for x in b[1]] + [""]
         elif k == "image":
-            out += [f"![{b[2]}]({b[1]})", "", f"*{b[2]}*", ""]
+            out += [f"![{b[4]}]({b[1]})", "", b[2], ""]
         elif k == "table":
-            hdr, rows, cap = b[1], b[2], b[3]
+            hdr, rows, cap, take = b[1], b[2], b[3], b[4]
             esc = lambda s: str(s).replace("|", "/").replace("\n", " ")
-            out += [f"*{cap}*", "", "| " + " | ".join(map(esc, hdr)) + " |", "|" + "---|" * len(hdr)]
-            out += ["| " + " | ".join(esc(c) for c in r) + " |" for r in rows]
-            out += [""]
-    return "\n".join(out)
+            out += [cap, "", "| " + " | ".join(md(esc(c)) for c in hdr) + " |", "|" + "---|" * len(hdr)]
+            out += ["| " + " | ".join(md(esc(c)) for c in r) + " |" for r in rows] + [""]
+            if take:
+                out += [md(take), ""]
+    return "\n".join(out) + "\n"
+
+
+FONT = "Times New Roman"
+
+
+def _tnr_style(style, size=12, bold=None):
+    from docx.oxml.ns import qn
+    from docx.shared import Pt, RGBColor
+    style.font.name = FONT
+    style.font.size = Pt(size)
+    style.font.color.rgb = RGBColor(0, 0, 0)
+    style.font.italic = False
+    if bold is not None:
+        style.font.bold = bold
+    rf = style.element.get_or_add_rPr().get_or_add_rFonts()
+    for a in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+        rf.attrib.pop(qn(a), None)
+    for a in ("w:ascii", "w:hAnsi", "w:eastAsia", "w:cs"):
+        rf.set(qn(a), FONT)
 
 
 def to_docx(blocks: list, path: Path) -> None:
     from docx import Document
-    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
-    from docx.shared import Inches, Pt, RGBColor
+    from docx.shared import Cm, Inches, Mm, Pt
 
     doc = Document()
     sec = doc.sections[0]
-    sec.left_margin = sec.right_margin = Inches(0.9)
-    st = doc.styles["Normal"]
-    st.font.name = "Calibri"
-    st.font.size = Pt(10.5)
+    sec.page_width, sec.page_height = Mm(210), Mm(297)
+    sec.left_margin = sec.right_margin = sec.top_margin = sec.bottom_margin = Cm(2.54)
+    # document defaults: no theme fonts
+    rpr_default = doc.styles.element.find(qn("w:docDefaults")).find(qn("w:rPrDefault")).find(qn("w:rPr"))
+    rf = rpr_default.find(qn("w:rFonts"))
+    if rf is not None:
+        for a in list(rf.attrib):
+            del rf.attrib[a]
+        for a in ("w:ascii", "w:hAnsi", "w:eastAsia", "w:cs"):
+            rf.set(qn(a), FONT)
+    for name, size, bold in (("Normal", 12, None), ("Title", 14, True), ("Heading 1", 12, True),
+                             ("Heading 2", 12, True), ("List Bullet", 12, None), ("Footer", 12, None),
+                             ("Table Grid", 12, None)):
+        try:
+            _tnr_style(doc.styles[name], size, bold)
+        except KeyError:
+            pass
+    normal = doc.styles["Normal"].paragraph_format
+    normal.line_spacing, normal.space_after, normal.space_before = 1.15, Pt(6), Pt(0)
+    title = doc.styles["Title"]
+    ppr = title.element.get_or_add_pPr()
+    for el_ in ppr.findall(qn("w:pBdr")):
+        ppr.remove(el_)
+    title.paragraph_format.space_after = Pt(6)
+    for name in ("Heading 1", "Heading 2"):
+        pf = doc.styles[name].paragraph_format
+        pf.space_before, pf.space_after, pf.keep_with_next = Pt(8 if name == "Heading 1" else 4), Pt(2), True
+    lb = doc.styles["List Bullet"].paragraph_format
+    lb.space_after = Pt(2)
 
-    def shade(cell, hexcolor):
-        tcPr = cell._tc.get_or_add_tcPr()
-        shd = OxmlElement("w:shd")
-        shd.set(qn("w:val"), "clear")
-        shd.set(qn("w:color"), "auto")
-        shd.set(qn("w:fill"), hexcolor)
-        tcPr.append(shd)
+    # page number, bottom centre
+    fp = sec.footer.paragraphs[0]
+    fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fld = OxmlElement("w:fldSimple")
+    fld.set(qn("w:instr"), "PAGE")
+    r = OxmlElement("w:r")
+    t = OxmlElement("w:t")
+    t.text = "1"
+    r.append(t)
+    fld.append(r)
+    fp._p.append(fld)
+
+    from docx.opc.constants import RELATIONSHIP_TYPE as RT
+
+    def link_run(par, text, target, bold=False):
+        h = OxmlElement("w:hyperlink")
+        if target.startswith("http"):
+            h.set(qn("r:id"), par.part.relate_to(target, RT.HYPERLINK, is_external=True))
+        else:
+            h.set(qn("w:anchor"), "g_" + target)
+        r_ = OxmlElement("w:r")
+        rpr = OxmlElement("w:rPr")
+        if bold:
+            rpr.append(OxmlElement("w:b"))
+        u = OxmlElement("w:u")
+        u.set(qn("w:val"), "single")
+        rpr.append(u)
+        r_.append(rpr)
+        t_ = OxmlElement("w:t")
+        t_.text = text
+        t_.set(qn("xml:space"), "preserve")
+        r_.append(t_)
+        h.append(r_)
+        par._p.append(h)
+
+    def rich(par, text, bold=False):
+        for t_, target in segments(str(text)):
+            if target is None:
+                run_ = par.add_run(t_)
+                run_.bold = bold or None
+            else:
+                link_run(par, t_, target, bold)
+
+    def runs(par, item):
+        if isinstance(item, str):
+            rich(par, item)
+        else:
+            par.add_run(item[0]).bold = True
+            rich(par, item[1])
+
+    bookmark_id = [100]
 
     for b in blocks:
         k = b[0]
         if k == "title":
-            doc.add_heading(b[1], level=0)
+            doc.add_paragraph(b[1], style="Title")
+        elif k == "meta":
+            p = doc.add_paragraph()
+            rich(p, b[1])
+            p.paragraph_format.space_after = Pt(0)
+        elif k == "glossary":
+            for key, term, text in b[1]:
+                p = doc.add_paragraph()
+                p.paragraph_format.space_after = Pt(3)
+                bookmark_id[0] += 1
+                start = OxmlElement("w:bookmarkStart")
+                start.set(qn("w:id"), str(bookmark_id[0]))
+                start.set(qn("w:name"), "g_" + key)
+                p._p.append(start)
+                p.add_run(term + ": ").bold = True
+                rich(p, text)
+                end = OxmlElement("w:bookmarkEnd")
+                end.set(qn("w:id"), str(bookmark_id[0]))
+                p._p.append(end)
         elif k == "h1":
-            doc.add_heading(b[1], level=1)
+            doc.add_paragraph(b[1], style="Heading 1")
         elif k == "h2":
-            doc.add_heading(b[1], level=2)
+            doc.add_paragraph(b[1], style="Heading 2")
         elif k == "p":
-            doc.add_paragraph(b[1])
-        elif k == "callout":
-            t = doc.add_table(rows=1, cols=1)
-            t.style = "Table Grid"
-            c = t.rows[0].cells[0]
-            shade(c, "EAF2FC")
-            r = c.paragraphs[0].add_run(b[1])
-            r.bold = True
-            doc.add_paragraph()
+            rich(doc.add_paragraph(), b[1])
         elif k == "bullets":
             for x in b[1]:
-                doc.add_paragraph(x, style="List Bullet")
-        elif k == "code":
-            p = doc.add_paragraph()
-            r = p.add_run(b[1])
-            r.font.name = "Consolas"
-            r.font.size = Pt(9)
-        elif k == "mermaid":
-            continue  # the PNG of the same diagram is embedded; the source is architecture.mmd
+                runs(doc.add_paragraph(style="List Bullet"), x)
         elif k == "image":
             img = OUT / b[1]
             if img.exists():
-                doc.add_picture(str(img), width=Inches(b[3]))
-                cap = doc.add_paragraph(b[2])
-                cap.runs[0].italic = True
-                cap.runs[0].font.size = Pt(9)
+                p = doc.add_paragraph()
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p.paragraph_format.keep_with_next = True
+                p.paragraph_format.line_spacing = 1.0
+                p.paragraph_format.space_after = Pt(0)
+                shape = p.add_run().add_picture(str(img), width=Inches(b[3]))
+                shape._inline.docPr.set("descr", b[4])
+                doc.add_paragraph(b[2])
         elif k == "table":
-            hdr, rows, capt = b[1], b[2], b[3]
-            cap = doc.add_paragraph(capt)
-            cap.runs[0].italic = True
-            cap.runs[0].font.size = Pt(9)
-            t = doc.add_table(rows=1 + len(rows), cols=len(hdr))
-            t.style = "Table Grid"
-            t.alignment = WD_TABLE_ALIGNMENT.CENTER
-            small = Pt(8) if len(hdr) > 6 else Pt(9)
-            for j, h in enumerate(hdr):
-                c = t.rows[0].cells[j]
-                c.text = ""
-                run = c.paragraphs[0].add_run(str(h))
-                run.bold = True
-                run.font.size = small
-                shade(c, "F0EFEC")
-            for i, row in enumerate(rows, start=1):
-                for j, v in enumerate(row):
-                    c = t.rows[i].cells[j]
+            hdr, rows, capt, take = b[1], b[2], b[3], b[4]
+            cp = doc.add_paragraph(capt)
+            cp.paragraph_format.keep_with_next = True
+            cp.paragraph_format.space_after = Pt(2)
+            tb = doc.add_table(rows=1 + len(rows), cols=len(hdr))
+            tb.style = "Table Grid"
+            for i, vals in enumerate([hdr] + rows):
+                for j, v in enumerate(vals):
+                    c = tb.rows[i].cells[j]
                     c.text = ""
-                    run = c.paragraphs[0].add_run(str(v))
-                    run.font.size = small
-                    run.font.color.rgb = RGBColor(0x0B, 0x0B, 0x0B)
-            doc.add_paragraph()
+                    para = c.paragraphs[0]
+                    para.paragraph_format.space_after = Pt(0)
+                    para.paragraph_format.line_spacing = 1.0
+                    rich(para, v, bold=(i == 0))
+            if take:
+                tp = doc.add_paragraph()
+                rich(tp, take)
+                tp.paragraph_format.space_before = Pt(4)
+            else:
+                doc.add_paragraph().paragraph_format.space_after = Pt(0)
     doc.core_properties.title = "FairShed report"
     doc.core_properties.subject = "Fair, auditable load-shedding planner (Qiskit hackathon). Synthetic data, simulator only."
     doc.save(str(path))
 
 
+def to_pdf(docx_path: Path) -> tuple:
+    """(pdf path or None, page count or None). LibreOffice if present, else Microsoft Word on Windows."""
+    import shutil
+    pdf = docx_path.with_suffix(".pdf")
+    soffice = shutil.which("soffice") or shutil.which("libreoffice")
+    if soffice:
+        subprocess.run([soffice, "--headless", "--convert-to", "pdf", "--outdir", str(docx_path.parent), str(docx_path)],
+                       capture_output=True, timeout=180)
+        return (pdf if pdf.exists() else None), None
+    if sys.platform == "win32":
+        ps = (f"$w = New-Object -ComObject Word.Application; $w.Visible = $false; "
+              f"$d = $w.Documents.Open('{docx_path}', $false, $true); $n = $d.ComputeStatistics(2); "
+              f"$d.SaveAs2('{pdf}', 17); $d.Close(0); $w.Quit(); Write-Output $n")
+        try:
+            out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, timeout=180)
+            pages = int(out.stdout.strip().splitlines()[-1]) if out.stdout.strip() else None
+            return (pdf if pdf.exists() else None), pages
+        except Exception:
+            return None, None
+    return None, None
+
+
 # ------------------------------------------------------------------------------------------
 # key numbers for the README block and the demo script (all read from results JSON)
 # ------------------------------------------------------------------------------------------
-NA = "not available"
-
-
 def key_numbers() -> dict:
     K = {}
     base, abl, cnt = load("plans/base.json"), load("ablation.json"), load("counting.json")
@@ -935,11 +1117,14 @@ def main() -> int:
     blocks = build()
     (OUT / "FairShed_Report.md").write_text(to_markdown(blocks), encoding="utf-8")
     to_docx(blocks, OUT / "FairShed_Report.docx")
+    pdf, pages = to_pdf(OUT / "FairShed_Report.docx")
     K = key_numbers()
     update_readme(K)
     (ROOT / "docs" / "demo_script.md").write_text(demo_script(K), encoding="utf-8")
-    print("wrote docs/report/FairShed_Report.md, docs/report/FairShed_Report.docx, docs/report/architecture.png, "
-          "docs/report/architecture.mmd, docs/report/figures/*.png, docs/demo_script.md, README.md key results")
+    print("wrote docs/report/FairShed_Report.md and .docx, docs/report/architecture.png and .mmd, "
+          "docs/report/figures/mps_memory.png, docs/demo_script.md, README.md key results")
+    print(f"PDF: {pdf.relative_to(ROOT) if pdf else 'not written (no LibreOffice or Word found)'}"
+          + (f", {pages} pages" if pages else ""))
     return 0
 
 

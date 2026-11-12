@@ -1,0 +1,140 @@
+/* Schedule: a full-screen map with floating cards and slide-in panels.
+   Layout rules below are container queries on the map area (.sf), not the window, so the Inner
+   working drawer narrowing the page gives the same result as a narrower screen.
+   The page frame stops scrolling on this route (main.js sets body[data-route]) so the map fills
+   everything under the top bar. .sf isolates its own stacking order, so the cards sit above the
+   Leaflet controls but below the Inner working drawer, glossary cards and the tour. */
+body[data-route="schedule"] .app { height: 100vh; height: 100dvh; overflow: hidden; }
+body[data-route="schedule"] #main { display: flex; flex-direction: column; min-height: 0; }
+
+.sf { position: relative; flex: 1; min-height: 480px; overflow: hidden; isolation: isolate; container: sf / inline-size;
+  --lw: 0px; --rw: 0px; --dock-h: 120px; --glass: color-mix(in srgb, var(--panel) 93%, transparent); }
+.sf .plan-map-wrap { position: absolute; inset: 0; height: auto; min-height: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden; }
+.sf .plan-map { position: absolute; inset: 0; }
+.sf .leaflet-bottom.leaflet-right { bottom: calc(var(--dock-h) + 24px); right: calc(var(--rw) + 8px); transition: right 0.28s ease; }
+
+/* frosted cards */
+.sf-card, .sf-panel, .sf-sheet, .sf > .sf-dock.dock { background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-2); }
+
+/* ---------- title card (top left) ---------- */
+.sf-title { position: absolute; z-index: 1010; top: 16px; left: 16px; width: 352px; max-height: calc(100% - var(--dock-h) - 48px);
+  overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 10px; }
+.sf-title h1 { font-size: 24px; line-height: 1.2; }
+.sf-lede { font-size: var(--fs-min); color: var(--text-dim); line-height: 1.5; }
+.sf-pills { display: flex; flex-direction: column; gap: 6px; }
+.sf-pill { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: var(--target);
+  padding: 4px 10px 4px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--panel); color: var(--text); text-align: left; }
+.sf-pill:hover, .sf-pill[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-tint); }
+.sf-pill svg { color: var(--accent); }
+.sf-pill-k { font-size: var(--fs-min); color: var(--text-dim); font-weight: 700; }
+.sf-pill-v { font-weight: 700; font-size: var(--fs-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sf-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.sf-find { display: flex; flex-direction: column; gap: 6px; }
+.sf-mine { display: flex; flex-direction: column; gap: 8px; }
+.sf-mine:empty { display: none; }
+.sf-mine-say { font-size: var(--fs-small); line-height: 1.45; }
+.sf-mine-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; gap: 6px; }
+.sf-mine-strip .tt-cell { min-width: 0; flex-direction: column; gap: 0; padding: 4px 2px; min-height: 52px; }
+.sf-mine-strip .tt-cell.is-now { box-shadow: 0 0 0 3px var(--accent); }
+.sf-mine-t { font-size: var(--fs-min); color: var(--text); font-weight: 700; }
+.sf-key { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- slide-in panels ---------- */
+.sf-panel { position: absolute; z-index: 1030; top: 16px; bottom: 16px; width: 400px; max-width: calc(100% - 32px); display: flex; flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease, visibility 0s linear 0.28s; }
+.sf-panel--left { left: 16px; transform: translateX(calc(-100% - 24px)); }
+.sf-panel--right { right: 16px; width: 372px; transform: translateX(calc(100% + 24px)); }
+.sf-panel[data-open="false"], .sf-sheet[data-open="false"] { visibility: hidden; opacity: 0; }
+.sf-panel[data-open="true"], .sf-sheet[data-open="true"] { transform: none; visibility: visible; opacity: 1;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease, visibility 0s; }
+.sf-panel-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px 10px 20px; border-bottom: 1px solid var(--border); }
+.sf-panel-h h2 { font-size: var(--fs-h4); }
+.sf-panel-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 16px; }
+.sf-h3 { font-size: var(--fs-small); }
+.sf-panel .ctl { padding: 0; }
+.sf-panel .ctl + .ctl { border-left: 0; border-top: 1px solid var(--border); padding-top: 16px; }
+.sf-panel .ctl .seg-item { padding: 0 12px; }
+.sf-panel .ctl-help { min-height: 0; }
+.sf-panel .showing { flex-direction: column; align-items: flex-start; padding: 12px 14px; }
+.sf-panel .showing-t { font-size: var(--fs-small); }
+.sf-panel .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sf-panel .kpi { padding: 12px; }
+.sf-panel .kpi-v { font-size: 24px; }
+.sf-panel .now { position: static; padding: 0; border: 0; box-shadow: none; background: none; }
+.sf-panel .now-head h2 { font-size: var(--fs-h3); }
+.sf-panel .now-head h2:focus { outline: none; }
+.now-item.is-mine { box-shadow: 0 0 0 3px var(--accent); }
+
+/* ---------- timetable sheet (slides up above the player) ---------- */
+.sf-sheet { position: absolute; z-index: 1040; left: calc(16px + var(--lw)); right: calc(16px + var(--rw)); bottom: calc(var(--dock-h) + 28px);
+  max-height: min(62%, 640px); display: flex; flex-direction: column; transform: translateY(calc(100% + var(--dock-h) + 48px));
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease, left 0.28s ease, right 0.28s ease, visibility 0s linear 0.3s; }
+.sf-sheet .sf-panel-b { gap: 10px; padding-top: 12px; }
+
+/* ---------- player bar (bottom) ---------- */
+.sf > .sf-dock.dock { position: absolute; z-index: 1020; bottom: 16px; left: calc(16px + var(--lw)); right: calc(16px + var(--rw));
+  display: block; padding: 10px 16px 2px; container-type: inline-size; transition: left 0.28s ease, right 0.28s ease; }
+/* the bar reflows on its own width (it narrows when side panels open), not on the window's */
+.sf-dock-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "play mid quota btns"; align-items: center; gap: 20px; }
+.sf-dock-in .play-btn { grid-area: play; }
+.sf-dock-mid { grid-area: mid; min-width: 0; }
+.sf-dock .quota { grid-area: quota; text-align: right; min-width: 150px; }
+.sf-dock-btns { grid-area: btns; display: flex; gap: 8px; }
+@container (max-width: 860px) {
+  .sf-dock-in { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play mid mid" "quota quota btns"; gap: 2px 16px; }
+  .sf-dock .quota { text-align: left; min-width: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
+  .sf-dock .quota .q-num { font-size: 24px; }
+  .sf-dock-btns { padding-bottom: 8px; }
+}
+@container (max-width: 520px) {
+  .sf-dock-in { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "play mid" "quota quota" "btns btns"; }
+  .sf-dock-btns .btn { flex: 1; }
+}
+.sf-toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-tint); }
+.sf-debug { position: absolute; z-index: 1005; right: calc(16px + var(--rw)); top: 16px; max-width: 420px; }
+.sf-debug:empty { display: none; }
+
+/* the reader's own area on the map */
+.fm.is-focus .fm-chip { box-shadow: 0 0 0 3px var(--panel), 0 0 0 6px var(--accent); }
+.fm.is-focus .fm-dot { animation: fm-pulse 1.6s ease-out infinite; }
+@keyframes fm-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } 100% { box-shadow: 0 0 0 16px transparent; } }
+
+/* ---------- narrower screens: cards span the width, one side panel at a time ---------- */
+@container sf (max-width: 1279px) {
+  .sf-panel--right { width: 340px; }
+}
+@container sf (max-width: 899px) {
+  .sf-title { left: 8px; right: 8px; top: 8px; width: auto; padding: 10px 12px; gap: 8px; max-height: 42%; }
+  .sf-title h1 { font-size: 19px; }
+  .sf-facts { display: none; }
+  .sf-find { flex-direction: row; align-items: center; gap: 10px; }
+  .sf-find .ctl-label { flex: none; }
+  .sf-find .select-wrap { flex: 1; }
+  .sf-pills { flex-direction: row; flex-wrap: wrap; }
+  .sf-pill { flex: 1 1 150px; grid-template-columns: minmax(0, 1fr) auto; }
+  .sf-pill-k { grid-column: 1; }
+  .sf-pill-v { grid-column: 1; }
+  .sf-pill svg { grid-row: 1 / span 2; grid-column: 2; }
+  .sf-key, .sf-lede { display: none; }
+  .sf-panel, .sf-panel--right { left: 8px; right: 8px; top: 8px; bottom: 8px; width: auto; max-width: none; }
+  .sf > .sf-dock.dock { left: 8px; right: 8px; bottom: 8px; padding: 8px 12px 2px; }
+  .sf-sheet { left: 8px; right: 8px; bottom: calc(var(--dock-h) + 16px); max-height: 70%; }
+}
+/* phones: let the page scroll, and give the map one full screen below the top bar */
+@media (max-width: 760px) {
+  body[data-route="schedule"] .app { height: auto; overflow: visible; }
+  .sf { flex: none; height: 100vh; height: 100svh; min-height: 600px; }
+}
+@container sf (max-width: 899px) {
+  /* a compact player bar on phones: play and slider on one row */
+  .sf-dock .dock-top { gap: 8px; }
+  .sf-dock .hour-title { font-size: var(--fs-small); }
+  .sf-dock .range-wrap { padding-bottom: 40px; }
+  .sf-dock .play-btn { min-width: 0; padding: 0 16px; }
+}
+@container sf (max-width: 760px) {
+  /* one-line area labels on phones: name and icon; the colour and icon carry On, Off or Protected */
+  .sf .fm-chip { min-width: 0; padding: 4px 10px 4px 8px; min-height: var(--target); justify-content: center; }
+  .sf .fm-states { display: none; }
+}

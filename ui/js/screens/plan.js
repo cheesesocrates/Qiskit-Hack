@@ -1,12 +1,13 @@
-// Schedule: who loses power tonight? Built for the people who use the schedule.
-// Top: one menu bar (which evening, which priority, which method made the plan). Then a one-line
-// "Showing" summary, the map with the hour control and a "This hour" list beside it, the whole
-// evening as a timetable (areas by hours, the way load-shedding schedules are published), and the
-// plan's scores. Every number comes from the results files; nothing is re-optimised in the browser.
+// Schedule: the working example, built for the people who live with a load-shedding schedule.
+// A full-screen map of tonight's areas. Floating over it: a title card (the current choices as pills,
+// the rule check, the key and "Find your area"), a player bar (Play, hour slider, quota) and three
+// slide-in panels: Plan settings (left), This hour (right) and Tonight's timetable (a sheet above the
+// player). The map keeps the areas clear of whatever is open. Every number comes from the results
+// files; nothing is re-optimised in the browser.
 import { el, fmt, fmtTrim, clock, clockRange, sum, KIND_LABEL, PROTECTED_WHY } from '../util.js';
 import { icon, STATE, stateOf, stateChip } from '../icons.js';
 import { createFeederMap } from '../components/map.js';
-import { naPanel, panel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
+import { naPanel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
 import { debugBox } from '../components/planGrid.js';
 import { buildOptions, defaultMethod, versusRoundRobin, feederFacts, paretoApplies } from '../planModel.js';
 import { explainPanel, pageHeader } from '../explain.js';
@@ -20,9 +21,12 @@ const METHOD_LABEL = {
   round_robin: 'Round-robin: taking turns (classical)',
   random_valid: 'One random valid plan (classical)',
 };
+const METHOD_SHORT = { quantum: 'FairShed', exact: 'Exact search', round_robin: 'Round-robin', random_valid: 'Random plan' };
 const methodLabel = (o) => METHOD_LABEL[o.key] || `${o.label} (${o.kind})`;
 const STEP_MS = 1800;
-/** The reader's choices, kept for the session so a re-render (theme switch, leaving and coming back) does not reset them. */
+const NARROW_PX = 900;   // below this map width the card spans the top and panels cover the map
+const COMPACT_PX = 1100; // below this, one side panel at a time so the map keeps room
+/** The reader's choices and open panels, kept for the session so a re-render (theme switch, leaving and coming back) does not reset them. */
 let memory = null;
 
 /** Three plain stops on the Pareto sweep, chosen from the data. */
@@ -37,16 +41,28 @@ function paretoStops(par) {
   ];
 }
 
+/** Hours (indices) grouped into runs: [0, 1, 3] -> [[0, 1], [3]]. */
+function runs(hours) {
+  const out = [];
+  for (const t of hours) { const last = out[out.length - 1]; if (last && last[last.length - 1] === t - 1) last.push(t); else out.push([t]); }
+  return out;
+}
+
 export default {
   async mount({ root, results, params }) {
     const scenarios = ['base', 'heatwave_cap'].filter((k) => results.ok('plans/' + k) || (k === 'base' && results.ok('instance')));
+    let sf = null; // the map area; its width (not the window's) decides the layout, so the Inner working drawer is accounted for
+    const width = () => (sf && sf.clientWidth) || window.innerWidth;
+    const narrow = () => width() < NARROW_PX;
+    const compact = () => width() < COMPACT_PX;
     // method: the plan on screen. want: the method the reader picked; kept when the evening changes and
     // used again as soon as it is available (the heatwave has no quantum plan).
-    const S = { scenario: 'base', method: null, want: 'quantum', pIndex: 0, stop: 'bal', hour: 0, playing: false, pick: null };
+    const S = { scenario: 'base', method: null, want: 'quantum', pIndex: 0, stop: 'bal', hour: 0, playing: false, pick: null, mine: null,
+      ui: { settings: false, hour: null, sheet: false } }; // hour: null = decide from the width once the map is on screen
     const par0 = results.ok('pareto');
     if (par0) S.pIndex = par0.default_index;
     if (memory && scenarios.includes(memory.scenario)) {
-      Object.assign(S, { scenario: memory.scenario, want: memory.want, stop: memory.stop, hour: memory.hour });
+      Object.assign(S, { scenario: memory.scenario, want: memory.want, stop: memory.stop, hour: memory.hour, mine: memory.mine, ui: { ...memory.ui } });
       if (par0 && memory.pIndex >= 0 && memory.pIndex < par0.points.length) S.pIndex = memory.pIndex;
     }
 
@@ -61,65 +77,169 @@ export default {
     const pickMethod = () => (model.opts.some((o) => o.key === S.want) ? S.want : defaultMethod(model.opts));
     S.method = pickMethod();
     S.hour = Math.max(0, Math.min(model.inst.n_hours - 1, S.hour));
-    const remember = () => { memory = { scenario: S.scenario, want: S.want, pIndex: S.pIndex, stop: S.stop, hour: S.hour }; };
+    if (S.mine !== null && !(S.mine >= 0 && S.mine < model.inst.n_feeders)) S.mine = null;
+    const remember = () => { memory = { scenario: S.scenario, want: S.want, pIndex: S.pIndex, stop: S.stop, hour: S.hour, mine: S.mine, ui: { ...S.ui } }; };
     const cur = () => model.opts.find((o) => o.key === S.method) || model.opts[0];
     const inst = () => model.inst;
     const T = () => inst().n_hours;
 
     // ---------- DOM ----------
-    const lede = el('p', { class: 'lede' });
+    const mapHost = el('div', { class: 'plan-map', role: 'application', 'aria-label': 'Map of areas. Select an area to see why it is on or off.' });
+    const mapWrap = el('div', { class: 'plan-map-wrap' }, mapHost);
+
+    // title card
+    const pill = (k) => el('button', { type: 'button', class: 'sf-pill', 'aria-controls': 'sf-settings', 'aria-expanded': 'false' },
+      el('span', { class: 'sf-pill-k' }, k), el('span', { class: 'sf-pill-v' }), icon('arrowr', 18));
+    const pills = { ev: pill('Evening'), pr: pill('Priority'), me: pill('Plan made by') };
+    const lede = el('p', { class: 'sf-lede' });
+    const facts = el('div', { class: 'sf-facts', 'aria-live': 'polite' });
+    const findSel = el('select', { class: 'select', id: 'sf-find' });
+    const mineHost = el('div', { class: 'sf-mine', 'aria-live': 'polite' });
+    const titleCard = el('section', { class: 'sf-card sf-title', 'aria-label': 'Tonight' },
+      el('h1', null, 'Who loses power tonight?'), lede,
+      el('div', { class: 'sf-pills' }, pills.ev, pills.pr, pills.me),
+      facts,
+      el('div', { class: 'sf-find' }, el('label', { class: 'ctl-label', for: 'sf-find' }, 'Find your area'), el('div', { class: 'select-wrap' }, findSel)),
+      mineHost,
+      el('div', { class: 'sf-key', 'aria-label': 'Key' }, stateChip(STATE.on), stateChip(STATE.off), stateChip(STATE.protected)));
+
+    // slide-in panels
+    const slide = (cls, id, title, ...body) => {
+      const close = el('button', { type: 'button', class: 'btn btn--icon', 'aria-label': `Close ${title}` }, icon('close', 20));
+      const node = el(cls === 'sf-sheet' ? 'section' : 'aside', { class: cls, id, 'aria-label': title, 'data-open': 'false' },
+        el('div', { class: 'sf-panel-h' }, el('h2', null, title), close), el('div', { class: 'sf-panel-b' }, ...body));
+      return { node, close };
+    };
     const menuEvening = el('div', { class: 'ctl' });
     const menuPriority = el('div', { class: 'ctl' });
     const menuMethod = el('div', { class: 'ctl' });
     const showing = el('div', { class: 'showing', 'aria-live': 'polite' });
-    const mapHost = el('div', { class: 'plan-map', role: 'application', 'aria-label': 'Map of areas. Select an area to see why it is on or off.' });
-    const keyRow = el('div', { class: 'map-key', 'aria-label': 'Key' }, el('span', { class: 'ml-h' }, 'Key'),
-      stateChip(STATE.on), stateChip(STATE.off), stateChip(STATE.protected),
-      el('span', { class: 'map-caption' }, 'Illustrative Karachi zones, synthetic data. Click an area for the reason.'));
+    const kpiHost = el('div', { class: 'kpis' });
+    const settings = slide('sf-panel sf-panel--left', 'sf-settings', 'Plan settings',
+      menuEvening, menuPriority, menuMethod, showing,
+      el('div', null, el('h3', { class: 'sf-h3' }, 'How this plan scores'), el('p', { class: 'ctl-help' }, 'The same score is used for every plan. Lower is better.')), kpiHost,
+      el('p', { class: 'ctl-help' }, 'Every plan was computed in advance; nothing is re-optimised in your browser.'));
+    const nowHost = el('div', { class: 'now' });
+    const hourPanel = slide('sf-panel sf-panel--right', 'sf-hour', 'This hour', nowHost);
+    const ttHost = el('div');
+    const ttWhy = el('div', { class: 'tt-why', 'aria-live': 'polite' });
+    const sheet = slide('sf-sheet', 'sf-sheet', 'Tonight\'s timetable', el('p', { class: 'ctl-help' }, 'Each row is one area. Click a cell to jump to that hour and see why.'), ttHost, ttWhy);
+
+    // player bar
     const playBtn = el('button', { type: 'button', class: 'btn btn--primary play-btn', 'aria-label': 'Play the hours' }, icon('play', 22), el('span', null, 'Play'));
     const hourTitle = el('div', { class: 'hour-title' });
     const hourClock = el('div', { class: 'hour-clock' });
     let hourSlider = null;
     const sliderHost = el('div', { class: 'hour-slider' });
     const quotaEl = el('div', { class: 'quota' });
-    const dock = el('div', { class: 'dock', role: 'group', 'aria-label': 'Hour control' },
-      playBtn, el('div', null, el('div', { class: 'dock-top' }, hourTitle, hourClock), sliderHost), quotaEl);
-    const debugHost = el('div', { class: 'plan-debug' });
-    const nowHost = el('div', { class: 'now' });
-    const ttHost = el('div');
-    const ttWhy = el('div', { class: 'tt-why', 'aria-live': 'polite' });
-    const kpiHost = el('div', { class: 'kpis kpis--row' });
+    const toggle = (ic, label, controls) => el('button', { type: 'button', class: 'btn sf-toggle', 'aria-controls': controls, 'aria-expanded': 'false' }, icon(ic, 20), el('span', { class: 'btn-label' }, label));
+    const ttBtn = toggle('audit', 'Timetable', 'sf-sheet');
+    const hourBtn = toggle('info', 'This hour', 'sf-hour');
+    const dock = el('div', { class: 'dock sf-dock', role: 'group', 'aria-label': 'Hour control' }, el('div', { class: 'sf-dock-in' },
+      playBtn, el('div', { class: 'sf-dock-mid' }, el('div', { class: 'dock-top' }, hourTitle, hourClock), sliderHost), quotaEl,
+      el('div', { class: 'sf-dock-btns' }, ttBtn, hourBtn)));
+    const debugHost = el('div', { class: 'plan-debug sf-debug' });
     const fairExpert = el('div', { class: 'expert-only stack-s' });
 
+    sf = el('div', { class: 'sf' }, mapWrap, titleCard, settings.node, hourPanel.node, sheet.node, dock, debugHost);
     const ins0 = model.inst;
     const prot = ins0.feeders.filter((f) => f.protected);
-    root.append(el('div', { class: 'page page--wide sched-page' },
-      el('header', { class: 'page-head' }, el('h1', null, 'Who loses power tonight?'), lede),
-      el('section', { class: 'menubar', 'aria-label': 'Choose the plan' }, menuEvening, menuPriority, menuMethod),
-      showing,
-      el('div', { class: 'sched' },
-        el('div', { class: 'sched-main' }, dock, el('div', { class: 'plan-map-wrap' }, mapHost), keyRow, debugHost),
-        el('aside', { class: 'sched-side', 'aria-label': 'This hour' }, nowHost)),
-      panel('Tonight\'s timetable', 'Each row is one area. Click a cell to jump to that hour and see why.', el('div', { class: 'stack-s' }, ttHost, ttWhy), { label: 'Tonight\'s timetable' }),
-      panel('How this plan scores', 'The same score is used for every plan. Lower is better.', kpiHost),
+    root.append(sf,
       explainPanel('schedule', {
-        say: "Tonight's load-shedding schedule: which neighbourhood power lines are off in each hour, and the plain reason for every choice.",
+        say: "Tonight's load-shedding schedule on a full-screen map: which neighbourhood power lines are off in each hour, and the plain reason for every choice.",
         made: [{ kind: 'classical', text: 'A ridge-regression forecast of the shortage sets how many areas must be off each hour (the quota).' },
           { kind: 'classical', text: 'Hospitals, water pumps and telecom towers are taken out of the choice: they get no switch.' },
           { kind: 'quantum', text: 'A quantum circuit (Dicke start, Grover mixer) on the Qiskit simulator samples valid plans; the best valid one is kept.' },
           { kind: 'classical', text: 'The plan is audited against the rules and compared with the exact best plan. Nothing is re-optimised in your browser.' }],
         qa: [{ q: 'What does Priority change?', a: () => ['It moves along a ', term('pareto', 'trade-off'), ' between total harm and an even spread of outage hours. Each choice is a plan computed in advance by the same circuit with a different fairness weight.'] },
-          { q: 'Why is an area off or on?', a: 'The "This hour" list gives a short reason for every area that is off. Click any area, on the map or in the timetable, for the full reason: its harm this hour and its outage hours so far against the average, and whether it would be a back-to-back cut.' },
-          { q: 'What does "Plan made by" do?', a: 'It shows the plan the exact search, round-robin or a random draw would choose for the same evening, so you can see what FairShed changed. The "Showing" line compares each with taking turns.' }],
-        what: [el('span', null, 'Which ', term('feeder', 'feeders'), ' (neighbourhood power lines, called areas here) are off in each hour of this evening\'s shortage.')],
-        how: ['Pick the evening, the priority and which method made the plan in the menu bar at the top.',
-          'Press Play or drag the hour slider; the map and the "This hour" list follow.',
-          'The timetable shows the whole evening at once: amber stripes are Off, teal is On, blue with a shield is Protected.'],
+          { q: 'Why is an area off or on?', a: 'Click it on the map, or open "This hour" for a one-line reason for every area that is off: its harm this hour and its outage hours so far against the average, and whether it would be a back-to-back cut.' },
+          { q: 'How does a resident use it?', a: 'Pick your area under "Find your area". The map flies to it, rings it, and the card shows when your area is off tonight.' },
+          { q: 'What does "Plan made by" do?', a: 'It shows the plan the exact search, round-robin or a random draw would choose for the same evening, so you can see what FairShed changed. Try Heatwave with round-robin and open the timetable: the red cells are the rules it breaks.' }],
+        what: [el('span', null, 'A full-screen map of the ', term('feeder', 'feeders'), ' (neighbourhood power lines, called areas here) and which are off in each hour of this evening\'s shortage.')],
+        how: ['The pills on the card open Plan settings: the evening, the priority and which method made the plan.',
+          'Press Play or drag the hour slider; the map and "This hour" follow.',
+          '"Timetable" slides up the whole evening at once: amber stripes are Off, teal is On, blue with a shield is Protected.',
+          'Esc closes the panel on top.'],
         notice: [`${ins0.n_feeders} areas over ${ins0.n_hours} hours; ${prot.length} are protected (${prot.map((f) => f.name).join(', ')}).`,
           `Quotas per hour: ${ins0.quotas.join(', ')} areas off.`],
         not: ['Real feeders or real outages: everything is synthetic.', 'Live re-planning: the plans shown were computed in advance.'],
       }),
-      fairExpert));
+      fairExpert);
+
+    // ---------- panel layout: what is open decides where the map fits the areas ----------
+    function measure() {
+      const wide = !narrow();
+      sf.style.setProperty('--lw', wide && S.ui.settings ? `${settings.node.offsetWidth + 16}px` : '0px');
+      sf.style.setProperty('--rw', wide && S.ui.hour ? `${hourPanel.node.offsetWidth + 16}px` : '0px');
+      sf.style.setProperty('--dock-h', `${dock.offsetHeight}px`);
+    }
+    /** Pixels the map must keep clear on each side, from the panels' layout boxes (not their slide animation). */
+    function mapPadding() {
+      const W = sf.clientWidth, H = sf.clientHeight;
+      if (!W || !H) return { tl: [40, 40], br: [40, 40] };
+      const wide = !narrow();
+      let left = 24, top = 24, right = 24;
+      let bottom = H - dock.offsetTop + 16;
+      if (S.ui.sheet) bottom = H - sheet.node.offsetTop + 16;
+      if (wide) left = titleCard.offsetLeft + titleCard.offsetWidth + 16; else top = titleCard.offsetTop + titleCard.offsetHeight + 16;
+      if (wide && S.ui.settings) left = Math.max(left, settings.node.offsetLeft + settings.node.offsetWidth + 16);
+      if (wide && S.ui.hour) right = W - hourPanel.node.offsetLeft + 16;
+      let tl = [left + 70, top + 40], br = [right + 90, bottom + 40]; // room for the labels beside each dot
+      const fitIn = (a, b, size) => { const room = size - 200; if (a + b > room && room > 0) { const k = room / (a + b); return [a * k, b * k]; } return [a, b]; };
+      [tl[0], br[0]] = fitIn(tl[0], br[0], W);
+      [tl[1], br[1]] = fitIn(tl[1], br[1], H);
+      return { tl, br };
+    }
+
+    const panels = { settings: { p: settings, btns: [pills.ev, pills.pr, pills.me] }, hour: { p: hourPanel, btns: [hourBtn] }, sheet: { p: sheet, btns: [ttBtn] } };
+    function paintPanel(name) {
+      const { p, btns } = panels[name];
+      const open = !!S.ui[name];
+      p.node.dataset.open = String(open);
+      p.node.inert = !open;
+      btns.forEach((b) => b.setAttribute('aria-expanded', String(open)));
+    }
+    let autoClosedHour = false; // "This hour" was closed for lack of room, not by the reader
+    function setPanel(name, open, focusEl) {
+      if (name === 'hour') autoClosedHour = false;
+      if (open && compact()) for (const k of ['settings', 'hour']) if (k !== name && S.ui[k]) { S.ui[k] = false; paintPanel(k); }
+      S.ui[name] = open;
+      paintPanel(name);
+      const { p, btns } = panels[name];
+      if (open && focusEl) setTimeout(() => focusEl.focus({ preventScroll: true }), 60);
+      if (!open && p.node.contains(document.activeElement)) btns[0].focus({ preventScroll: true });
+      settle();
+      remember();
+    }
+    /** Panels slide and the player bar resizes for about 0.3 s; once they rest, glide the map to fit and re-place the labels. */
+    let settleTimer = null;
+    function settle() {
+      measure();
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => { measure(); fmap.refit(); setTimeout(() => fmap.relayout(), 500); }, 320);
+    }
+    settings.close.addEventListener('click', () => setPanel('settings', false));
+    hourPanel.close.addEventListener('click', () => setPanel('hour', false));
+    sheet.close.addEventListener('click', () => setPanel('sheet', false));
+    hourBtn.addEventListener('click', () => setPanel('hour', !S.ui.hour, nowHost.querySelector('h2')));
+    ttBtn.addEventListener('click', () => setPanel('sheet', !S.ui.sheet, sheet.close));
+    const onKey = (e) => {
+      if (e.defaultPrevented || e.key !== 'Escape') return; // a glossary card, the tour or the Inner working panel went first
+      const top = ['sheet', 'settings', 'hour'].find((k) => S.ui[k]);
+      if (top) { e.preventDefault(); setPanel(top, false); }
+    };
+    document.addEventListener('keydown', onKey);
+    let wasCompact = null;
+    const onResize = () => {
+      const c = compact();
+      if (wasCompact !== null && c !== wasCompact) {
+        if (c && S.ui.hour) { S.ui.hour = false; autoClosedHour = true; paintPanel('hour'); } // no room: step aside
+        else if (!c && autoClosedHour) { S.ui.hour = true; autoClosedHour = false; paintPanel('hour'); } // room again: come back
+      }
+      wasCompact = c;
+      settle();
+    };
+    window.addEventListener('resize', onResize);
 
     // ---------- reasons ----------
     function whyParts(fa) {
@@ -169,7 +289,10 @@ export default {
         el('p', { class: 'pop-why' }, reasonOf(fa)), dl);
     }
 
-    const fmap = createFeederMap(mapHost, { feeders: inst().feeders, debug: params.debug, tiles: params.tiles, buildPopup });
+    const fmap = createFeederMap(mapHost, { feeders: inst().feeders, debug: params.debug, tiles: params.tiles, buildPopup,
+      padding: mapPadding, zoomPosition: 'bottomright', tileOpacity: 0.62,
+      obstacles: () => [titleCard, dock, S.ui.settings && settings.node, S.ui.hour && hourPanel.node, S.ui.sheet && sheet.node,
+        mapHost.querySelector('.leaflet-bottom.leaflet-right')] });
 
     // ---------- menus: built once, then updated in place (no flicker, focus stays where it was) ----------
     const evHelp = el('p', { class: 'ctl-help' });
@@ -199,7 +322,22 @@ export default {
     sel.addEventListener('change', () => { S.method = S.want = sel.value; refreshAll(false); renderMenus(); });
     menuMethod.append(el('label', { class: 'ctl-label', for: 'plan-method' }, 'Plan made by'), el('div', { class: 'select-wrap' }, sel), mHelp);
 
-    /** The priority stop that matches the plan on screen (null when none does), and its label for the "Showing" line. */
+    // the pills open Plan settings at the matching control
+    const checkedIn = (seg) => (seg ? seg.root.querySelector('[aria-checked="true"]') || seg.root.querySelector('button:not(:disabled)') : null);
+    pills.ev.addEventListener('click', () => setPanel('settings', true, checkedIn(evSeg) || sel));
+    pills.pr.addEventListener('click', () => setPanel('settings', true, checkedIn(prSeg) || sel));
+    pills.me.addEventListener('click', () => setPanel('settings', true, sel));
+
+    let findFor = null;
+    findSel.addEventListener('change', () => {
+      S.mine = findSel.value === '' ? null : Number(findSel.value);
+      fmap.focus(S.mine);
+      if (S.mine === null) { fmap.closePopup(); fmap.refit(true); } else fmap.flyTo(S.mine, { open: true });
+      renderMine(); remember();
+      if (S.mine !== null) requestAnimationFrame(() => mineHost.scrollIntoView({ block: 'nearest' }));
+    });
+
+    /** The priority stop that matches the plan on screen (null when none does), and its label. */
     function stopNow() {
       const par = paretoApplies(results, S.scenario);
       const st = par ? (stops.find((s) => s.i === S.pIndex && s.key === S.stop) || stops.find((s) => s.i === S.pIndex)) : null;
@@ -209,10 +347,8 @@ export default {
 
     function renderMenus() {
       const ins = inst();
-      // evening
       if (evSeg) evSeg.set(S.scenario); else evStatic.textContent = SCEN[S.scenario] || S.scenario;
       evHelp.textContent = `${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}, ${ins.quotas.join(', ')} areas off by hour.`;
-      // priority
       const { par, curStop } = stopNow();
       if (prSeg) stops.forEach((s) => prSeg.setDisabled(s.key, !par));
       if (!prSeg) prHelp.textContent = 'The quantum plans are missing (results/pareto.json).';
@@ -225,13 +361,21 @@ export default {
         const pt = par0.points[S.pIndex];
         fsText.textContent = `w_f ${fmtTrim(pt.fairness_weight, 3)} | score at this weight ${fmt(pt.cost, 2)} | exact ${fmt(pt.exact_cost, 2)} | P(optimal) per try ${fmt(pt.p_optimal, 4)}`;
       }
-      // method: options change only with the evening
       if (selFor !== S.scenario) {
         sel.replaceChildren(...model.opts.map((o) => el('option', { value: o.key }, methodLabel(o))));
         selFor = S.scenario;
       }
       sel.value = S.method;
       mHelp.textContent = S.method === 'quantum' ? 'Or pick a normal method to compare.' : 'A normal method, shown for comparison.';
+      if (findFor !== S.scenario) {
+        findSel.replaceChildren(el('option', { value: '' }, 'All areas'), ...ins.feeders.map((fd, f) => el('option', { value: String(f) }, fd.name)));
+        findFor = S.scenario;
+      }
+      findSel.value = S.mine === null ? '' : String(S.mine);
+      // pills: the current choices at a glance
+      pills.ev.querySelector('.sf-pill-v').textContent = SCEN[S.scenario] || S.scenario;
+      pills.pr.querySelector('.sf-pill-v').textContent = S.method === 'quantum' && S.stopLabel ? S.stopLabel : 'Not used';
+      pills.me.querySelector('.sf-pill-v').textContent = METHOD_SHORT[S.method] || cur().label;
     }
 
     // ---------- views ----------
@@ -243,16 +387,16 @@ export default {
     function renderShowing() {
       const c = cur();
       const v = versusRoundRobin(model.opts, c);
-      const facts = [passChip(c.auditPassed, 'Follows every rule', `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken`)];
-      if (v && !v.isRR) {
-        const abs = Math.abs(v.pct);
-        facts.push(el('span', { class: 'chip chip--neutral' }, abs < 0.05 ? 'Same score as taking turns' : `${fmt(abs, abs < 1 ? 1 : 0)}% ${v.pct > 0 ? 'better' : 'worse'} score than taking turns`));
-      }
+      const rule = () => passChip(c.auditPassed, 'Follows every rule', `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken`);
+      const turns = () => (v && !v.isRR ? el('span', { class: 'chip chip--neutral' }, Math.abs(v.pct) < 0.05 ? 'Same score as taking turns'
+        : `${fmt(Math.abs(v.pct), Math.abs(v.pct) < 1 ? 1 : 0)}% ${v.pct > 0 ? 'better' : 'worse'} than taking turns`) : null);
+      const list = [rule(), turns()];
       if (c.key === 'quantum' && c.point) {
-        facts.push(el('span', { class: 'chip chip--neutral' }, c.point.matches_exact ? 'Same score as the exact best plan'
+        list.push(el('span', { class: 'chip chip--neutral' }, c.point.matches_exact ? 'Same score as the exact best plan'
           : `Exact best plan scores ${fmt(c.point.exact_cost, 2)}; this one ${fmt(c.point.cost, 2)}`));
       }
-      showing.replaceChildren(el('div', { class: 'showing-t' }, el('span', { class: 'showing-k' }, 'Showing'), el('span', null, planName(c))), el('div', { class: 'showing-f' }, facts));
+      showing.replaceChildren(el('div', { class: 'showing-t' }, el('span', { class: 'showing-k' }, 'Showing'), el('span', null, planName(c))), el('div', { class: 'showing-f' }, list.filter(Boolean)));
+      facts.replaceChildren(...[rule(), turns()].filter(Boolean));
     }
 
     function renderNow() {
@@ -261,7 +405,7 @@ export default {
       const off = [], on = [], pr = [];
       ins.feeders.forEach((fd, f) => (fd.protected ? pr : row[f] ? off : on).push(f));
       const item = (f, st, why) => {
-        const b = el('button', { type: 'button', class: `now-item now-item--${st.key}`, 'aria-label': `${ins.feeders[f].name}: ${st.label}. Show on the map.` },
+        const b = el('button', { type: 'button', class: `now-item now-item--${st.key}${f === S.mine ? ' is-mine' : ''}`, 'aria-label': `${ins.feeders[f].name}: ${st.label}. Show on the map.` },
           stateChip(st), el('span', { class: 'now-txt' }, el('span', { class: 'now-name' }, ins.feeders[f].name), why ? el('span', { class: 'now-why' }, why) : null));
         b.addEventListener('click', () => fmap.open(f));
         return b;
@@ -274,11 +418,30 @@ export default {
         return bits.length ? cap(bits.join(', ')) : 'Needed to meet the quota at the lowest score';
       };
       nowHost.replaceChildren(
-        el('div', { class: 'now-head' }, el('div', { class: 'now-k' }, 'This hour'), el('h2', null, clockRange(ins.start_hour, t)),
+        el('div', { class: 'now-head' }, el('h2', { tabindex: '-1' }, clockRange(ins.start_hour, t)),
           el('p', { class: off.length === ins.quotas[t] ? 'subtle' : 'subtle warn-text' }, `${off.length} of ${ins.n_feeders} areas off; the quota is ${ins.quotas[t]}.`)),
         el('h3', { class: 'now-h' }, `Off now (${off.length})`), el('div', { class: 'now-list' }, off.map((f) => item(f, STATE.off, offWhy(f)))),
         el('h3', { class: 'now-h' }, `Never cut (${pr.length})`), el('div', { class: 'now-list' }, pr.map((f) => item(f, STATE.protected, cap(PROTECTED_WHY[ins.feeders[f].kind] || ins.feeders[f].kind)))),
         el('h3', { class: 'now-h' }, `On now (${on.length})`), el('div', { class: 'now-list now-list--grid' }, on.map((f) => item(f, STATE.on, null))));
+    }
+
+    /** "Find your area": the reader's own area for the whole evening. */
+    function renderMine() {
+      if (S.mine === null) { mineHost.replaceChildren(); return; }
+      const ins = inst(); const c = cur(); const f = S.mine; const fd = ins.feeders[f];
+      const hours = Array.from({ length: ins.n_hours }, (_, t) => t);
+      const offH = hours.filter((t) => c.matrix[t][f] === 1);
+      const said = fd.protected ? `Never cut: protected (${PROTECTED_WHY[fd.kind] || fd.kind}).`
+        : offH.length ? `Off ${runs(offH).map((r) => `${clock(ins.start_hour, r[0])} to ${clock(ins.start_hour, r[r.length - 1] + 1)}`).join(' and ')} (${offH.length} hour${offH.length === 1 ? '' : 's'}).`
+          : 'On all evening.';
+      const strip = el('div', { class: 'sf-mine-strip' }, hours.map((t) => {
+        const st = stateOf(fd, f, c.matrix[t]);
+        const b = el('button', { type: 'button', class: `tt-cell tt-cell--${st.key}${t === S.hour ? ' is-now' : ''}`, 'aria-label': `${fd.name}, ${clockRange(ins.start_hour, t)}: ${st.label}` },
+          el('span', { class: 'sf-mine-t' }, clock(ins.start_hour, t)), icon(st.icon, 16), el('span', null, st.label));
+        b.addEventListener('click', () => { setHour(t, true); fmap.open(f); });
+        return b;
+      }));
+      mineHost.replaceChildren(el('p', { class: 'sf-mine-say' }, el('b', null, `${fd.name}: `), said), strip);
     }
 
     function renderTable() {
@@ -293,7 +456,7 @@ export default {
       const head = el('tr', null, el('th', { scope: 'col' }, 'Area'),
         hours.map((t) => el('th', { scope: 'col', class: now(t) }, clock(ins.start_hour, t), t === S.hour ? el('span', { class: 'tt-now' }, 'now') : null)),
         el('th', { scope: 'col', class: 'num' }, 'Off tonight'));
-      const body = ins.feeders.map((fd, f) => el('tr', { class: S.pick === f ? 'is-pick' : null },
+      const body = ins.feeders.map((fd, f) => el('tr', { class: S.pick === f || S.mine === f ? 'is-pick' : null },
         el('th', { scope: 'row' }, el('div', { class: 'tt-name' }, fd.name), el('div', { class: 'tt-kind' }, KIND_LABEL[fd.kind] || fd.kind)),
         hours.map((t) => {
           const st = stateOf(fd, f, c.matrix[t]);
@@ -351,9 +514,9 @@ export default {
     function renderKpis() {
       const c = cur();
       kpiHost.replaceChildren(
-        kpi('Total score', fmt(c.cost, 2), 'Harm plus unevenness plus back-to-back cuts. Lower is better.'),
+        kpi('Total score', fmt(c.cost, 2), 'Harm plus unevenness plus back-to-back cuts.'),
         kpi('Harm', fmt(c.breakdown.hardship, 1), el('span', null, 'Sum of the ', term('hardship'), ' of every cut.')),
-        kpi('Unevenness', `${fmt(c.fairness, 2)} h`, 'How much total outage hours differ between areas. 0 is perfectly even.'),
+        kpi('Unevenness', `${fmt(c.fairness, 2)} h`, 'How much outage hours differ between areas.'),
         kpi('Back-to-back cuts', fmt(c.breakdown.consecutive, 0), 'Times an area is off two hours in a row.'),
         kpi('Rules check', null, c.nViolations ? `${c.nViolations} rule${c.nViolations === 1 ? '' : 's'} broken` : 'Quota, protected areas, back-to-back and daily limits all met', passChip(c.auditPassed, 'Passes', 'Fails')));
     }
@@ -365,14 +528,13 @@ export default {
 
     function renderLede() {
       const ins = inst();
-      const prots = ins.feeders.filter((f) => f.protected).map((f) => PROTECTED_WHY[f.kind] || f.kind);
-      lede.textContent = `${SCEN[S.scenario] || S.scenario}, ${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}. Every hour some areas must lose power; FairShed picks which, spreads the hours fairly and never cuts the ${[...new Set(prots)].join(' or the ')}.`;
+      lede.textContent = `${clock(ins.start_hour, 0)} to ${clock(ins.start_hour, ins.n_hours)}. FairShed picks who loses power each hour, fairly, and never cuts hospitals or water pumps.`;
     }
 
     function setHour(t, user = false) {
       S.hour = Math.max(0, Math.min(T() - 1, t));
       if (user) stopPlay();
-      renderMap(); renderDock(); renderNow(); renderTable();
+      renderMap(); renderDock(); renderNow(); renderTable(); renderMine();
       remember();
     }
 
@@ -398,7 +560,9 @@ export default {
       if (!model.inst) return;
       S.method = pickMethod();
       S.hour = Math.min(S.hour, T() - 1);
+      if (S.mine !== null && S.mine >= inst().n_feeders) S.mine = null;
       fmap.setFeeders(inst().feeders);
+      fmap.focus(S.mine);
       buildHourSlider();
       renderMenus();
       refreshAll(false, true);
@@ -408,7 +572,7 @@ export default {
       if (rebuild) model = buildOptions(results, S.scenario, S.pIndex);
       if (!model.opts.some((o) => o.key === S.method)) S.method = defaultMethod(model.opts);
       stopNow();
-      renderLede(); renderMap(!full); renderDock(); renderShowing(); renderNow(); renderTable(); renderKpis(); renderDebug();
+      renderLede(); renderMap(!full); renderDock(); renderShowing(); renderNow(); renderTable(); renderKpis(); renderMine(); renderDebug();
       if (S.pick !== null && ttWhy.firstChild) explainCell(S.pick, S.hour);
       remember();
     }
@@ -416,7 +580,12 @@ export default {
     buildHourSlider();
     renderMenus();
     refreshAll(false, true);
-    requestAnimationFrame(() => fmap.relayout());
-    return { destroy() { stopPlay(); fmap.destroy(); } };
+    if (S.ui.hour === null) S.ui.hour = width() >= COMPACT_PX;
+    wasCompact = compact();
+    ['settings', 'hour', 'sheet'].forEach(paintPanel);
+    fmap.focus(S.mine);
+    measure();
+    requestAnimationFrame(() => { measure(); fmap.refit(); fmap.relayout(); });
+    return { destroy() { stopPlay(); clearTimeout(settleTimer); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); fmap.destroy(); } };
   },
 };

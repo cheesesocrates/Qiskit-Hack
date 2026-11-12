@@ -222,11 +222,6 @@ details.spec > summary { color: var(--accent); }
 /* Drawer pushed beside the page on 1280 to 1620px screens: the page is then as narrow as a
    1100px window, so give it the same single-column layouts the narrow breakpoints use. */
 @media (min-width: 1280px) and (max-width: 1620px) {
-  body.iw-open .sched { grid-template-columns: minmax(0, 1fr); }
-  body.iw-open .menubar { grid-template-columns: minmax(0, 1fr); }
-  body.iw-open .plan-map-wrap { height: 56vh; min-height: 320px; }
-  body.iw-open .dock { grid-template-columns: minmax(0, 1fr); gap: 12px; position: static; }
-  body.iw-open .quota { text-align: left; }
   body.iw-open .grid-2, body.iw-open .grid-3, body.iw-open .decisions, body.iw-open .algos { grid-template-columns: minmax(0, 1fr); }
   body.iw-open .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body.iw-open .problem, body.iw-open .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

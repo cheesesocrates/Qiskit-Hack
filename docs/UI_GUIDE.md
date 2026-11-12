@@ -55,21 +55,26 @@ button, **Inner working**, so the pages stay clean and a judge can open the deta
 
 ![Schedule](../media/screenshots/schedule.png)
 
-- **Menu bar (top):** *Evening* (Normal evening, Heatwave), *Priority* (Least harm, Balanced,
-  Most even: plans computed in advance along the harm and evenness trade-off) and *Plan made by*
-  (FairShed, or the exact search, round-robin or a random plan for comparison). Nothing is
-  re-optimised in the browser.
-- **Showing line:** which plan is on screen, whether it follows every rule, how its score compares
-  with taking turns, and the exact best score.
-- **Hour control, map and "This hour":** Play or drag the slider. The map shows each area as On
-  (teal, check), Off (amber, stripes, power icon) or Protected (blue, shield); the list beside it
-  says who is off now and why, in one line each. Click an area for the full reason.
-- **Tonight's timetable:** areas by hours, the way load-shedding schedules are published, with the
-  hours each area is off tonight. Click a cell to jump to that hour and read why. Cells that break a
-  rule are outlined in red and listed under the table (try Heatwave with round-robin).
+The working example, built for the people who live with the schedule: the map fills the whole
+tab and everything else floats over it or slides in.
+
+- **Title card (top left):** the current choices as three pills (Evening, Priority, Plan made by;
+  each opens Plan settings), whether the plan follows every rule, how it compares with taking turns,
+  the key, and **Find your area**: pick an area and the map flies to it, rings it, opens its reason,
+  and the card shows when it is off tonight ("Off 18:00 to 19:00 and 20:00 to 21:00").
+- **Plan settings (slides in from the left):** Evening (Normal evening, Heatwave), Priority (Least
+  harm, Balanced, Most even: plans computed in advance along the harm and evenness trade-off), Plan
+  made by (FairShed, or the exact search, round-robin or a random plan for comparison), and the
+  plan's scores. Nothing is re-optimised in the browser.
+- **This hour (slides in from the right):** who is off now and why, one line each. Open by default on
+  wide screens; it steps aside when the map gets narrow (for example when Inner working is open).
+- **Player bar (bottom):** Play or drag the hour slider; the quota; buttons for Timetable and This hour.
+- **Timetable (slides up above the player):** areas by hours, the hours each area is off tonight,
+  and red cells where a plan breaks a rule (try Heatwave with round-robin). Press Play with it open.
+- The map keeps the areas and their labels clear of whatever is open. Esc closes the panel on top.
 - **Say to a judge:** "The quota comes from the forecast; the choice of which areas comes from the
   circuit, and we show when that choice is not the exact best one. Switch to Heatwave and
-  round-robin to see the rules it breaks."
+  round-robin, open the timetable, and you see the rules it breaks."
 
 ## Replay and rules: watch it hour by hour
 

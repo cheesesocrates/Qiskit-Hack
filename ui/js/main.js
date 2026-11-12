@@ -153,6 +153,7 @@ async function showRoute() {
   }
   clear(mainEl);
   resetExplain();
+  document.body.dataset.route = r.section.id; // lets a screen (the full-screen Schedule map) change the page frame
   markActive(r);
   const screen = (r.tab || r.section).screen;
   const title = r.tab ? `${r.tab.label} - ${r.section.label}` : r.section.label;

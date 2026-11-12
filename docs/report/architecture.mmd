@@ -1,0 +1,34 @@
+flowchart LR
+  subgraph A2["Area 2: data, classical, report"]
+    GEN["Synthetic generator + cost model<br/>(QUBO export)"]
+    BASE["Exact, MILP, round-robin,<br/>random-valid baselines"]
+    FC["Ridge forecast<br/>(classical)"]
+    AUD["Audit mode"]
+    REP["Receding-horizon replay"]
+    RPT["fill_report.py"]
+  end
+  subgraph C["Contract"]
+    RES[("results/*.json<br/>+ schemas/")]
+  end
+  subgraph A1["Area 1: quantum (Qiskit, Aer simulator)"]
+    QAOA["QAOA: Dicke + XY mixer,<br/>Grover mixer, penalty"]
+    GAS["Grover Adaptive Search"]
+    CNT["Counting (IAE)"]
+    RSK["Risk: VaR / CVaR (IAE)"]
+    MPS["MPS scaling"]
+    WIN["solve-window"]
+  end
+  subgraph A3["Area 3: dashboard"]
+    UI["Static dashboard,<br/>7 screens, offline"]
+  end
+  GEN --> RES
+  BASE --> RES
+  FC --> RES
+  AUD --> RES
+  REP --> RES
+  RES --> QAOA & GAS & CNT & RSK & MPS
+  QAOA & GAS & CNT & RSK & MPS --> RES
+  REP -- "window_in.json" --> WIN
+  WIN -- "window_out.json" --> REP
+  RES --> UI
+  RES --> RPT

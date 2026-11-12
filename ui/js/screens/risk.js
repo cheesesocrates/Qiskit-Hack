@@ -71,7 +71,7 @@ export default {
   title: 'Risk and counting',
   async mount({ root, results }) {
     const page = el('div', { class: 'page' }, pageHead('Risk and counting', 'Two amplitude-estimation results, each checked against the exact classical answer.'),
-      el('div', { class: 'callout' }, 'Simulator only. Both problems are small enough to solve exactly in a fraction of a second; these panels show that the quantum estimators give the right numbers, not that they are faster.'));
+      el('div', { class: 'callout' }, 'Simulator only. Both problems are small enough to solve exactly by enumeration; these panels show that the quantum estimators give the right numbers, not that they are faster.'));
     root.append(page);
     const c = results.ok('counting');
     page.append(c ? countingPanel(c) : panel('How many valid plans are there?', null, naPanel(results.get('counting'))));

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T14:15:45Z",
+  "generated_at": "2026-11-12T15:56:16Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -33,7 +33,7 @@
       "id": "C04",
       "name": "Round-robin and random-valid baselines always return valid plans",
       "passed": true,
-      "detail": "94 round-robin plans and 1350 random plans valid across 9 scenarios",
+      "detail": "134 round-robin plans and 1650 random plans valid across 11 scenarios",
       "area": "classical",
       "test": "tests/classical/test_cls_baselines.py::test_baselines_always_valid"
     },
@@ -73,7 +73,7 @@
       "id": "C09",
       "name": "Bit order: bits[t*N+f] equals matrix[t][f]",
       "passed": true,
-      "detail": "1000 (hour, feeder) cells checked across 9 scenarios; index q = t*N + f",
+      "detail": "1700 (hour, feeder) cells checked across 11 scenarios; index q = t*N + f",
       "area": "classical",
       "test": "tests/classical/test_cls_cost_model.py::test_bit_order"
     },
@@ -169,7 +169,7 @@
       "id": "Q07",
       "name": "Fixed seed reproduces QAOA angles and samples",
       "passed": true,
-      "detail": "two runs: identical angles [-0.6918, 1.3242] and identical counts over 500 shots",
+      "detail": "two runs: identical angles [-0.6916, 1.3253] and identical counts over 500 shots",
       "area": "quantum",
       "test": "tests/quantum/test_core.py::test_seed_reproducible"
     },
@@ -214,6 +214,38 @@
       "test": "tests/quantum/test_risk.py::test_iae_matches_exact"
     },
     {
+      "id": "Q13",
+      "name": "MPS qubit layouts are permutations; the paired layout puts each feeder's hours side by side; line routing leaves only nearest-neighbour gates",
+      "passed": true,
+      "detail": "3 layouts on 10 qubits are permutations; paired puts each feeder's hours on adjacent sites; after routing every 2-qubit gate is nearest-neighbour (SWAPs inserted: {'default': 0, 'paired': 0, 'interleaved': 0})",
+      "area": "quantum",
+      "test": "tests/quantum/test_mps.py::test_layouts_and_routing"
+    },
+    {
+      "id": "Q14",
+      "name": "Untruncated MPS equals the statevector for every layout and compile path, and every sample decodes to a valid plan",
+      "passed": true,
+      "detail": "default/aer: fidelity 1.000000000000, bond 10; paired/aer: fidelity 1.000000000000, bond 22; interleaved/aer: fidelity 1.000000000000, bond 22; default/line: fidelity 1.000000000000, bond 22",
+      "area": "quantum",
+      "test": "tests/quantum/test_mps.py::test_untruncated_mps_is_exact"
+    },
+    {
+      "id": "Q15",
+      "name": "Bond dimension and fidelity are measured per run (no leak between runs in one process)",
+      "passed": true,
+      "detail": "chi=64 then chi=2 in one process: final bond 10 then 2; fidelity 1.0000 then 0.0041",
+      "area": "quantum",
+      "test": "tests/quantum/test_mps.py::test_bond_readout_is_per_run"
+    },
+    {
+      "id": "Q16",
+      "name": "A point whose simulator run crashes is retried once with the line-routed circuit, and the crash is recorded",
+      "passed": true,
+      "detail": "crash on 'aer' -> retried on 'line' and recorded; both crash -> point failed with both reasons; no crash -> one attempt",
+      "area": "quantum",
+      "test": "tests/quantum/test_mps.py::test_crash_fallback"
+    },
+    {
       "id": "S01",
       "name": "Committed schemas match schemas/build_schemas.py",
       "passed": true,
@@ -233,7 +265,7 @@
       "id": "S03",
       "name": "All results JSON files validate against their schemas",
       "passed": true,
-      "detail": "20 files valid, 0 not generated yet",
+      "detail": "22 files valid, 0 not generated yet",
       "area": "shared",
       "test": "tests/test_schemas.py::test_results_validate"
     },
@@ -263,8 +295,8 @@
     }
   ],
   "summary": {
-    "total": 32,
-    "passed": 32,
+    "total": 36,
+    "passed": 36,
     "failed": 0
   }
 }

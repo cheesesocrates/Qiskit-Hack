@@ -112,6 +112,17 @@ Scenario files Area 2 always writes to `results/plans/`:
 MPS scaling curve. Each embeds its instance and the exact reference (`exact.cost_min`,
 `exact.cost_max`, `exact.method`).
 
+### Optional fields in `scaling.json` (added after `v1.1-submission`)
+
+Readers must treat these as optional: files written before the change do not have them.
+
+- top level `layout`: the qubit layout of `points` on the MPS chain (`default`, `paired` or
+  `interleaved`; see `qubit_positions` in `src/quantum/scaling.py`).
+- per point `fidelity`: overlap of the simulated final state with the exact one, |<exact|mps>|^2
+  (1 = exact; measured up to 20 qubits, null above); `max_bond_dim_used`: the largest bond
+  dimension of that run's final MPS; `mps_memory_mb`: the memory of that MPS. For the
+  statevector point (`bond_dim` null) the last two are null and `fidelity` is 1 by definition.
+
 ### The one cross-area call: the window solver
 
 The replay (Area 2) can ask the quantum area to solve a window. It does so through files,

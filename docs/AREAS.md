@@ -33,7 +33,8 @@ Never imports `src/data`, `src/cost` or any other Area 2 module.
 | `python scripts/run_quantum.py pareto` | fairness-weight sweep, warm-started angles | about 30 s |
 | `python scripts/run_quantum.py counting` | IAE count of valid plans on `block_4x2` | about 3 s |
 | `python scripts/run_quantum.py risk` | IAE expected loss, tail probability, VaR, CVaR | about 4 s |
-| `python scripts/run_quantum.py scaling` | Aer MPS curve, 6 instances x (statevector + 6 bond dimensions) | about 45 s |
+| `python scripts/run_quantum.py scaling` | Aer MPS curve, 8 instances (10 to 72 qubits) x (statevector up to 20 qubits + 6 bond dimensions); fidelity, bond dimension and memory per point; crash fallback | about 6 to 10 min |
+| `python -m src.quantum.mps_probe --phase crash\|options\|layouts --report` | MPS diagnostics, one fresh process per configuration; `--report` writes `docs/MPS_DIAGNOSTICS.md` | 2 to 15 min per phase |
 | `python scripts/run_quantum.py solve-window --in IN --out OUT` | the replay's window solver (Grover mixer, p=2, best of 256 shots) | 3 to 5 s per window |
 
 **Modules**
@@ -48,7 +49,8 @@ Never imports `src/data`, `src/cost` or any other Area 2 module.
 | `gas.py` | Grover Adaptive Search (`GroverOptimizer`) on an integer-scaled penalised QUBO |
 | `counting.py` | reversible validity oracle and IAE counting; seeded Aer sampler shared with `risk.py` |
 | `risk.py` | residual scenarios loaded with `StatePreparation`, IAE for each risk measure |
-| `scaling.py` | MPS curve; points run in an isolated worker process with time limits |
+| `scaling.py` | MPS curve; points run in an isolated worker process with time limits; a crashed point is retried once with the circuit routed to a line |
+| `mps_probe.py` | MPS diagnostics (crash causes, simulator options, qubit layouts); writes `results/tmp/mps_probe.json` and `docs/MPS_DIAGNOSTICS.md` |
 | `io.py` | the only file reader and writer; validates every result against its schema before writing |
 
 **How to test:** `python -m pytest -q tests/quantum`. Checks Q01 to Q12: cost table
@@ -61,8 +63,11 @@ with Area 2's exact reference, counting within tolerance, GAS scoring, risk IAE 
 - Per-shot P(optimal) of every QAOA variant is low on the 18-qubit base instance; the decision
   rule (best valid of 256 shots) misses the optimum at one Pareto weight and in 3 of 12 replay
   frames.
-- Aer on Windows: the interleaved MPS layout crashes at 16 qubits and one 12-qubit point at
-  chi=2 crashes; both are isolated and recorded (`docs/KNOWN_ISSUES.md`).
+- Aer 0.18.2 on Windows crashes or hangs on some MPS circuits at bond dimension 2 or 4. The stage
+  retries such a point once with the circuit routed to a line; points that fail both ways carry no
+  numbers (`docs/KNOWN_ISSUES.md`, `docs/MPS_DIAGNOSTICS.md`).
+- MPS fidelity is measured only up to 20 qubits (it needs the exact state). At 54 and 72 qubits
+  bond dimension 64 is not enough: most samples are invalid there.
 - `risk.py` uses the 8-feeder replay cluster, not a 4-6 feeder block (a smaller block has zero
   loss in every scenario).
 - COBYLA angles differ in the 4th decimal across machines, so sampled counts are reproducible per
@@ -74,7 +79,8 @@ with Area 2's exact reference, counting within tolerance, GAS scoring, risk IAE 
 1. In `stages.py`, raise `DECISION_SHOTS` to 1024 or use p=3 for `solve_window`; re-run
    `pareto` and the replay and check whether every point matches exact.
 2. Add CVaR-QAOA (score samples by the mean of the best alpha fraction) as an ablation row.
-3. Try `ordering="interleaved"` in `scaling.py` on Linux; compare the bond dimension needed.
+3. Run the MPS stage on Linux (CI) to see whether the small-bond-dimension crashes are Windows-only;
+   try bond dimensions 128 and 256 on the 54- and 72-qubit instances on a bigger machine.
 4. Add a noise-model row (Aer `NoiseModel` from a fake backend) for the 6-qubit block.
 5. Make `risk.py` take a feeder subset and a feeder size so a 4-6 feeder block has a non-zero loss.
 

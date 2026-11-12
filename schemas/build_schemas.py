@@ -120,6 +120,19 @@ PLAN_ROW = obj({
     "audit_passed": B, "n_violations": I, "notes": S,
 })
 
+# One point of the MPS scaling curve. fidelity, max_bond_dim_used and mps_memory_mb are optional
+# (added after v1.1-submission): |<exact|mps>|^2 of the final state, and the bond dimension and
+# memory of the final MPS of that run.
+SCALING_POINT = obj({
+    "n_feeders": I, "n_hours": I, "n_qubits": I,
+    "bond_dim": I0, "simulator": S,
+    "approx_ratio": PROB0, "feasibility_pct": {"type": ["number", "null"]},
+    "exact_cost_min": N0, "exact_cost_max": N0, "exact_method": S0,
+    "best_sampled_cost": N0, "runtime_s": N0,
+    "status": enum("ok", "failed", "skipped"), "notes": S,
+    "fidelity": PROB0, "max_bond_dim_used": I0, "mps_memory_mb": N0,
+}, optional=("fidelity", "max_bond_dim_used", "mps_memory_mb"))
+
 SCHEMAS = {
     "instance": top(
         "instance", "Base problem instance (Area 2 writes, Areas 1 and 3 read).", INSTANCE_PROPS),
@@ -269,16 +282,11 @@ SCHEMAS = {
     "scaling": top(
         "scaling", "MPS-simulator scaling: approximation ratio vs bond dimension vs feeders.", {
             "method": S, "layers": I, "shots": I, "parameter_source": S,
-            "points": arr(obj({
-                "n_feeders": I, "n_hours": I, "n_qubits": I,
-                "bond_dim": I0, "simulator": S,
-                "approx_ratio": PROB0, "feasibility_pct": {"type": ["number", "null"]},
-                "exact_cost_min": N0, "exact_cost_max": N0, "exact_method": S0,
-                "best_sampled_cost": N0, "runtime_s": N0,
-                "status": enum("ok", "failed", "skipped"), "notes": S,
-            }), 1),
+            "points": arr(SCALING_POINT, 1),
             "notes": S,
-        }),
+            # optional (added after v1.1-submission): the qubit layout on the MPS chain
+            "layout": S,
+        }, optional=("layout",)),
 
     "forecast": top(
         "forecast", "Classical ridge-regression shortfall forecast. The demand series is synthetic.", {

@@ -24,9 +24,12 @@ telecom towers, and lets anyone audit a published schedule against the rules.
   and MILP, round-robin and random baselines, a ridge-regression shortfall forecast, an audit
   mode that scores any schedule, and a receding-horizon replay that re-plans every hour with the
   quantum window solver.
-- **Dashboard** (`ui/`): static and offline (no build step), seven screens: Plan, Compare and
-  proof, Audit, Replay, Risk and counting, Scale, Forecast. It reads only `results/*.json` and
-  shows "not available" for anything missing or schema-invalid.
+- **Dashboard** (`ui/`): static and offline (no build step). Built for the people who use the
+  schedule: Start here, Schedule, Replay and rules (hour-by-hour replay, rule checker), Results
+  (compare methods, fair tie-breaks, risk and counting, bigger cities, forecast). Every explanation
+  sits behind one **Inner working** button: a side panel about the current screen, plus four pages
+  for judges (how FairShed works in six steps, questions judges ask, the methods, glossary). It
+  reads only `results/*.json` and shows "not available" for anything missing or schema-invalid.
 - **Report** (`docs/report/`): `FairShed_Report.md` and `FairShed_Report.docx`, generated from
   the results files by `scripts/fill_report.py`, with the architecture diagram embedded.
 
@@ -60,7 +63,7 @@ PY=.venv/Scripts/python.exe            # Linux/macOS: PY=.venv/bin/python
 $PY scripts/tasks.py test              # pytest + schema validation of results/
 $PY scripts/tasks.py demo              # regenerate every results file, then test, report, validate
 $PY scripts/tasks.py ui                # dashboard at http://localhost:8000/ui/  (Ctrl+C to stop)
-$PY scripts/tasks.py ui-smoke          # load all 7 screens in headless Chrome/Edge, fail on console errors
+$PY scripts/tasks.py ui-smoke          # load all 13 screens in headless Chrome/Edge, fail on console errors
 $PY scripts/tasks.py report            # rebuild docs/report/ from results/*.json
 $PY scripts/tasks.py status            # write docs/STATUS.md (files, schema checks, test counts)
 ```
@@ -90,7 +93,7 @@ offline grid instead of map tiles.
 - `demo`: rewrites the 20 files in `results/`, `results/checks.json` and `docs/report/`. A failed
   quantum stage deletes its own output file and the dashboard says "not available"; nothing
   is faked.
-- `ui-smoke`: `ui_smoke: all 7 screens passed`, with screenshots in `results/tmp/ui_smoke/`.
+- `ui-smoke`: `ui_smoke: all 13 screens passed`, with screenshots in `results/tmp/ui_smoke/`.
 
 ## Key results
 

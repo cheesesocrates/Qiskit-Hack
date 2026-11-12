@@ -860,8 +860,8 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 1:20 to 2:00 Quantum stages and real numbers
 
-- **On screen:** Results > Scoreboard (summary, table, proof checklist), then Results > Fair
-  lottery, then Results > Uncertainty and counting.
+- **On screen:** Results > Compare methods (verdict, the four-row table, the "Why this combination"
+  cards, proof checklist), then Results > Fair tie-breaks, then Results > Risk and counting.
 - **Caption:** "Constraint-preserving circuits: every sample is a valid plan."
 - **Voice-over:** "Each hour starts in a Dicke state, so every sample meets the quota and never
   touches a protected feeder. The best variant, {g('best_q_label')}, reaches approximation ratio
@@ -873,7 +873,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 2:00 to 2:30 Honest limits and scale
 
-- **On screen:** Results > Bigger problems: the chart, then the callout "This is not a quantum advantage".
+- **On screen:** Results > Bigger cities: the three tiles and the chart, then the callout "This is not a quantum advantage".
 - **Caption:** "Simulator only. No speed-up claimed."
 - **Voice-over:** "Be clear about the limits. This runs on a simulator, the data is synthetic, and
   at {g('qubits')} qubits a classical brute force finds the exact answer, which is better than our

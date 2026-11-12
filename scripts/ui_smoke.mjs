@@ -287,8 +287,10 @@ async function main() {
     const r2 = await S('Runtime.evaluate', { returnByValue: true, expression: `(() => { const m = document.getElementById('main');
       return { text: m ? m.innerText.length : 0, failedRender: !!(m && /This screen failed to render/.test(m.innerText)), na: m ? m.querySelectorAll('.na').length : 0 }; })()` });
     Object.assign(state || {}, r2.result.value);
+    let clipH = VH;
+    if (FULL && SCALE !== 1) clipH = Math.min(6000, (await S('Runtime.evaluate', { returnByValue: true, expression: 'document.documentElement.scrollHeight' })).result.value);
     const shot = await S('Page.captureScreenshot', SCALE === 1 ? { format: 'png', captureBeyondViewport: FULL }
-      : { format: 'png', clip: { x: 0, y: 0, width: VW, height: VH, scale: SCALE } });
+      : { format: 'png', captureBeyondViewport: FULL, clip: { x: 0, y: 0, width: VW, height: clipH, scale: SCALE } });
     writeFileSync(join(OUT, `${shotName(screen)}.png`), Buffer.from(shot.data, 'base64'));
 
     // exercise the main controls of the screen; any console error they cause fails the screen

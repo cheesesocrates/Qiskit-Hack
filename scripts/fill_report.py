@@ -837,7 +837,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 0:00 to 0:20 Problem
 
-- **On screen:** Plan screen, map of synthetic Karachi zones, hour slider.
+- **On screen:** Start here, then Schedule: the map of synthetic Karachi zones and the hour slider.
 - **Caption:** "Who loses power, and is it fair?"
 - **Voice-over:** "When supply falls short, a utility switches whole feeders off, an hour at a
   time. The quota says how many. FairShed decides which ones: spread the hours evenly, avoid
@@ -847,9 +847,9 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 0:20 to 1:20 Replay mode
 
-- **On screen:** Replay screen. Press play. Point at the feeder cards changing, the actual vs
-  forecast chart, the solver chip and the "Matches exact" chip. Then open Audit, pick
-  "Round-robin", show the violations; switch to "Exact optimum", show it passes.
+- **On screen:** Replay and rules > Watch it hour by hour. Press Play. Point at the feeder cards
+  changing, the real vs forecast chart, the solver chip and the "Matches best plan" chip. Then open
+  Rule checker, pick "Round-robin", show the violations; switch to "Exact optimum", show it passes.
 - **Caption:** "Re-planning every hour, warm-started from the last plan."
 - **Voice-over:** "This is one afternoon and evening, hour by hour. Each hour a classical ridge
   forecast sets the next three quotas, a quantum circuit on the simulator picks the plan, and only
@@ -860,8 +860,8 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 1:20 to 2:00 Quantum stages and real numbers
 
-- **On screen:** Compare and proof: the ablation table, then the fair lottery panel, then the
-  proof checklist. Then Risk and counting.
+- **On screen:** Results > Scoreboard (summary, table, proof checklist), then Results > Fair
+  lottery, then Results > Uncertainty and counting.
 - **Caption:** "Constraint-preserving circuits: every sample is a valid plan."
 - **Voice-over:** "Each hour starts in a Dicke state, so every sample meets the quota and never
   touches a protected feeder. The best variant, {g('best_q_label')}, reaches approximation ratio
@@ -873,7 +873,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 2:00 to 2:30 Honest limits and scale
 
-- **On screen:** Scale screen chart, then the callout "Simulator only".
+- **On screen:** Results > Bigger problems: the chart, then the callout "This is not a quantum advantage".
 - **Caption:** "Simulator only. No speed-up claimed."
 - **Voice-over:** "Be clear about the limits. This runs on a simulator, the data is synthetic, and
   at {g('qubits')} qubits a classical brute force finds the exact answer, which is better than our
@@ -883,7 +883,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 
 ## 2:30 to 3:00 Close
 
-- **On screen:** Back to Plan, press play once more; end on the badge "Simulator - synthetic data".
+- **On screen:** Back to Schedule, press Play once more; end on the badge "Simulator - synthetic data".
 - **Caption:** "Fair, auditable, and honest about what quantum does today."
 - **Voice-over:** "FairShed turns load-shedding into a constrained optimisation that a quantum
   circuit can sample from without ever proposing an invalid plan, with a fair lottery among ties

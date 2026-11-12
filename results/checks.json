@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T13:07:00Z",
+  "generated_at": "2026-11-12T14:15:45Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -239,16 +239,32 @@
     },
     {
       "id": "U01",
-      "name": "Every dashboard screen loads with no console errors (headless browser)",
+      "name": "Every screen loads with no console errors, readable text, large targets and keyboard focus",
       "passed": true,
-      "detail": "7 of 7 screens loaded with no console errors",
+      "detail": "13 screens and flows pass at 1440x900 (console, 14px text, 44px targets, keyboard, modes, glossary, tour)",
       "area": "ui",
       "test": "tests/ui/test_ui_smoke.py::test_every_screen_loads"
+    },
+    {
+      "id": "U02",
+      "name": "Every colour pair in the UI tokens meets its contrast target",
+      "passed": true,
+      "detail": "ui_contrast: every pair meets its target",
+      "area": "ui",
+      "test": "tests/ui/test_ui_smoke.py::test_contrast"
+    },
+    {
+      "id": "U03",
+      "name": "Missing or invalid results files show 'Not available' without errors",
+      "passed": true,
+      "detail": "2 files removed and 1 broken: banner shown, affected screens say Not available, no errors",
+      "area": "ui",
+      "test": "tests/ui/test_ui_smoke.py::test_not_available_path"
     }
   ],
   "summary": {
-    "total": 30,
-    "passed": 30,
+    "total": 32,
+    "passed": 32,
     "failed": 0
   }
 }

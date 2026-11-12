@@ -10,17 +10,45 @@ verified), **not started**, **not working** (tried, fails: see `docs/KNOWN_ISSUE
 
 ## RESUME HERE
 
-- Updated: 2026-11-12 18:05 PKT (UTC+5), session 2, final pass.
-- Deadline: 2026-11-12 23:59 PKT. Code freeze 22:59. Tag `v1.0-submission` pushed in this pass.
-- Remote: `https://github.com/cheesesocrates/Qiskit-Hack` (origin, branch main). CI runs on push.
-- Passing: `pytest -q` 56 passed (includes the headless UI smoke test). `validate_results.py`:
-  20 valid, 0 missing, 0 invalid. `ui_smoke.mjs`: 7 of 7 screens with interactions, locally and
-  on Ubuntu CI. `results/checks.json`: 30 of 30. A fresh clone from GitHub passed setup, test and
-  demo (see the log below).
-- Half-finished: nothing. Every spec item is done or listed as a limit in `docs/KNOWN_ISSUES.md`.
-- After the tag: follow `docs/GIT_WORKFLOW.md` (feature branches and pull requests only). Pick
-  work from the TODO lists in `docs/AREAS.md`.
-- Next command for a new session: `.venv/Scripts/python.exe scripts/tasks.py test`.
+- Updated: 2026-11-12 19:20 PKT (UTC+5), session 3 (dashboard redesign) on branch `feat/ui`.
+- Deadline: 2026-11-12 23:59 PKT. Code freeze 22:59. `v1.0-submission` (commit `c2ba24e`) is the
+  safe tag; never move it. The redesign merges to main via a pull request and is tagged
+  `v1.1-submission` only if `tasks.py test`, `tasks.py ui-smoke` and `validate_results.py` pass.
+- Remote: `https://github.com/cheesesocrates/Qiskit-Hack` (origin). CI runs on push and on PRs.
+- Branch state: every screen redesigned, smoke test with all checks green at 1440 x 900, contrast
+  check green. Safe to merge once the full test suite passes on the branch.
+- Half-finished: nothing on the branch. Not built: presenter mode (P2).
+- Next command: `.venv/Scripts/python.exe scripts/tasks.py test` on `feat/ui`, then open the PR.
+
+## Session 3: dashboard redesign (branch feat/ui)
+
+Decisions:
+- The light, high-contrast design in `ui/css/tokens.css` replaces the dark-slate look in
+  `docs/SPEC.md` (UI SPEC paragraph), at the team's request. A dark theme is an optional toggle and
+  meets the same contrast targets (`scripts/ui_contrast.mjs`).
+- Desktop browser only (team decision during the session); no phone layout work.
+- Information architecture: five sections (Start here, Schedule, Replay and rules, Results, Learn)
+  with sub-tabs; old hash routes (`#/plan`, `#/compare`, ...) redirect to the new ones.
+- Fonts: Atkinson Hyperlegible (OFL, vendored woff2) for text, IBM Plex Mono for code. Body 18px,
+  nothing under 14px (checked by the smoke test).
+- Every result sentence in the UI and in `docs/TEAM_CHEATSHEET.md` is built from `results/*.json`
+  at runtime or generation time. Chart titles are takeaways computed from the data.
+- Charts render without animation (no decorative motion; also makes screenshots reliable).
+- `docs/demo_script.md` template in `scripts/fill_report.py`: only the screen names changed.
+
+Coverage (redesign brief):
+
+| Item | Status | Evidence |
+|---|---|---|
+| Step 1 audit | done | `docs/UI_AUDIT.md` |
+| Step 2 design system and contrast script | done | `ui/css/tokens.css`, `scripts/ui_contrast.mjs` (U02) |
+| Step 3 Home and five sections, breadcrumb | done | `ui/js/main.js`, `ui/js/screens/home.js` |
+| Step 4 Beginner/Expert, explain panels, glossary (32 terms), translations | done | `explain.js`, `glossary.js`, `metrics.js` |
+| Step 4 Algorithms explained, guided tour (8 steps) | done | `screens/learn.js`, `tour.js`; tour checked in U01 flows |
+| Step 4 presenter mode (P2) | not started | listed in `docs/KNOWN_ISSUES.md` |
+| Step 5 every screen reworked | done | screenshots in `media/screenshots/` |
+| Step 7 tests | done | U01 (console, 14px, 44px, keyboard, modes, glossary, tour), U02, U03 |
+| Step 8 docs | done | `docs/UI_GUIDE.md`, `docs/TEAM_CHEATSHEET.md` (generated), `docs/AREAS.md` Area 3 |
 
 ## Session 2 verification log (what was actually run)
 

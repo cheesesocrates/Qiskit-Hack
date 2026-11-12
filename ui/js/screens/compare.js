@@ -46,11 +46,11 @@ function scoreTable(rows, guess, best, expert) {
   const cols = [
     { label: 'Method', render: (r) => el('div', null, el('div', { class: 'm-name' }, SHORT[r.method] || r.label), kindTag(r.kind)) },
     { label: 'What it is', cls: 'note', render: (r) => WHAT[r.method] || r.label },
-    { label: 'Valid tries', num: true, render: (r) => el('div', { class: 'metric' }, el('span', { class: 'metric-v' }, pctOf(r.feasibility_pct)), el('span', { class: 'metric-p' }, 'right count, nothing protected cut')) },
+    { label: 'Valid tries (right count off, nothing protected cut)', num: true, render: (r) => el('b', null, pctOf(r.feasibility_pct)) },
     { label: 'Chance one try finds the best plan', num: true, render: (r) => el('div', { class: 'metric' }, el('span', { class: 'metric-v' }, pct(r.p_optimal)),
       guess && r.kind === 'quantum' ? el('span', { class: 'metric-p' }, `guessing: ${pct(guess)}`) : null) },
     { label: 'How close to best', num: true, render: (r) => el('div', { class: 'bar-cell' }, el('span', { class: 'bar-track' }, el('span', { class: 'bar-fill', style: `display:block;width:${Math.max(0, Math.min(1, r.approx_ratio)) * 100}%;background:${r.kind === 'quantum' ? COLORS.quantum : COLORS.classical}` })), el('b', null, `${fmt(r.approx_ratio * 100, 0)}%`)) },
-    { label: 'Verdict', render: (r) => el('div', { class: 'stack-s' }, verdicts(r, guess, best)) },
+    { label: 'Verdict', render: (r) => el('div', { class: 'row', style: 'gap:6px' }, verdicts(r, guess, best)) },
   ];
   if (expert) {
     cols.push({ label: 'Qubits, rounds, tries', render: (r) => el('span', { class: 'mono' }, [r.n_qubits, r.layers, r.shots].map((x) => (x === null ? '-' : x)).join(' / ')) },
@@ -66,7 +66,7 @@ const GROUPS = [
   { name: 'Every plan is valid', ids: ['C04', 'C05', 'C07', 'C12', 'C13', 'Q04', 'Q05'],
     what: 'Quantum samples never break the quota or cut a protected feeder; the rule checker catches broken plans.' },
   { name: 'Results repeat', ids: ['C06', 'C10', 'C14', 'Q07'], what: 'The same seed gives the same results.' },
-  { name: 'Files and screens load', ids: ['S01', 'S02', 'S03', 'C11', 'U01'], what: 'Every results file matches its schema and every screen loads without errors.' },
+  { name: 'Files and screens load', ids: ['S01', 'S02', 'S03', 'C11', 'U01', 'U02', 'U03'], what: 'Every results file matches its schema, every screen loads without errors, text is readable and colours have enough contrast.' },
 ];
 
 function checksPanel(chk, expert) {

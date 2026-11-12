@@ -1,5 +1,4 @@
 // Chart.js wrapper: house styling, a registry so charts are destroyed on route change, and small plugins.
-import { reduced } from './motion.js';
 
 const registry = new Set();
 
@@ -83,7 +82,7 @@ export function makeChart(canvas, config) {
   const C = window.Chart;
   if (!C) throw new Error('Chart.js is not loaded');
   config.options = config.options || {};
-  config.options.animation = reduced() ? false : { duration: 250, easing: 'easeOutQuad' };
+  config.options.animation = false; // no decorative animation: charts appear in their final state
   const chart = new C(canvas, config);
   registry.add(chart);
   return chart;

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:09:21Z",
+  "generated_at": "2026-11-12T12:25:13Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -169,7 +169,7 @@
       "id": "Q07",
       "name": "Fixed seed reproduces QAOA angles and samples",
       "passed": true,
-      "detail": "two runs: identical angles [-0.6916, 1.3253] and identical counts over 500 shots",
+      "detail": "two runs: identical angles [-0.6918, 1.3242] and identical counts over 500 shots",
       "area": "quantum",
       "test": "tests/quantum/test_core.py::test_seed_reproducible"
     },
@@ -188,11 +188,35 @@
       "detail": "18 qubits for 24 variables; cost_min 10.5, cost_max 41.5, 4500 valid, 4 optimal: identical on both sides",
       "area": "quantum",
       "test": "tests/quantum/test_core.py::test_reference_matches_area2"
+    },
+    {
+      "id": "S01",
+      "name": "Committed schemas match schemas/build_schemas.py",
+      "passed": true,
+      "detail": "13 schema files in sync",
+      "area": "shared",
+      "test": "tests/test_schemas.py::test_schemas_match_builder"
+    },
+    {
+      "id": "S02",
+      "name": "Every schema is valid and requires the five meta fields",
+      "passed": true,
+      "detail": "12 schemas checked",
+      "area": "shared",
+      "test": "tests/test_schemas.py::test_schemas_are_wellformed"
+    },
+    {
+      "id": "S03",
+      "name": "All results JSON files validate against their schemas",
+      "passed": true,
+      "detail": "17 files valid, 3 not generated yet",
+      "area": "shared",
+      "test": "tests/test_schemas.py::test_results_validate"
     }
   ],
   "summary": {
-    "total": 23,
-    "passed": 23,
+    "total": 26,
+    "passed": 26,
     "failed": 0
   }
 }

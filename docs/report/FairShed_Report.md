@@ -1,6 +1,6 @@
 # FairShed: a fair, auditable load-shedding planner with Qiskit
 
-Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 12:56 UTC from commit fb32c2d by scripts/fill_report.py.
+Qiskit hackathon, Energy and Smart Infrastructure. Repository: https://github.com/cheesesocrates/Qiskit-Hack. Report generated 2026-11-12 13:00 UTC from commit 618ef39 by scripts/fill_report.py.
 
 > Simulator only. Every feeder, demand figure and outage ledger in this report is synthetic, on illustrative Karachi zones. Weather in the forecast is a real Open-Meteo snapshot. No quantum speed-up is claimed: every instance here is also solved exactly by classical brute force or MILP, and that exact answer is the yardstick for every quantum number.
 
@@ -114,7 +114,7 @@ All rows use the same instance and the same exact reference: 4500 valid plans, c
 
 *Figure 2. Approximation ratio on the base instance.*
 
-Best quantum row by approximation ratio: Grover-mixer QAOA, p=3 at 0.846. Highest sampled P(optimal): Grover-mixer QAOA, p=3 at 0.0093, against 0.0022 for sampling the Dicke state alone (uniform over valid plans). The single deterministic round-robin plan scores 0.952, higher than the mean QAOA sample; it is one plan, while the QAOA rows average over thousands of samples. A uniformly random valid plan averages 0.619. Penalty QAOA with the X mixer produces valid plans in only 19.6%, 27.9% of samples, which is why the constraint-preserving mixers matter. The honest reading: the constraint-preserving circuits always produce valid plans and shift probability towards cheap ones, but at 18 qubits the exact answer is instant classically, and per-shot P(optimal) stays at the percent level.
+Best quantum row by approximation ratio: Grover-mixer QAOA, p=3 at 0.846. Highest sampled P(optimal): Grover-mixer QAOA, p=3 at 0.0093, against 0.0022 for sampling the Dicke state alone (uniform over valid plans). The single deterministic round-robin plan scores 0.952, higher than the mean QAOA sample; it is one plan, while the QAOA rows average over thousands of samples. A uniformly random valid plan averages 0.619. Penalty QAOA with the X mixer produces valid plans in only 19.6% and 27.9% of samples, which is why the constraint-preserving mixers matter. The honest reading: the constraint-preserving circuits always produce valid plans and shift probability towards cheap ones, but at 18 qubits classical brute force over all valid plans gives the exact answer, and per-shot P(optimal) stays below 0.9%.
 
 ### 4.2 Fair lottery among tied optima
 
@@ -303,7 +303,7 @@ Angles: COBYLA from a small grid of linear-ramp starts (src.quantum.qaoa.QAOARun
 - Simulator only. Nothing ran on quantum hardware, and there is no noise model.
 - No speed-up claim. Every instance is also solved exactly by brute force or MILP; the quantum methods are measured against that exact answer, and the classical answer is better.
 - Real feeder maps are not public, so the feeders are synthetic and placed on illustrative Karachi zones; nothing here describes a real network.
-- Per-shot P(optimal) of the QAOA variants is at the percent level on the base instance; the plan comes from the best of 256 shots, which can still miss the optimum (see the Pareto and replay rows).
+- Per-shot P(optimal) of the QAOA variants is low on the base instance (Table 1); the plan comes from the best of 256 shots, which can still miss the optimum (see the Pareto and replay rows).
 - All feeders, demand, supply, shortfall and ledger values are synthetic. Weather is real but only used as a forecast input.
 - Counting and risk use 8 and 3 search qubits; they show that the estimators are correct, not that they are useful at this size.
 

@@ -15,7 +15,7 @@ What it does
 
 Each "sample" in the ablation row is the final answer of one complete GAS run, so
 `p_optimal` is the fraction of runs that returned an optimal valid plan. Simulator only; at
-6 variables the exact answer is instant classically, so no speed-up is claimed.
+6 variables classical enumeration gives the exact answer, so no speed-up is claimed.
 """
 from __future__ import annotations
 

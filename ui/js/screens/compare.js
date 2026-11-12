@@ -123,7 +123,7 @@ export default {
   title: 'Compare and proof',
   async mount({ root, results }) {
     const page = el('div', { class: 'page' }, pageHead('Compare and proof', 'How each method does on the same problem, what the lottery looks like, and which checks pass.'),
-      el('div', { class: 'callout' }, 'Simulator only. No speed-up is claimed; at this size the exact classical answer is instant.'));
+      el('div', { class: 'callout' }, 'Simulator only. No speed-up is claimed; at this size classical brute force gives the exact answer.'));
     root.append(page);
 
     const abl = results.ok('ablation');

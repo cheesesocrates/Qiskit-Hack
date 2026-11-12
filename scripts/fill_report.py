@@ -414,11 +414,12 @@ def build() -> list:
                 txt += f"A uniformly random valid plan averages {f(rv['approx_ratio'])}. "
             if pen:
                 txt += (f"Penalty QAOA with the X mixer produces valid plans in only "
-                        f"{', '.join(pct(r['feasibility_pct']) for r in pen)} of samples, which is why the constraint-"
+                        f"{' and '.join(pct(r['feasibility_pct']) for r in pen)} of samples, which is why the constraint-"
                         "preserving mixers matter. ")
             txt += ("The honest reading: the constraint-preserving circuits always produce valid plans and shift "
-                    "probability towards cheap ones, but at 18 qubits the exact answer is instant classically, and "
-                    "per-shot P(optimal) stays at the percent level.")
+                    f"probability towards cheap ones, but at {best['n_qubits']} qubits classical brute force over all "
+                    f"valid plans gives the exact answer, and per-shot P(optimal) is at most "
+                    f"{100 * max(r['p_optimal'] for r in q):.2f}%.")
             B += [("p", txt)]
     else:
         B += [na("ablation.json")]
@@ -575,8 +576,8 @@ def build() -> list:
               "methods are measured against that exact answer, and the classical answer is better.",
               "Real feeder maps are not public, so the feeders are synthetic and placed on illustrative Karachi "
               "zones; nothing here describes a real network.",
-              "Per-shot P(optimal) of the QAOA variants is at the percent level on the base instance; the plan "
-              "comes from the best of 256 shots, which can still miss the optimum (see the Pareto and replay rows).",
+              "Per-shot P(optimal) of the QAOA variants is low on the base instance (Table 1); the plan comes "
+              "from the best of 256 shots, which can still miss the optimum (see the Pareto and replay rows).",
               "All feeders, demand, supply, shortfall and ledger values are synthetic. Weather is real but only "
               "used as a forecast input.",
               "Counting and risk use 8 and 3 search qubits; they show that the estimators are correct, not that "

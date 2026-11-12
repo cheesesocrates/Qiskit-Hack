@@ -38,7 +38,7 @@ UI smoke test: Node 22 or newer and Chrome, Chromium or Edge.
 ```bash
 git clone https://github.com/cheesesocrates/Qiskit-Hack.git
 cd Qiskit-Hack
-python scripts/tasks.py setup          # creates .venv and installs requirements.txt
+python scripts/tasks.py setup          # creates .venv and installs requirements.txt (Linux/macOS: python3)
 ```
 
 On Windows, if `python` is not 3.11, install it with `py install 3.11` and run

@@ -157,7 +157,7 @@ def run_ablation(seed: int = 7, layers: tuple = (1, 3), scenario: str = "base",
             print(f"  ablation {kind} p={p}: P(opt)={rows[-1]['p_optimal']:.4f} "
                   f"ratio={rows[-1]['approx_ratio']:.3f} valid={rows[-1]['feasibility_pct']:.1f}%")
     notes = ("Quantum rows are sampled from the Aer statevector simulator. approx_ratio is the mean over all "
-             "samples with invalid samples scored 0. No speed-up is claimed: the exact answer is instant at this size.")
+             "samples with invalid samples scored 0. No speed-up is claimed: at this size classical brute force gives the exact answer.")
     # same-instance comparison on the 8-variable block for Grover Adaptive Search
     try:
         bsc = load_scenario(block)

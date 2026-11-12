@@ -117,6 +117,11 @@ const INTERACT = {
   'results/uncertainty': `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
   'results/forecast': `const all = byText('button', /All hours/); if (!all) return 'no period control';
              all.click(); await wait(600); return 'switched to all hours';`,
+  'results/scale': `const mem = byText('button', /Memory needed/); if (!mem) return 'no view control';
+          mem.click(); await wait(600);
+          const acc = byText('button', /Accuracy/); if (acc) { acc.click(); await wait(600); }
+          const q = byText('button', /Plan quality/); if (q) { q.click(); await wait(400); }
+          return 'switched memory, accuracy and quality views';`,
 };
 
 if (typeof WebSocket === 'undefined') {

@@ -106,3 +106,15 @@ button.pg-cell:hover { filter: brightness(1.2); }
 .check-sum { font-size: 15px; color: var(--text-dim); }
 .cs-n { font-size: 34px; font-weight: 500; color: var(--accent); }
 .cs-of { font-size: 15px; }
+
+/* ---------- replay ---------- */
+.feeder-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.fr-cell { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+.fr-cell.fr-changed { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fr-name { font-size: 13px; font-weight: 500; }
+.mini-row { display: grid; grid-template-columns: 170px minmax(0, 1fr) 80px; align-items: center; gap: 10px; font-size: 13px; }
+.mini-name { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-bar { height: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.mini-bar i { display: block; height: 100%; }
+.mini-val { text-align: right; color: var(--text-dim); font-size: 12px; }
+@media (max-width: 640px) { .mini-row { grid-template-columns: 110px minmax(0, 1fr) 70px; } }

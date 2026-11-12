@@ -7,6 +7,8 @@ so on Windows without `make` you can run the same targets directly:
   python scripts/tasks.py ui         serve the dashboard at http://localhost:8000/ui/
   python scripts/tasks.py report     rebuild the report tables from results/*.json
   python scripts/tasks.py validate   validate results/*.json against schemas/
+  python scripts/tasks.py ui-smoke   load every dashboard screen in headless Chrome/Edge (Node 22+)
+  python scripts/tasks.py status     regenerate docs/STATUS.md (files, schema checks, test counts)
   python scripts/tasks.py classical | quantum | replay     one area's stages only
 
 The targets run with the interpreter that runs this script (use the venv's python).
@@ -93,6 +95,19 @@ def demo() -> None:
         sys.exit(1)
 
 
+def ui_smoke() -> None:
+    import shutil
+    node = shutil.which("node")
+    if not node:
+        print("node is not installed: the UI smoke test needs Node 22+ and Chrome, Chromium or Edge")
+        sys.exit(2)
+    sh(node, "scripts/ui_smoke.mjs")
+
+
+def status() -> None:
+    sh(PY, "scripts/status_report.py")
+
+
 def ui() -> None:
     port = os.environ.get("PORT", "8000")
     print(f"Dashboard: http://localhost:{port}/ui/   (Ctrl+C to stop)")
@@ -100,7 +115,7 @@ def ui() -> None:
 
 
 TARGETS = {"setup": setup, "test": test, "demo": demo, "ui": ui, "report": report, "validate": validate,
-           "classical": classical, "quantum": quantum, "replay": replay}
+           "classical": classical, "quantum": quantum, "replay": replay, "ui-smoke": ui_smoke, "status": status}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in TARGETS:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:43:27Z",
+  "generated_at": "2026-11-12T12:48:03Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -236,11 +236,19 @@
       "detail": "20 files valid, 0 not generated yet",
       "area": "shared",
       "test": "tests/test_schemas.py::test_results_validate"
+    },
+    {
+      "id": "U01",
+      "name": "Every dashboard screen loads with no console errors (headless browser)",
+      "passed": true,
+      "detail": "7 of 7 screens loaded with no console errors",
+      "area": "ui",
+      "test": "tests/ui/test_ui_smoke.py::test_every_screen_loads"
     }
   ],
   "summary": {
-    "total": 29,
-    "passed": 29,
+    "total": 30,
+    "passed": 30,
     "failed": 0
   }
 }

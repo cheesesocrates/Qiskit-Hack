@@ -51,11 +51,11 @@ export function planGrid({ inst, matrix, violations = [], editable = false, onTo
         const st = fd.protected && M[t][f] === 0 ? STATE.protected : (M[t][f] === 1 ? STATE.off : STATE.on);
         const here = viols.filter((v) => (v.hour === t && v.feeder === f) || (v.feeder === f && v.hour === null && M[t][f] === 1));
         c.className = `pg-cell ${st.cls}${here.length ? ' viol' : ''}`;
-        c.replaceChildren(
+        c.replaceChildren(...[
           svgEl(iconSvg(st.icon, 16)),
           el('span', { class: 'pg-lab' }, fd.protected && M[t][f] === 1 ? 'Off (protected!)' : st.label),
           here.length ? svgEl(iconSvg('warn', 14), 'pg-warn') : null,
-          debug ? el('span', { class: 'pg-dbg' }, `q=${t * N + f}`) : null);
+          debug ? el('span', { class: 'pg-dbg' }, `q=${t * N + f}`) : null].filter(Boolean));  // replaceChildren would print null as text
         const desc = `${fd.name}, ${clock(inst.start_hour, t)}: ${fd.protected && M[t][f] === 1 ? 'off although protected' : st.label}${here.length ? '. Violation: ' + here.map((v) => v.rule).join(', ') : ''}`;
         c.setAttribute('aria-label', desc);
         if (editable) c.setAttribute('aria-pressed', String(M[t][f] === 1));

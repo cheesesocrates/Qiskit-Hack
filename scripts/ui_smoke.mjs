@@ -24,6 +24,28 @@ const args = process.argv.slice(2);
 const resultsArg = args.includes('--results') ? args[args.indexOf('--results') + 1] : null;
 const WAIT_MS = Number(process.env.SMOKE_WAIT_MS || 2500);
 
+// Per-screen interactions (run in the page; `main`, `byText`, `wait` are in scope). Each returns
+// a short description of what it did. A missing control is not an error when the screen shows
+// "not available" instead (the control does not exist then).
+const INTERACT = {
+  plan: `const play = main.querySelector('.play-btn'); if (!play) return 'no play button';
+         play.click(); await wait(2200); play.click();
+         const d = main.querySelector('.details-toggle'); if (d) { d.click(); await wait(400); }
+         return 'played hours, opened details';`,
+  compare: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened details';`,
+  audit: `const edit = byText('button', /Edit this plan/); if (!edit) return 'no edit button';
+          edit.click(); await wait(200);
+          const cell = main.querySelector('button.pg-cell'); if (!cell) return 'interaction error: no editable cell';
+          cell.click(); await wait(200);
+          const rr = byText('button', /Round-robin/); if (rr) rr.click(); await wait(200);
+          return 'edited a cell, switched example';`,
+  replay: `const play = main.querySelector('.btn--primary'); if (!play) return 'no play button';
+           play.click(); await wait(3500); play.click(); return 'played frames';`,
+  risk: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
+  forecast: `const all = byText('button', /All hours/); if (!all) return 'no period control';
+             all.click(); await wait(600); return 'switched to all hours';`,
+};
+
 if (typeof WebSocket === 'undefined') {
   console.error('ui_smoke: this Node has no built-in WebSocket (need Node 22 or newer)');
   process.exit(2);
@@ -194,16 +216,33 @@ async function main() {
     const shot = await S('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     writeFileSync(join(OUT, `${screen}.png`), Buffer.from(shot.data, 'base64'));
 
+    // exercise the main controls of the screen; any console error they cause fails the screen
+    let interaction = '';
+    if (INTERACT[screen]) {
+      const r = await S('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: `(async () => {
+        const main = document.getElementById('main');
+        const byText = (sel, re) => [...main.querySelectorAll(sel)].find((n) => re.test(n.textContent));
+        const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+        try { ${INTERACT[screen]} } catch (e) { return 'interaction error: ' + e.message; }
+      })()` });
+      interaction = r.result.value || '';
+      await sleep(800);
+      const r3 = await S('Runtime.evaluate', { returnByValue: true, expression: `(() => { const m = document.getElementById('main');
+        return !!(m && /This screen failed to render/.test(m.innerText)); })()` });
+      if (r3.result.value && state) state.failedRender = true;
+    }
+
     // a 404 for a results file is how the dashboard learns that a file is absent: allowed, reported
     const fatal = events.filter((e) => !((e.kind === 'http' || e.kind === 'log.error') && /\/results\/.*\.json/.test(e.url || '') && /404/.test(e.text + (e.kind === 'log.error' ? ' 404' : ''))));
     const problems = [];
+    if (/^interaction error/.test(interaction)) problems.push(interaction);
     if (!state || !state.ready) problems.push('screen never rendered');
     if (state && state.failedRender) problems.push('"This screen failed to render" shown');
     if (state && state.text < 40) problems.push(`screen almost empty (${state.text} characters)`);
     problems.push(...fatal.map((e) => `${e.kind}: ${e.text}`));
     const ok = problems.length === 0;
     if (!ok) failed++;
-    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(9)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}`);
+    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(9)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}${interaction ? `; ${interaction}` : ''}`);
     for (const p of problems) console.log(`        ${p}`);
   }
   if (resultsArg === null) {

@@ -1,0 +1,36 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "method": "quantum_counting_iae",
+ "instance": {
+  "n_feeders": 4,
+  "n_hours": 2,
+  "quotas": [
+   2,
+   1
+  ],
+  "protected": [
+   1
+  ]
+ },
+ "n_qubits_search": 8,
+ "n_qubits_total": 12,
+ "search_space": 256,
+ "exact_count": 9,
+ "estimated_count": 9.31,
+ "estimated_count_rounded": 9,
+ "ci": [
+  8.1,
+  10.5
+ ],
+ "tolerance": 1.0,
+ "within_tolerance": true,
+ "epsilon_target": 0.01,
+ "confidence_alpha": 0.05,
+ "oracle_queries": 412,
+ "flexibility_bits": 3.169925001442312,
+ "notes": "MOCK FIXTURE - invented numbers, not real results."
+}

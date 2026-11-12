@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "replay",
+  "description": "Receding-horizon replay of one day, one frame per committed hour.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "scenario": {
+      "type": "string"
+    },
+    "horizon_hours": {
+      "type": "integer"
+    },
+    "n_feeders": {
+      "type": "integer"
+    },
+    "feeders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "residential",
+              "commercial",
+              "industrial",
+              "hospital",
+              "water_pump",
+              "telecom"
+            ]
+          },
+          "protected": {
+            "type": "boolean"
+          },
+          "population": {
+            "type": "integer"
+          },
+          "heat_index": {
+            "type": "number"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "zone",
+          "kind",
+          "protected",
+          "population",
+          "heat_index",
+          "lat",
+          "lon"
+        ]
+      },
+      "minItems": 1
+    },
+    "solver_requested": {
+      "type": "string"
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "integer"
+          },
+          "hour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "shortfall_mw": {
+            "type": "number"
+          },
+          "forecast_mw": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "quota": {
+            "type": "integer"
+          },
+          "plan": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "changed_from_previous": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "revised_vs_prior_plan": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "window_quotas": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "window_bits": {
+            "type": "string",
+            "pattern": "^[01]+$"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "exact_cost": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "matches_exact": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "solver_used": {
+            "type": "string"
+          },
+          "warm_started": {
+            "type": "boolean"
+          },
+          "ledger_after": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "runtime_s": {
+            "type": "number"
+          },
+          "audit_passed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "step",
+          "hour",
+          "shortfall_mw",
+          "forecast_mw",
+          "quota",
+          "plan",
+          "changed_from_previous",
+          "revised_vs_prior_plan",
+          "window_quotas",
+          "window_bits",
+          "cost",
+          "exact_cost",
+          "matches_exact",
+          "solver_used",
+          "warm_started",
+          "ledger_after",
+          "runtime_s",
+          "audit_passed"
+        ]
+      },
+      "minItems": 1
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "n_frames": {
+          "type": "integer"
+        },
+        "n_changed": {
+          "type": "integer"
+        },
+        "matches_exact_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_hardship": {
+          "type": "number"
+        },
+        "fairness_spread_hours": {
+          "type": "number"
+        },
+        "final_ledger": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "n_frames",
+        "n_changed",
+        "matches_exact_count",
+        "total_hardship",
+        "fairness_spread_hours",
+        "final_ledger"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "scenario",
+    "horizon_hours",
+    "n_feeders",
+    "feeders",
+    "solver_requested",
+    "frames",
+    "summary",
+    "notes"
+  ]
+}

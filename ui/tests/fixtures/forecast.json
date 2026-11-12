@@ -1,0 +1,2902 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "label": "classical",
+ "model": {
+  "type": "ridge_regression",
+  "alpha": 1.0,
+  "features": [
+   "hour_sin",
+   "hour_cos",
+   "temperature_c",
+   "is_weekend"
+  ],
+  "n_train": 240,
+  "n_test": 96
+ },
+ "weather_source": "synthetic-scenario-file",
+ "weather_provenance": "synthetic",
+ "demand_provenance": "synthetic",
+ "location": "Karachi (illustrative)",
+ "metrics": {
+  "mae_mw": 0.9097786496959936,
+  "rmse_mw": 1.1400976294946699,
+  "r2": 0.9399854081412926
+ },
+ "series": [
+  {
+   "time": "2026-10-05T00:00",
+   "hour": 0,
+   "temperature_c": 28.72724589947352,
+   "shortfall_actual_mw": 6.102338227186722,
+   "shortfall_pred_mw": 6.146163299040522,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T01:00",
+   "hour": 1,
+   "temperature_c": 27.796804291707716,
+   "shortfall_actual_mw": 3.9112836618657756,
+   "shortfall_pred_mw": 4.887902989164047,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T02:00",
+   "hour": 2,
+   "temperature_c": 27.59094475469032,
+   "shortfall_actual_mw": 4.416964022143371,
+   "shortfall_pred_mw": 4.310158337617359,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T03:00",
+   "hour": 3,
+   "temperature_c": 28.74376555341492,
+   "shortfall_actual_mw": 5.415696830851086,
+   "shortfall_pred_mw": 4.771591136966579,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T04:00",
+   "hour": 4,
+   "temperature_c": 28.466892103398678,
+   "shortfall_actual_mw": 4.485222885346781,
+   "shortfall_pred_mw": 4.845404479696517,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T05:00",
+   "hour": 5,
+   "temperature_c": 28.80082065763315,
+   "shortfall_actual_mw": 4.179047952924807,
+   "shortfall_pred_mw": 5.567555697079485,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T06:00",
+   "hour": 6,
+   "temperature_c": 29.373988407392442,
+   "shortfall_actual_mw": 4.885723431445776,
+   "shortfall_pred_mw": 6.709222225246467,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T07:00",
+   "hour": 7,
+   "temperature_c": 29.589985597782103,
+   "shortfall_actual_mw": 7.748924588347864,
+   "shortfall_pred_mw": 7.905608029897467,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T08:00",
+   "hour": 8,
+   "temperature_c": 30.338738128088956,
+   "shortfall_actual_mw": 8.43704539800998,
+   "shortfall_pred_mw": 9.541006512209123,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T09:00",
+   "hour": 9,
+   "temperature_c": 31.9870516965019,
+   "shortfall_actual_mw": 11.34199674095411,
+   "shortfall_pred_mw": 11.71912026921582,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T10:00",
+   "hour": 10,
+   "temperature_c": 31.18123960375191,
+   "shortfall_actual_mw": 11.953286688239473,
+   "shortfall_pred_mw": 12.622457324747472,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T11:00",
+   "hour": 11,
+   "temperature_c": 31.75591637840827,
+   "shortfall_actual_mw": 13.008139516828557,
+   "shortfall_pred_mw": 14.135720338738455,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T12:00",
+   "hour": 12,
+   "temperature_c": 32.30820289831742,
+   "shortfall_actual_mw": 16.55127295092862,
+   "shortfall_pred_mw": 15.453570945604651,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T13:00",
+   "hour": 13,
+   "temperature_c": 32.852166735342074,
+   "shortfall_actual_mw": 16.03685374370034,
+   "shortfall_pred_mw": 16.51282401705196,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T14:00",
+   "hour": 14,
+   "temperature_c": 33.40275022159038,
+   "shortfall_actual_mw": 18.584057277706414,
+   "shortfall_pred_mw": 17.268075801868644,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T15:00",
+   "hour": 15,
+   "temperature_c": 33.03047776209293,
+   "shortfall_actual_mw": 16.062893984818214,
+   "shortfall_pred_mw": 17.208567204142152,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T16:00",
+   "hour": 16,
+   "temperature_c": 34.302968275261186,
+   "shortfall_actual_mw": 16.175371415208073,
+   "shortfall_pred_mw": 17.647422421601014,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T17:00",
+   "hour": 17,
+   "temperature_c": 32.65727953139768,
+   "shortfall_actual_mw": 16.323132633540126,
+   "shortfall_pred_mw": 16.249812503659975,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T18:00",
+   "hour": 18,
+   "temperature_c": 33.62511337086072,
+   "shortfall_actual_mw": 14.927158357855088,
+   "shortfall_pred_mw": 15.901646905955289,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T19:00",
+   "hour": 19,
+   "temperature_c": 30.80344388508931,
+   "shortfall_actual_mw": 13.188233334734678,
+   "shortfall_pred_mw": 13.363534132736621,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T20:00",
+   "hour": 20,
+   "temperature_c": 31.213832863355844,
+   "shortfall_actual_mw": 11.487027334506767,
+   "shortfall_pred_mw": 12.325007108587842,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T21:00",
+   "hour": 21,
+   "temperature_c": 31.122969888984063,
+   "shortfall_actual_mw": 10.79968658239983,
+   "shortfall_pred_mw": 10.948864293184384,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T22:00",
+   "hour": 22,
+   "temperature_c": 30.455476474167536,
+   "shortfall_actual_mw": 8.511679583670192,
+   "shortfall_pred_mw": 9.286884742222712,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-05T23:00",
+   "hour": 23,
+   "temperature_c": 30.411971482869504,
+   "shortfall_actual_mw": 9.134062350549343,
+   "shortfall_pred_mw": 8.047135595626798,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T00:00",
+   "hour": 0,
+   "temperature_c": 31.497047090632474,
+   "shortfall_actual_mw": 8.375660831948036,
+   "shortfall_pred_mw": 7.572404412451283,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T01:00",
+   "hour": 1,
+   "temperature_c": 31.604331764883003,
+   "shortfall_actual_mw": 6.149990404254076,
+   "shortfall_pred_mw": 6.8484957710637975,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T02:00",
+   "hour": 2,
+   "temperature_c": 30.910542857380516,
+   "shortfall_actual_mw": 7.02600976665408,
+   "shortfall_pred_mw": 6.019503870852564,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T03:00",
+   "hour": 3,
+   "temperature_c": 31.01585768909233,
+   "shortfall_actual_mw": 5.716762110648108,
+   "shortfall_pred_mw": 5.9415491930552395,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T04:00",
+   "hour": 4,
+   "temperature_c": 31.2468882592249,
+   "shortfall_actual_mw": 6.320681797194573,
+   "shortfall_pred_mw": 6.276895239834499,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T05:00",
+   "hour": 5,
+   "temperature_c": 31.364191438102743,
+   "shortfall_actual_mw": 5.156721801883772,
+   "shortfall_pred_mw": 6.887500539218789,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T06:00",
+   "hour": 6,
+   "temperature_c": 32.59765768553068,
+   "shortfall_actual_mw": 8.775643741273855,
+   "shortfall_pred_mw": 8.36917156572463,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T07:00",
+   "hour": 7,
+   "temperature_c": 31.750681173849163,
+   "shortfall_actual_mw": 9.73212951737083,
+   "shortfall_pred_mw": 9.01820516285708,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T08:00",
+   "hour": 8,
+   "temperature_c": 32.886081045554555,
+   "shortfall_actual_mw": 10.86005253476981,
+   "shortfall_pred_mw": 10.852698199844273,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T09:00",
+   "hour": 9,
+   "temperature_c": 33.837996173485365,
+   "shortfall_actual_mw": 14.805247941827979,
+   "shortfall_pred_mw": 12.672218679361928,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T10:00",
+   "hour": 10,
+   "temperature_c": 34.17313907401984,
+   "shortfall_actual_mw": 15.629784112914496,
+   "shortfall_pred_mw": 14.163062493561956,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T11:00",
+   "hour": 11,
+   "temperature_c": 35.517645262994414,
+   "shortfall_actual_mw": 15.445338603272326,
+   "shortfall_pred_mw": 16.07273026198737,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T12:00",
+   "hour": 12,
+   "temperature_c": 34.64339176774354,
+   "shortfall_actual_mw": 17.295369254760967,
+   "shortfall_pred_mw": 16.656019115453674,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T13:00",
+   "hour": 13,
+   "temperature_c": 34.40854965638969,
+   "shortfall_actual_mw": 16.88343701817625,
+   "shortfall_pred_mw": 17.31424518666292,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T14:00",
+   "hour": 14,
+   "temperature_c": 36.1337692514968,
+   "shortfall_actual_mw": 19.892555875756365,
+   "shortfall_pred_mw": 18.674346993603493,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T15:00",
+   "hour": 15,
+   "temperature_c": 35.85374171157083,
+   "shortfall_actual_mw": 17.177251510361533,
+   "shortfall_pred_mw": 18.662337652219314,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T16:00",
+   "hour": 16,
+   "temperature_c": 36.66277360030397,
+   "shortfall_actual_mw": 19.872651221686294,
+   "shortfall_pred_mw": 18.862546230834916,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T17:00",
+   "hour": 17,
+   "temperature_c": 35.64609337316686,
+   "shortfall_actual_mw": 18.5593307443794,
+   "shortfall_pred_mw": 17.788828803843856,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T18:00",
+   "hour": 18,
+   "temperature_c": 34.04687908484402,
+   "shortfall_actual_mw": 14.82810552378663,
+   "shortfall_pred_mw": 16.118824804293304,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T19:00",
+   "hour": 19,
+   "temperature_c": 33.830697583337034,
+   "shortfall_actual_mw": 16.740861232761503,
+   "shortfall_pred_mw": 14.922344093158035,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T20:00",
+   "hour": 20,
+   "temperature_c": 33.480834772868704,
+   "shortfall_actual_mw": 13.431334364758026,
+   "shortfall_pred_mw": 13.49234407769899,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T21:00",
+   "hour": 21,
+   "temperature_c": 33.18662557675928,
+   "shortfall_actual_mw": 12.763066412896986,
+   "shortfall_pred_mw": 12.011493118395277,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T22:00",
+   "hour": 22,
+   "temperature_c": 32.981958465822785,
+   "shortfall_actual_mw": 11.161968199242258,
+   "shortfall_pred_mw": 10.587834608333091,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-06T23:00",
+   "hour": 23,
+   "temperature_c": 31.558180527030657,
+   "shortfall_actual_mw": 5.871591972689304,
+   "shortfall_pred_mw": 8.637347798785633,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T00:00",
+   "hour": 0,
+   "temperature_c": 32.125981264247116,
+   "shortfall_actual_mw": 9.326389412548306,
+   "shortfall_pred_mw": 7.896258622241296,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T01:00",
+   "hour": 1,
+   "temperature_c": 31.582871140199245,
+   "shortfall_actual_mw": 6.519163670604951,
+   "shortfall_pred_mw": 6.837445149329229,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T02:00",
+   "hour": 2,
+   "temperature_c": 31.61481866409554,
+   "shortfall_actual_mw": 5.246282271591852,
+   "shortfall_pred_mw": 6.382153404661594,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T03:00",
+   "hour": 3,
+   "temperature_c": 30.812197563503894,
+   "shortfall_actual_mw": 4.944066057966947,
+   "shortfall_pred_mw": 5.836679412074647,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T04:00",
+   "hour": 4,
+   "temperature_c": 31.553543876706158,
+   "shortfall_actual_mw": 8.478181206129312,
+   "shortfall_pred_mw": 6.434800020403653,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T05:00",
+   "hour": 5,
+   "temperature_c": 32.01609752143423,
+   "shortfall_actual_mw": 8.443501278822756,
+   "shortfall_pred_mw": 7.223183569862916,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T06:00",
+   "hour": 6,
+   "temperature_c": 32.11105114161782,
+   "shortfall_actual_mw": 8.457987096264889,
+   "shortfall_pred_mw": 8.11860547412264,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T07:00",
+   "hour": 7,
+   "temperature_c": 32.23326047651408,
+   "shortfall_actual_mw": 8.983544188156289,
+   "shortfall_pred_mw": 9.266697525463732,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T08:00",
+   "hour": 8,
+   "temperature_c": 31.78568500732959,
+   "shortfall_actual_mw": 8.881597557230794,
+   "shortfall_pred_mw": 10.286076279195136,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T09:00",
+   "hour": 9,
+   "temperature_c": 32.93946965625849,
+   "shortfall_actual_mw": 12.804885206262965,
+   "shortfall_pred_mw": 12.209544511826264,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T10:00",
+   "hour": 10,
+   "temperature_c": 34.49686396024139,
+   "shortfall_actual_mw": 15.489857076708166,
+   "shortfall_pred_mw": 14.329756674948385,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T11:00",
+   "hour": 11,
+   "temperature_c": 35.48600981200204,
+   "shortfall_actual_mw": 16.064045107481004,
+   "shortfall_pred_mw": 16.056440363278885,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T12:00",
+   "hour": 12,
+   "temperature_c": 35.7016878997242,
+   "shortfall_actual_mw": 19.20338419208583,
+   "shortfall_pred_mw": 17.20096272310763,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T13:00",
+   "hour": 13,
+   "temperature_c": 35.52722845878893,
+   "shortfall_actual_mw": 18.99709825163639,
+   "shortfall_pred_mw": 17.89028136780678,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T14:00",
+   "hour": 14,
+   "temperature_c": 35.673755363868324,
+   "shortfall_actual_mw": 17.134309098723254,
+   "shortfall_pred_mw": 18.437474137396393,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T15:00",
+   "hour": 15,
+   "temperature_c": 35.89307216381056,
+   "shortfall_actual_mw": 18.174482150721452,
+   "shortfall_pred_mw": 18.68258990287629,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T16:00",
+   "hour": 16,
+   "temperature_c": 35.81075384262417,
+   "shortfall_actual_mw": 18.278454547383397,
+   "shortfall_pred_mw": 18.423819577196376,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T17:00",
+   "hour": 17,
+   "temperature_c": 35.69148825523059,
+   "shortfall_actual_mw": 16.226807997786377,
+   "shortfall_pred_mw": 17.81220378373208,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T18:00",
+   "hour": 18,
+   "temperature_c": 36.216036977937115,
+   "shortfall_actual_mw": 19.07864219924509,
+   "shortfall_pred_mw": 17.235779399620895,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T19:00",
+   "hour": 19,
+   "temperature_c": 34.532563249699564,
+   "shortfall_actual_mw": 14.757886049141437,
+   "shortfall_pred_mw": 15.283752584371378,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T20:00",
+   "hour": 20,
+   "temperature_c": 34.16725016741561,
+   "shortfall_actual_mw": 14.806460266761905,
+   "shortfall_pred_mw": 13.845796830808405,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T21:00",
+   "hour": 21,
+   "temperature_c": 33.79476446479155,
+   "shortfall_actual_mw": 13.0973222524571,
+   "shortfall_pred_mw": 12.324639306484178,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T22:00",
+   "hour": 22,
+   "temperature_c": 32.01583352786364,
+   "shortfall_actual_mw": 9.130445589764562,
+   "shortfall_pred_mw": 10.09035229385976,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-07T23:00",
+   "hour": 23,
+   "temperature_c": 33.12982129106816,
+   "shortfall_actual_mw": 10.169827958121248,
+   "shortfall_pred_mw": 9.446625620001626,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T00:00",
+   "hour": 0,
+   "temperature_c": 28.18196210076251,
+   "shortfall_actual_mw": 3.760314263075694,
+   "shortfall_pred_mw": 5.865382795847431,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T01:00",
+   "hour": 1,
+   "temperature_c": 27.74815095446376,
+   "shortfall_actual_mw": 5.064612581742813,
+   "shortfall_pred_mw": 4.862850147789201,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T02:00",
+   "hour": 2,
+   "temperature_c": 27.922792110318852,
+   "shortfall_actual_mw": 4.709996251932769,
+   "shortfall_pred_mw": 4.4810349851849836,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T03:00",
+   "hour": 3,
+   "temperature_c": 28.052019128048226,
+   "shortfall_actual_mw": 2.2731100626615923,
+   "shortfall_pred_mw": 4.415393300435182,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T04:00",
+   "hour": 4,
+   "temperature_c": 27.705676504934136,
+   "shortfall_actual_mw": 5.607353019792255,
+   "shortfall_pred_mw": 4.453435198231434,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T05:00",
+   "hour": 5,
+   "temperature_c": 27.870145779340508,
+   "shortfall_actual_mw": 3.140413711148136,
+   "shortfall_pred_mw": 5.088327520387094,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T06:00",
+   "hour": 6,
+   "temperature_c": 29.24376637980578,
+   "shortfall_actual_mw": 5.995371824292135,
+   "shortfall_pred_mw": 6.642167589625455,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T07:00",
+   "hour": 7,
+   "temperature_c": 29.078952838022794,
+   "shortfall_actual_mw": 8.056324480809305,
+   "shortfall_pred_mw": 7.642464258209101,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T08:00",
+   "hour": 8,
+   "temperature_c": 28.728703401228433,
+   "shortfall_actual_mw": 7.900839301223527,
+   "shortfall_pred_mw": 8.71195866256663,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T09:00",
+   "hour": 9,
+   "temperature_c": 29.670279981075158,
+   "shortfall_actual_mw": 8.150090165591559,
+   "shortfall_pred_mw": 10.52615556060213,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T10:00",
+   "hour": 10,
+   "temperature_c": 30.374877439006617,
+   "shortfall_actual_mw": 12.221165530030333,
+   "shortfall_pred_mw": 12.207240927509439,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T11:00",
+   "hour": 11,
+   "temperature_c": 31.260493527974614,
+   "shortfall_actual_mw": 11.274131898717759,
+   "shortfall_pred_mw": 13.880614506570055,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T12:00",
+   "hour": 12,
+   "temperature_c": 31.23254092792007,
+   "shortfall_actual_mw": 15.268563345367307,
+   "shortfall_pred_mw": 14.899685225860557,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T13:00",
+   "hour": 13,
+   "temperature_c": 32.678089974546275,
+   "shortfall_actual_mw": 14.737253961682613,
+   "shortfall_pred_mw": 16.423187463378426,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T14:00",
+   "hour": 14,
+   "temperature_c": 33.61853989159587,
+   "shortfall_actual_mw": 16.604640751132997,
+   "shortfall_pred_mw": 17.37919139391675,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T15:00",
+   "hour": 15,
+   "temperature_c": 31.847332970454374,
+   "shortfall_actual_mw": 15.552206556895435,
+   "shortfall_pred_mw": 16.599335844743884,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T16:00",
+   "hour": 16,
+   "temperature_c": 32.85896600156134,
+   "shortfall_actual_mw": 17.814813347810862,
+   "shortfall_pred_mw": 16.90386890693609,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T17:00",
+   "hour": 17,
+   "temperature_c": 32.68173101236249,
+   "shortfall_actual_mw": 15.349515445171361,
+   "shortfall_pred_mw": 16.262403193398683,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T18:00",
+   "hour": 18,
+   "temperature_c": 31.51128173972374,
+   "shortfall_actual_mw": 12.751719351467777,
+   "shortfall_pred_mw": 14.813181210735408,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T19:00",
+   "hour": 19,
+   "temperature_c": 31.294394316533282,
+   "shortfall_actual_mw": 12.437069638081502,
+   "shortfall_pred_mw": 13.616337002562506,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T20:00",
+   "hour": 20,
+   "temperature_c": 30.914605550206176,
+   "shortfall_actual_mw": 10.43106427410352,
+   "shortfall_pred_mw": 12.170927350938912,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T21:00",
+   "hour": 21,
+   "temperature_c": 29.942778276624633,
+   "shortfall_actual_mw": 8.842966200864371,
+   "shortfall_pred_mw": 10.341153600943242,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T22:00",
+   "hour": 22,
+   "temperature_c": 29.009633398382967,
+   "shortfall_actual_mw": 6.653057284778596,
+   "shortfall_pred_mw": 8.5423833517235,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-08T23:00",
+   "hour": 23,
+   "temperature_c": 28.56135707552399,
+   "shortfall_actual_mw": 5.210200869598146,
+   "shortfall_pred_mw": 7.094207146736194,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T00:00",
+   "hour": 0,
+   "temperature_c": 32.87337727807688,
+   "shortfall_actual_mw": 7.600798193799466,
+   "shortfall_pred_mw": 8.281111847926168,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T01:00",
+   "hour": 1,
+   "temperature_c": 32.72704278411016,
+   "shortfall_actual_mw": 8.249319888365887,
+   "shortfall_pred_mw": 7.426608243255734,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T02:00",
+   "hour": 2,
+   "temperature_c": 32.986684225645114,
+   "shortfall_actual_mw": 7.563551316198422,
+   "shortfall_pred_mw": 7.088561890656809,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T03:00",
+   "hour": 3,
+   "temperature_c": 32.05624172420291,
+   "shortfall_actual_mw": 6.210627127213513,
+   "shortfall_pred_mw": 6.477269406241378,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T04:00",
+   "hour": 4,
+   "temperature_c": 32.303641117740405,
+   "shortfall_actual_mw": 7.650488031504106,
+   "shortfall_pred_mw": 6.821044176711272,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T05:00",
+   "hour": 5,
+   "temperature_c": 32.554141965481826,
+   "shortfall_actual_mw": 7.612249121796451,
+   "shortfall_pred_mw": 7.500236345127921,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T06:00",
+   "hour": 6,
+   "temperature_c": 33.11096454133141,
+   "shortfall_actual_mw": 9.091291681647927,
+   "shortfall_pred_mw": 8.633486327331143,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T07:00",
+   "hour": 7,
+   "temperature_c": 33.41467294112344,
+   "shortfall_actual_mw": 9.322092057220418,
+   "shortfall_pred_mw": 9.87503686559405,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T08:00",
+   "hour": 8,
+   "temperature_c": 33.936746736423395,
+   "shortfall_actual_mw": 10.767175124540126,
+   "shortfall_pred_mw": 11.393712699206318,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T09:00",
+   "hour": 9,
+   "temperature_c": 33.98191217082452,
+   "shortfall_actual_mw": 13.033903233292142,
+   "shortfall_pred_mw": 12.746324688463877,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T10:00",
+   "hour": 10,
+   "temperature_c": 36.0730632440006,
+   "shortfall_actual_mw": 16.640797965574123,
+   "shortfall_pred_mw": 15.141381793964719,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T11:00",
+   "hour": 11,
+   "temperature_c": 35.54049340381168,
+   "shortfall_actual_mw": 16.21754923872083,
+   "shortfall_pred_mw": 16.08449535108568,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T12:00",
+   "hour": 12,
+   "temperature_c": 36.50980317474626,
+   "shortfall_actual_mw": 19.363091151651407,
+   "shortfall_pred_mw": 17.617081841436644,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T13:00",
+   "hour": 13,
+   "temperature_c": 36.98615424527799,
+   "shortfall_actual_mw": 19.014774200292756,
+   "shortfall_pred_mw": 18.641519378949074,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T14:00",
+   "hour": 14,
+   "temperature_c": 36.68320583601107,
+   "shortfall_actual_mw": 19.08950159029173,
+   "shortfall_pred_mw": 18.957265871878054,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T15:00",
+   "hour": 15,
+   "temperature_c": 36.51729864091197,
+   "shortfall_actual_mw": 18.62718616268604,
+   "shortfall_pred_mw": 19.00401999994007,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T16:00",
+   "hour": 16,
+   "temperature_c": 36.459083705150796,
+   "shortfall_actual_mw": 17.232009347506004,
+   "shortfall_pred_mw": 18.757661120747926,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T17:00",
+   "hour": 17,
+   "temperature_c": 35.748517271445806,
+   "shortfall_actual_mw": 18.587434176299016,
+   "shortfall_pred_mw": 17.841569475335916,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T18:00",
+   "hour": 18,
+   "temperature_c": 35.53078303969238,
+   "shortfall_actual_mw": 17.80413496593547,
+   "shortfall_pred_mw": 16.882924709915773,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T19:00",
+   "hour": 19,
+   "temperature_c": 34.87684416533757,
+   "shortfall_actual_mw": 15.51162962885309,
+   "shortfall_pred_mw": 15.461031588371,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T20:00",
+   "hour": 20,
+   "temperature_c": 35.198191139144484,
+   "shortfall_actual_mw": 14.068159026952266,
+   "shortfall_pred_mw": 14.37665457037206,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T21:00",
+   "hour": 21,
+   "temperature_c": 34.04819391523692,
+   "shortfall_actual_mw": 15.21507193896321,
+   "shortfall_pred_mw": 12.45513657925885,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T22:00",
+   "hour": 22,
+   "temperature_c": 33.48258697427238,
+   "shortfall_actual_mw": 10.671790361642982,
+   "shortfall_pred_mw": 10.84562096627655,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-09T23:00",
+   "hour": 23,
+   "temperature_c": 32.99509834789071,
+   "shortfall_actual_mw": 9.876809920270285,
+   "shortfall_pred_mw": 9.37725334841307,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T00:00",
+   "hour": 0,
+   "temperature_c": 32.10796360730806,
+   "shortfall_actual_mw": 7.73365050502238,
+   "shortfall_pred_mw": 6.5104390175863776,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T01:00",
+   "hour": 1,
+   "temperature_c": 31.04105646245837,
+   "shortfall_actual_mw": 5.107569807730956,
+   "shortfall_pred_mw": 5.181909130177059,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T02:00",
+   "hour": 2,
+   "temperature_c": 30.298962026726585,
+   "shortfall_actual_mw": 3.0148290019644324,
+   "shortfall_pred_mw": 4.328043484302936,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T03:00",
+   "hour": 3,
+   "temperature_c": 30.56810991143784,
+   "shortfall_actual_mw": 5.127416939669335,
+   "shortfall_pred_mw": 4.334450614374439,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T04:00",
+   "hour": 4,
+   "temperature_c": 31.0841237333328,
+   "shortfall_actual_mw": 5.759549027309451,
+   "shortfall_pred_mw": 4.816541789141369,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T05:00",
+   "hour": 5,
+   "temperature_c": 31.72882118168141,
+   "shortfall_actual_mw": 5.834452237369217,
+   "shortfall_pred_mw": 5.698715817897783,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T06:00",
+   "hour": 6,
+   "temperature_c": 32.67904719498544,
+   "shortfall_actual_mw": 6.979585362598693,
+   "shortfall_pred_mw": 7.034539240550667,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T07:00",
+   "hour": 7,
+   "temperature_c": 31.75128958797877,
+   "shortfall_actual_mw": 7.255682427651465,
+   "shortfall_pred_mw": 7.641976596152555,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T08:00",
+   "hour": 8,
+   "temperature_c": 33.19501730599661,
+   "shortfall_actual_mw": 9.765668744700514,
+   "shortfall_pred_mw": 9.635235486885446,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T09:00",
+   "hour": 9,
+   "temperature_c": 32.81791534154117,
+   "shortfall_actual_mw": 11.153941112024926,
+   "shortfall_pred_mw": 10.770411247497924,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T10:00",
+   "hour": 10,
+   "temperature_c": 34.357190117356346,
+   "shortfall_actual_mw": 13.047160023224624,
+   "shortfall_pred_mw": 12.881293204498785,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T11:00",
+   "hour": 11,
+   "temperature_c": 34.191915812584845,
+   "shortfall_actual_mw": 15.101472325962355,
+   "shortfall_pred_mw": 14.013536578971486,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T12:00",
+   "hour": 12,
+   "temperature_c": 35.28946493923412,
+   "shortfall_actual_mw": 16.78334786672291,
+   "shortfall_pred_mw": 15.61215677674572,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T13:00",
+   "hour": 13,
+   "temperature_c": 34.75406454480725,
+   "shortfall_actual_mw": 16.46106955183786,
+   "shortfall_pred_mw": 16.115617740024774,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T14:00",
+   "hour": 14,
+   "temperature_c": 35.554595486053906,
+   "shortfall_actual_mw": 15.638324301654182,
+   "shortfall_pred_mw": 16.999573829557953,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T15:00",
+   "hour": 15,
+   "temperature_c": 36.06048713813716,
+   "shortfall_actual_mw": 17.94036463883231,
+   "shortfall_pred_mw": 17.39225427856018,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T16:00",
+   "hour": 16,
+   "temperature_c": 35.19509578097085,
+   "shortfall_actual_mw": 19.085062140180835,
+   "shortfall_pred_mw": 16.73025972065635,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T17:00",
+   "hour": 17,
+   "temperature_c": 35.21928813370942,
+   "shortfall_actual_mw": 15.910285792876058,
+   "shortfall_pred_mw": 16.19251407098244,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T18:00",
+   "hour": 18,
+   "temperature_c": 34.754797548580505,
+   "shortfall_actual_mw": 16.004507522226522,
+   "shortfall_pred_mw": 15.106808180271866,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T19:00",
+   "hour": 19,
+   "temperature_c": 34.736467591375956,
+   "shortfall_actual_mw": 14.48657487372569,
+   "shortfall_pred_mw": 14.012206263808448,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T20:00",
+   "hour": 20,
+   "temperature_c": 33.33677248779656,
+   "shortfall_actual_mw": 11.692956877673973,
+   "shortfall_pred_mw": 12.041620886699393,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T21:00",
+   "hour": 21,
+   "temperature_c": 32.77850864006994,
+   "shortfall_actual_mw": 9.755626854603822,
+   "shortfall_pred_mw": 10.42480146816983,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T22:00",
+   "hour": 22,
+   "temperature_c": 32.603342473885085,
+   "shortfall_actual_mw": 8.966990744618041,
+   "shortfall_pred_mw": 9.016333745238347,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-10T23:00",
+   "hour": 23,
+   "temperature_c": 32.098576237647805,
+   "shortfall_actual_mw": 7.169294951573907,
+   "shortfall_pred_mw": 7.539069446415888,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T00:00",
+   "hour": 0,
+   "temperature_c": 29.794087532736174,
+   "shortfall_actual_mw": 4.83265891712992,
+   "shortfall_pred_mw": 5.3189653481310435,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T01:00",
+   "hour": 1,
+   "temperature_c": 30.118987128740198,
+   "shortfall_actual_mw": 3.8675396199230283,
+   "shortfall_pred_mw": 4.707112167361884,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T02:00",
+   "hour": 2,
+   "temperature_c": 29.411456902661516,
+   "shortfall_actual_mw": 3.6448372707030376,
+   "shortfall_pred_mw": 3.871044512555554,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T03:00",
+   "hour": 3,
+   "temperature_c": 28.561542603524256,
+   "shortfall_actual_mw": 3.517832800597243,
+   "shortfall_pred_mw": 3.301218048619485,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T04:00",
+   "hour": 4,
+   "temperature_c": 29.392835130533904,
+   "shortfall_actual_mw": 1.7391815346696895,
+   "shortfall_pred_mw": 3.9456542512002395,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T05:00",
+   "hour": 5,
+   "temperature_c": 29.837854374906605,
+   "shortfall_actual_mw": 5.33475691013173,
+   "shortfall_pred_mw": 4.7250088917379305,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T06:00",
+   "hour": 6,
+   "temperature_c": 29.482113899231642,
+   "shortfall_actual_mw": 6.459553522175801,
+   "shortfall_pred_mw": 5.3883569377233735,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T07:00",
+   "hour": 7,
+   "temperature_c": 30.433930405563473,
+   "shortfall_actual_mw": 5.538155286232747,
+   "shortfall_pred_mw": 6.963634831737433,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T08:00",
+   "hour": 8,
+   "temperature_c": 31.18444725879205,
+   "shortfall_actual_mw": 7.952222758216269,
+   "shortfall_pred_mw": 8.599941808816265,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T09:00",
+   "hour": 9,
+   "temperature_c": 30.796688090229438,
+   "shortfall_actual_mw": 7.167250859619763,
+   "shortfall_pred_mw": 9.72962990385181,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T10:00",
+   "hour": 10,
+   "temperature_c": 32.187132940485945,
+   "shortfall_actual_mw": 10.739315289679425,
+   "shortfall_pred_mw": 11.763875545071173,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T11:00",
+   "hour": 11,
+   "temperature_c": 32.933300278215455,
+   "shortfall_actual_mw": 13.452264401280473,
+   "shortfall_pred_mw": 13.365443413720168,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T12:00",
+   "hour": 12,
+   "temperature_c": 32.805413518830804,
+   "shortfall_actual_mw": 13.438815541875375,
+   "shortfall_pred_mw": 14.333055491457012,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T13:00",
+   "hour": 13,
+   "temperature_c": 34.3296870313847,
+   "shortfall_actual_mw": 17.42767933520477,
+   "shortfall_pred_mw": 15.897094959695906,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T14:00",
+   "hour": 14,
+   "temperature_c": 34.036509493674835,
+   "shortfall_actual_mw": 15.74905936003521,
+   "shortfall_pred_mw": 16.21787272301823,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T15:00",
+   "hour": 15,
+   "temperature_c": 33.22905839283091,
+   "shortfall_actual_mw": 15.228150228361619,
+   "shortfall_pred_mw": 15.93427956935042,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T16:00",
+   "hour": 16,
+   "temperature_c": 34.50137904647072,
+   "shortfall_actual_mw": 16.87055630157589,
+   "shortfall_pred_mw": 16.37304732181586,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T17:00",
+   "hour": 17,
+   "temperature_c": 33.28052376943531,
+   "shortfall_actual_mw": 13.896039978314839,
+   "shortfall_pred_mw": 15.194194966214347,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T18:00",
+   "hour": 18,
+   "temperature_c": 33.155956971137954,
+   "shortfall_actual_mw": 13.400260719381894,
+   "shortfall_pred_mw": 14.283524483009888,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T19:00",
+   "hour": 19,
+   "temperature_c": 32.61115833066359,
+   "shortfall_actual_mw": 13.519743932327293,
+   "shortfall_pred_mw": 12.917830445061593,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T20:00",
+   "hour": 20,
+   "temperature_c": 32.607600210697115,
+   "shortfall_actual_mw": 11.879102102243063,
+   "shortfall_pred_mw": 11.666151526776337,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T21:00",
+   "hour": 21,
+   "temperature_c": 31.305411421848376,
+   "shortfall_actual_mw": 9.752887891310197,
+   "shortfall_pred_mw": 9.66626622622364,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T22:00",
+   "hour": 22,
+   "temperature_c": 31.815356266478016,
+   "shortfall_actual_mw": 9.132117374242984,
+   "shortfall_pred_mw": 8.61057959602653,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-11T23:00",
+   "hour": 23,
+   "temperature_c": 29.641823769300146,
+   "shortfall_actual_mw": 7.386209248922835,
+   "shortfall_pred_mw": 6.274025086187035,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T00:00",
+   "hour": 0,
+   "temperature_c": 33.94355000737495,
+   "shortfall_actual_mw": 9.243013663613912,
+   "shortfall_pred_mw": 8.832171017749568,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T01:00",
+   "hour": 1,
+   "temperature_c": 31.76573565379069,
+   "shortfall_actual_mw": 6.943768568621046,
+   "shortfall_pred_mw": 6.931606740529519,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T02:00",
+   "hour": 2,
+   "temperature_c": 31.781018478922746,
+   "shortfall_actual_mw": 6.247981126538378,
+   "shortfall_pred_mw": 6.467733918419924,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T03:00",
+   "hour": 3,
+   "temperature_c": 30.760705900273354,
+   "shortfall_actual_mw": 4.048294307598323,
+   "shortfall_pred_mw": 5.810165044425547,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T04:00",
+   "hour": 4,
+   "temperature_c": 31.52583816232346,
+   "shortfall_actual_mw": 6.103432315621202,
+   "shortfall_pred_mw": 6.4205336430711775,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T05:00",
+   "hour": 5,
+   "temperature_c": 31.51844549314436,
+   "shortfall_actual_mw": 8.959191980746928,
+   "shortfall_pred_mw": 6.966929877292913,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T06:00",
+   "hour": 6,
+   "temperature_c": 32.57563089353709,
+   "shortfall_actual_mw": 9.57731824362956,
+   "shortfall_pred_mw": 8.357829410035594,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T07:00",
+   "hour": 7,
+   "temperature_c": 32.38288500273211,
+   "shortfall_actual_mw": 9.630996509813912,
+   "shortfall_pred_mw": 9.343743001344068,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T08:00",
+   "hour": 8,
+   "temperature_c": 33.072461146931545,
+   "shortfall_actual_mw": 10.806464206882234,
+   "shortfall_pred_mw": 10.948670056652634,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T09:00",
+   "hour": 9,
+   "temperature_c": 34.14169112396224,
+   "shortfall_actual_mw": 13.565903791079698,
+   "shortfall_pred_mw": 12.828598937153687,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T10:00",
+   "hour": 10,
+   "temperature_c": 34.499223901895114,
+   "shortfall_actual_mw": 14.59953575367253,
+   "shortfall_pred_mw": 14.330971868956723,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T11:00",
+   "hour": 11,
+   "temperature_c": 34.153944807958,
+   "shortfall_actual_mw": 14.598134227298393,
+   "shortfall_pred_mw": 15.370526197104258,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T12:00",
+   "hour": 12,
+   "temperature_c": 35.54700784230916,
+   "shortfall_actual_mw": 16.985263899075868,
+   "shortfall_pred_mw": 17.121314025571422,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T13:00",
+   "hour": 13,
+   "temperature_c": 35.31545602422109,
+   "shortfall_actual_mw": 18.1750903159362,
+   "shortfall_pred_mw": 17.78123435250769,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T14:00",
+   "hour": 14,
+   "temperature_c": 35.46670029279106,
+   "shortfall_actual_mw": 17.80535182973452,
+   "shortfall_pred_mw": 18.33085621259616,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T15:00",
+   "hour": 15,
+   "temperature_c": 36.46048963868913,
+   "shortfall_actual_mw": 19.040181045127582,
+   "shortfall_pred_mw": 18.974767599139366,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T16:00",
+   "hour": 16,
+   "temperature_c": 36.66140573263914,
+   "shortfall_actual_mw": 19.853273262641956,
+   "shortfall_pred_mw": 18.861841880967667,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T17:00",
+   "hour": 17,
+   "temperature_c": 36.12178717848698,
+   "shortfall_actual_mw": 19.528354514788635,
+   "shortfall_pred_mw": 18.033775648659997,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T18:00",
+   "hour": 18,
+   "temperature_c": 34.255435189488246,
+   "shortfall_actual_mw": 16.213750670461756,
+   "shortfall_pred_mw": 16.226215649472316,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T19:00",
+   "hour": 19,
+   "temperature_c": 34.231658830517645,
+   "shortfall_actual_mw": 14.911531866339567,
+   "shortfall_pred_mw": 15.128809242150968,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T20:00",
+   "hour": 20,
+   "temperature_c": 34.291723025755225,
+   "shortfall_actual_mw": 15.434128565611008,
+   "shortfall_pred_mw": 13.909891072891329,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T21:00",
+   "hour": 21,
+   "temperature_c": 33.740097780861745,
+   "shortfall_actual_mw": 14.191408630217609,
+   "shortfall_pred_mw": 12.296490039885773,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T22:00",
+   "hour": 22,
+   "temperature_c": 32.91324539445265,
+   "shortfall_actual_mw": 10.814499821203276,
+   "shortfall_pred_mw": 10.552452499418697,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-12T23:00",
+   "hour": 23,
+   "temperature_c": 32.68410622060794,
+   "shortfall_actual_mw": 10.460096122412988,
+   "shortfall_pred_mw": 9.217115588600727,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T00:00",
+   "hour": 0,
+   "temperature_c": 31.24122023299995,
+   "shortfall_actual_mw": 7.210863419628871,
+   "shortfall_pred_mw": 7.440672653711763,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T01:00",
+   "hour": 1,
+   "temperature_c": 30.486750574154403,
+   "shortfall_actual_mw": 7.341556881362489,
+   "shortfall_pred_mw": 6.273024778098872,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T02:00",
+   "hour": 2,
+   "temperature_c": 31.35104885586542,
+   "shortfall_actual_mw": 6.824667975355775,
+   "shortfall_pred_mw": 6.246331618543849,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T03:00",
+   "hour": 3,
+   "temperature_c": 31.035403819928316,
+   "shortfall_actual_mw": 5.4763233229829975,
+   "shortfall_pred_mw": 5.95161399319157,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T04:00",
+   "hour": 4,
+   "temperature_c": 30.766598062663792,
+   "shortfall_actual_mw": 6.703667280284364,
+   "shortfall_pred_mw": 6.029581596209066,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T05:00",
+   "hour": 5,
+   "temperature_c": 30.797228315382696,
+   "shortfall_actual_mw": 5.727057167329098,
+   "shortfall_pred_mw": 6.59555680044354,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T06:00",
+   "hour": 6,
+   "temperature_c": 32.353712971467566,
+   "shortfall_actual_mw": 9.822462642640367,
+   "shortfall_pred_mw": 8.243558225060832,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T07:00",
+   "hour": 7,
+   "temperature_c": 32.16833938916162,
+   "shortfall_actual_mw": 9.670295451496772,
+   "shortfall_pred_mw": 9.233268005610482,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T08:00",
+   "hour": 8,
+   "temperature_c": 32.65769295941776,
+   "shortfall_actual_mw": 11.960865541609394,
+   "shortfall_pred_mw": 10.73509536275213,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T09:00",
+   "hour": 9,
+   "temperature_c": 32.92110466058235,
+   "shortfall_actual_mw": 12.112123018571678,
+   "shortfall_pred_mw": 12.200087908238787,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T10:00",
+   "hour": 10,
+   "temperature_c": 33.972646164737185,
+   "shortfall_actual_mw": 15.354419503831359,
+   "shortfall_pred_mw": 14.059823592849877,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T11:00",
+   "hour": 11,
+   "temperature_c": 34.14422189903196,
+   "shortfall_actual_mw": 15.47732233712023,
+   "shortfall_pred_mw": 15.36551962389008,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T12:00",
+   "hour": 12,
+   "temperature_c": 34.48864348408,
+   "shortfall_actual_mw": 15.87690036329413,
+   "shortfall_pred_mw": 16.576335286486028,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T13:00",
+   "hour": 13,
+   "temperature_c": 34.76375527562647,
+   "shortfall_actual_mw": 17.484284877630603,
+   "shortfall_pred_mw": 17.497149598534463,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T14:00",
+   "hour": 14,
+   "temperature_c": 35.76700639584061,
+   "shortfall_actual_mw": 18.030842178458204,
+   "shortfall_pred_mw": 18.48549146661532,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T15:00",
+   "hour": 15,
+   "temperature_c": 35.09199709074258,
+   "shortfall_actual_mw": 17.906440529118594,
+   "shortfall_pred_mw": 18.27009596367771,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T16:00",
+   "hour": 16,
+   "temperature_c": 35.49693048736283,
+   "shortfall_actual_mw": 19.078535253796268,
+   "shortfall_pred_mw": 18.262223946054725,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T17:00",
+   "hour": 17,
+   "temperature_c": 34.463373239796724,
+   "shortfall_actual_mw": 17.489954310401025,
+   "shortfall_pred_mw": 17.179816111793805,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T18:00",
+   "hour": 18,
+   "temperature_c": 34.234442473075084,
+   "shortfall_actual_mw": 16.916864722009297,
+   "shortfall_pred_mw": 16.215405965612625,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T19:00",
+   "hour": 19,
+   "temperature_c": 33.78564954068593,
+   "shortfall_actual_mw": 13.997340976183624,
+   "shortfall_pred_mw": 14.899147709709009,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T20:00",
+   "hour": 20,
+   "temperature_c": 33.36912232926014,
+   "shortfall_actual_mw": 13.50418818850753,
+   "shortfall_pred_mw": 13.434820497861319,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T21:00",
+   "hour": 21,
+   "temperature_c": 32.644741181706365,
+   "shortfall_actual_mw": 12.007458434691262,
+   "shortfall_pred_mw": 11.73246305464662,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T22:00",
+   "hour": 22,
+   "temperature_c": 32.63745804064659,
+   "shortfall_actual_mw": 10.72050885054598,
+   "shortfall_pred_mw": 10.410442573286643,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-13T23:00",
+   "hour": 23,
+   "temperature_c": 32.156036024234666,
+   "shortfall_actual_mw": 9.965964651912973,
+   "shortfall_pred_mw": 8.94519880726693,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T00:00",
+   "hour": 0,
+   "temperature_c": 30.191693502247382,
+   "shortfall_actual_mw": 6.644740588896798,
+   "shortfall_pred_mw": 6.900244633895449,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T01:00",
+   "hour": 1,
+   "temperature_c": 28.801473554679895,
+   "shortfall_actual_mw": 5.196058571944054,
+   "shortfall_pred_mw": 5.405232757381617,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T02:00",
+   "hour": 2,
+   "temperature_c": 29.221527143463987,
+   "shortfall_actual_mw": 4.0810289309064665,
+   "shortfall_pred_mw": 5.149786701232671,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T03:00",
+   "hour": 3,
+   "temperature_c": 29.307844780941394,
+   "shortfall_actual_mw": 4.734828264376589,
+   "shortfall_pred_mw": 5.062049884723352,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T04:00",
+   "hour": 4,
+   "temperature_c": 29.774301783415908,
+   "shortfall_actual_mw": 5.610284777679456,
+   "shortfall_pred_mw": 5.518622992152839,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T05:00",
+   "hour": 5,
+   "temperature_c": 29.484967030242093,
+   "shortfall_actual_mw": 6.0205010464652915,
+   "shortfall_pred_mw": 5.9198400730557355,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T06:00",
+   "hour": 6,
+   "temperature_c": 30.400539219806866,
+   "shortfall_actual_mw": 6.485335758305299,
+   "shortfall_pred_mw": 7.237819360067558,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T07:00",
+   "hour": 7,
+   "temperature_c": 30.64642114775944,
+   "shortfall_actual_mw": 8.692439902295085,
+   "shortfall_pred_mw": 8.449593576533731,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T08:00",
+   "hour": 8,
+   "temperature_c": 31.416402258873973,
+   "shortfall_actual_mw": 10.297340634956907,
+   "shortfall_pred_mw": 10.095923195283596,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T09:00",
+   "hour": 9,
+   "temperature_c": 31.83509137791968,
+   "shortfall_actual_mw": 12.195928642803667,
+   "shortfall_pred_mw": 11.640872034410828,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T10:00",
+   "hour": 10,
+   "temperature_c": 33.47766592857664,
+   "shortfall_actual_mw": 14.056617216944886,
+   "shortfall_pred_mw": 13.80494567403342,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T11:00",
+   "hour": 11,
+   "temperature_c": 32.10528605964676,
+   "shortfall_actual_mw": 15.190522531277724,
+   "shortfall_pred_mw": 14.315619677633983,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T12:00",
+   "hour": 12,
+   "temperature_c": 33.08723103765025,
+   "shortfall_actual_mw": 14.106450549505443,
+   "shortfall_pred_mw": 15.854712357618942,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T13:00",
+   "hour": 13,
+   "temperature_c": 32.54346888373639,
+   "shortfall_actual_mw": 16.01536077581594,
+   "shortfall_pred_mw": 16.353867638165653,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T14:00",
+   "hour": 14,
+   "temperature_c": 34.50335541758081,
+   "shortfall_actual_mw": 18.55209591309824,
+   "shortfall_pred_mw": 17.83480542317343,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T15:00",
+   "hour": 15,
+   "temperature_c": 33.84041479896324,
+   "shortfall_actual_mw": 18.57599100943277,
+   "shortfall_pred_mw": 17.625624394003193,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T16:00",
+   "hour": 16,
+   "temperature_c": 33.916335701758726,
+   "shortfall_actual_mw": 16.646973950903043,
+   "shortfall_pred_mw": 17.448335471290953,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T17:00",
+   "hour": 17,
+   "temperature_c": 33.76430937218659,
+   "shortfall_actual_mw": 16.801296441718083,
+   "shortfall_pred_mw": 16.819850338052362,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T18:00",
+   "hour": 18,
+   "temperature_c": 33.39740605644804,
+   "shortfall_actual_mw": 15.960379532828139,
+   "shortfall_pred_mw": 15.784394615546741,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T19:00",
+   "hour": 19,
+   "temperature_c": 31.810865367589823,
+   "shortfall_actual_mw": 14.811648048261917,
+   "shortfall_pred_mw": 13.88228108882203,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T20:00",
+   "hour": 20,
+   "temperature_c": 32.07971586451081,
+   "shortfall_actual_mw": 13.11453190056598,
+   "shortfall_pred_mw": 12.770872299054444,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T21:00",
+   "hour": 21,
+   "temperature_c": 31.381949955108308,
+   "shortfall_actual_mw": 10.952049153669956,
+   "shortfall_pred_mw": 11.08221971921252,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T22:00",
+   "hour": 22,
+   "temperature_c": 31.111328948254794,
+   "shortfall_actual_mw": 8.001301727220055,
+   "shortfall_pred_mw": 9.624599869886447,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-14T23:00",
+   "hour": 23,
+   "temperature_c": 30.84881875454338,
+   "shortfall_actual_mw": 8.700161666562744,
+   "shortfall_pred_mw": 8.272079371783494,
+   "split": "train"
+  },
+  {
+   "time": "2026-10-15T00:00",
+   "hour": 0,
+   "temperature_c": 28.379026176672824,
+   "shortfall_actual_mw": 4.639921645476273,
+   "shortfall_pred_mw": 5.966856103006339,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T01:00",
+   "hour": 1,
+   "temperature_c": 28.648945954031696,
+   "shortfall_actual_mw": 4.821806001432527,
+   "shortfall_pred_mw": 5.326692414605848,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T02:00",
+   "hour": 2,
+   "temperature_c": 28.836649388915365,
+   "shortfall_actual_mw": 5.874074138150778,
+   "shortfall_pred_mw": 4.951603351854885,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T03:00",
+   "hour": 3,
+   "temperature_c": 29.092952693595205,
+   "shortfall_actual_mw": 4.24374503545107,
+   "shortfall_pred_mw": 4.95139648082632,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T04:00",
+   "hour": 4,
+   "temperature_c": 28.92639101953836,
+   "shortfall_actual_mw": 1.899458955278937,
+   "shortfall_pred_mw": 5.082012163980126,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T05:00",
+   "hour": 5,
+   "temperature_c": 28.617435592383558,
+   "shortfall_actual_mw": 3.8673376153319645,
+   "shortfall_pred_mw": 5.473126060584513,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T06:00",
+   "hour": 6,
+   "temperature_c": 29.372515734649586,
+   "shortfall_actual_mw": 6.303609074486072,
+   "shortfall_pred_mw": 6.708463908577688,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T07:00",
+   "hour": 7,
+   "temperature_c": 30.000452274441642,
+   "shortfall_actual_mw": 8.29205318484266,
+   "shortfall_pred_mw": 8.116967766403304,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T08:00",
+   "hour": 8,
+   "temperature_c": 30.09107506387837,
+   "shortfall_actual_mw": 8.883315650994845,
+   "shortfall_pred_mw": 9.413478498437627,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T09:00",
+   "hour": 9,
+   "temperature_c": 30.953297803344924,
+   "shortfall_actual_mw": 10.474529117104952,
+   "shortfall_pred_mw": 11.18681408483152,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T10:00",
+   "hour": 10,
+   "temperature_c": 31.761710287405442,
+   "shortfall_actual_mw": 12.020785380513248,
+   "shortfall_pred_mw": 12.921356450359411,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T11:00",
+   "hour": 11,
+   "temperature_c": 32.249501473703376,
+   "shortfall_actual_mw": 13.718192048547365,
+   "shortfall_pred_mw": 14.389879864022681,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T12:00",
+   "hour": 12,
+   "temperature_c": 33.120844603405416,
+   "shortfall_actual_mw": 15.278037851195387,
+   "shortfall_pred_mw": 15.872020837953697,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T13:00",
+   "hour": 13,
+   "temperature_c": 33.119572408705146,
+   "shortfall_actual_mw": 18.428282411528397,
+   "shortfall_pred_mw": 16.65051800264452,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T14:00",
+   "hour": 14,
+   "temperature_c": 33.50434510838713,
+   "shortfall_actual_mw": 17.310697314812433,
+   "shortfall_pred_mw": 17.320389594253577,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T15:00",
+   "hour": 15,
+   "temperature_c": 33.806948480942864,
+   "shortfall_actual_mw": 16.33962291929026,
+   "shortfall_pred_mw": 17.608391735273933,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T16:00",
+   "hour": 16,
+   "temperature_c": 33.546337003058476,
+   "shortfall_actual_mw": 17.557743826062435,
+   "shortfall_pred_mw": 17.257813726380455,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T17:00",
+   "hour": 17,
+   "temperature_c": 33.186584047703136,
+   "shortfall_actual_mw": 17.021957499607428,
+   "shortfall_pred_mw": 16.522364867735234,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T18:00",
+   "hour": 18,
+   "temperature_c": 33.001718427748465,
+   "shortfall_actual_mw": 16.353271995857124,
+   "shortfall_pred_mw": 15.58064498690166,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T19:00",
+   "hour": 19,
+   "temperature_c": 31.82314015158009,
+   "shortfall_actual_mw": 13.797193478156323,
+   "shortfall_pred_mw": 13.88860168744154,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T20:00",
+   "hour": 20,
+   "temperature_c": 31.32886061783697,
+   "shortfall_actual_mw": 13.042094635922716,
+   "shortfall_pred_mw": 12.384237826354868,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T21:00",
+   "hour": 21,
+   "temperature_c": 31.086591292936028,
+   "shortfall_actual_mw": 9.401881093924208,
+   "shortfall_pred_mw": 10.930132028393148,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T22:00",
+   "hour": 22,
+   "temperature_c": 30.49124401662711,
+   "shortfall_actual_mw": 8.027782276564077,
+   "shortfall_pred_mw": 9.305302359972442,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-15T23:00",
+   "hour": 23,
+   "temperature_c": 30.383763931041084,
+   "shortfall_actual_mw": 7.45376185130718,
+   "shortfall_pred_mw": 8.032610809423815,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T00:00",
+   "hour": 0,
+   "temperature_c": 27.09755152839155,
+   "shortfall_actual_mw": 5.115068298604979,
+   "shortfall_pred_mw": 5.306992198331075,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T01:00",
+   "hour": 1,
+   "temperature_c": 27.097783115428744,
+   "shortfall_actual_mw": 2.9126571754039556,
+   "shortfall_pred_mw": 4.527959198275337,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T02:00",
+   "hour": 2,
+   "temperature_c": 27.031485330079928,
+   "shortfall_actual_mw": 3.4954836286795525,
+   "shortfall_pred_mw": 4.022078443937119,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T03:00",
+   "hour": 3,
+   "temperature_c": 27.365007789599392,
+   "shortfall_actual_mw": 3.9022208594746823,
+   "shortfall_pred_mw": 4.06163368064634,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T04:00",
+   "hour": 4,
+   "temperature_c": 26.89158112339244,
+   "shortfall_actual_mw": 2.159961180268213,
+   "shortfall_pred_mw": 4.034236770886276,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T05:00",
+   "hour": 5,
+   "temperature_c": 27.075064367924455,
+   "shortfall_actual_mw": 3.734004023132619,
+   "shortfall_pred_mw": 4.6789198700872,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T06:00",
+   "hour": 6,
+   "temperature_c": 27.29767348095928,
+   "shortfall_actual_mw": 4.733732130170192,
+   "shortfall_pred_mw": 5.640074835924882,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T07:00",
+   "hour": 7,
+   "temperature_c": 27.165810150688266,
+   "shortfall_actual_mw": 5.694354033479876,
+   "shortfall_pred_mw": 6.657338406863817,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T08:00",
+   "hour": 8,
+   "temperature_c": 28.304691189017028,
+   "shortfall_actual_mw": 7.499441235854691,
+   "shortfall_pred_mw": 8.4936239851268,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T09:00",
+   "hour": 9,
+   "temperature_c": 28.833959529028675,
+   "shortfall_actual_mw": 8.498275424742545,
+   "shortfall_pred_mw": 10.095512878917143,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T10:00",
+   "hour": 10,
+   "temperature_c": 29.591402606532974,
+   "shortfall_actual_mw": 11.24020587943772,
+   "shortfall_pred_mw": 11.803809800046835,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T11:00",
+   "hour": 11,
+   "temperature_c": 29.847094580339476,
+   "shortfall_actual_mw": 12.119784092217142,
+   "shortfall_pred_mw": 13.152819423225012,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T12:00",
+   "hour": 12,
+   "temperature_c": 30.09175776401205,
+   "shortfall_actual_mw": 13.329275357176437,
+   "shortfall_pred_mw": 14.312266946510467,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T13:00",
+   "hour": 13,
+   "temperature_c": 30.83970768122364,
+   "shortfall_actual_mw": 13.12199075120794,
+   "shortfall_pred_mw": 15.476557641255344,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T14:00",
+   "hour": 14,
+   "temperature_c": 31.633926453185722,
+   "shortfall_actual_mw": 14.55715124817482,
+   "shortfall_pred_mw": 16.35726343420507,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T15:00",
+   "hour": 15,
+   "temperature_c": 31.171775098456536,
+   "shortfall_actual_mw": 13.96269136205167,
+   "shortfall_pred_mw": 16.251473906274413,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T16:00",
+   "hour": 16,
+   "temperature_c": 30.19413604693745,
+   "shortfall_actual_mw": 14.791178437007249,
+   "shortfall_pred_mw": 15.53168015430478,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T17:00",
+   "hour": 17,
+   "temperature_c": 30.134075704589172,
+   "shortfall_actual_mw": 11.848516662849915,
+   "shortfall_pred_mw": 14.950550648045033,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T18:00",
+   "hour": 18,
+   "temperature_c": 30.365878270267658,
+   "shortfall_actual_mw": 11.789144139215397,
+   "shortfall_pred_mw": 14.223383818490792,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T19:00",
+   "hour": 19,
+   "temperature_c": 29.90543570208845,
+   "shortfall_actual_mw": 13.509843744547108,
+   "shortfall_pred_mw": 12.901126868683413,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T20:00",
+   "hour": 20,
+   "temperature_c": 29.268953361659065,
+   "shortfall_actual_mw": 10.600046494146982,
+   "shortfall_pred_mw": 11.323539163955642,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T21:00",
+   "hour": 21,
+   "temperature_c": 29.160710290116192,
+   "shortfall_actual_mw": 9.249249381799341,
+   "shortfall_pred_mw": 9.938446894266582,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T22:00",
+   "hour": 22,
+   "temperature_c": 28.24020916636651,
+   "shortfall_actual_mw": 8.474270595428786,
+   "shortfall_pred_mw": 8.146187235966467,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-16T23:00",
+   "hour": 23,
+   "temperature_c": 27.716777755269675,
+   "shortfall_actual_mw": 5.941405120380002,
+   "shortfall_pred_mw": 6.659311763656662,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T00:00",
+   "hour": 0,
+   "temperature_c": 31.244053948320442,
+   "shortfall_actual_mw": 6.599073223677597,
+   "shortfall_pred_mw": 6.065589951215212,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T01:00",
+   "hour": 1,
+   "temperature_c": 31.550014522815125,
+   "shortfall_actual_mw": 6.421593040197494,
+   "shortfall_pred_mw": 5.443984586350452,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T02:00",
+   "hour": 2,
+   "temperature_c": 31.640425042560455,
+   "shortfall_actual_mw": 6.864118956205216,
+   "shortfall_pred_mw": 5.018796925889007,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T03:00",
+   "hour": 3,
+   "temperature_c": 30.279331537965483,
+   "shortfall_actual_mw": 3.725996775584537,
+   "shortfall_pred_mw": 4.1857512816480265,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T04:00",
+   "hour": 4,
+   "temperature_c": 31.06300384444179,
+   "shortfall_actual_mw": 4.233652650233913,
+   "shortfall_pred_mw": 4.805666620936816,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T05:00",
+   "hour": 5,
+   "temperature_c": 31.727262619021708,
+   "shortfall_actual_mw": 5.915783618316788,
+   "shortfall_pred_mw": 5.697913274325272,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T06:00",
+   "hour": 6,
+   "temperature_c": 31.94915306400547,
+   "shortfall_actual_mw": 5.4232876086594,
+   "shortfall_pred_mw": 6.658698179696304,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T07:00",
+   "hour": 7,
+   "temperature_c": 31.872120400067857,
+   "shortfall_actual_mw": 7.689272234662186,
+   "shortfall_pred_mw": 7.704195455945938,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T08:00",
+   "hour": 8,
+   "temperature_c": 32.667138757964025,
+   "shortfall_actual_mw": 8.927465134107734,
+   "shortfall_pred_mw": 9.363417390158936,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T09:00",
+   "hour": 9,
+   "temperature_c": 33.41288252424034,
+   "shortfall_actual_mw": 10.983605778184465,
+   "shortfall_pred_mw": 11.076774989344921,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T10:00",
+   "hour": 10,
+   "temperature_c": 33.527202975889395,
+   "shortfall_actual_mw": 13.970211483103137,
+   "shortfall_pred_mw": 12.45391170558798,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T11:00",
+   "hour": 11,
+   "temperature_c": 34.260725422058925,
+   "shortfall_actual_mw": 14.737599747395024,
+   "shortfall_pred_mw": 14.048968397812104,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T12:00",
+   "hour": 12,
+   "temperature_c": 35.357189312387945,
+   "shortfall_actual_mw": 16.82897006141674,
+   "shortfall_pred_mw": 15.647029779790223,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T13:00",
+   "hour": 13,
+   "temperature_c": 35.13644718847057,
+   "shortfall_actual_mw": 15.616914617622255,
+   "shortfall_pred_mw": 16.312516293317376,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T14:00",
+   "hour": 14,
+   "temperature_c": 35.86115540099911,
+   "shortfall_actual_mw": 17.76736561423358,
+   "shortfall_pred_mw": 17.157429330456054,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T15:00",
+   "hour": 15,
+   "temperature_c": 34.55462218497077,
+   "shortfall_actual_mw": 14.313815542742804,
+   "shortfall_pred_mw": 16.616846096086398,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T16:00",
+   "hour": 16,
+   "temperature_c": 35.37531005715924,
+   "shortfall_actual_mw": 16.80035820393862,
+   "shortfall_pred_mw": 16.82305663718013,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T17:00",
+   "hour": 17,
+   "temperature_c": 35.286797435797716,
+   "shortfall_actual_mw": 16.99529428650022,
+   "shortfall_pred_mw": 16.22727632846263,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T18:00",
+   "hour": 18,
+   "temperature_c": 34.58236840786586,
+   "shortfall_actual_mw": 17.701484270151493,
+   "shortfall_pred_mw": 15.01802002810329,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T19:00",
+   "hour": 19,
+   "temperature_c": 35.041834609376494,
+   "shortfall_actual_mw": 15.938964561437217,
+   "shortfall_pred_mw": 14.169447511715408,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T20:00",
+   "hour": 20,
+   "temperature_c": 34.187730527696054,
+   "shortfall_actual_mw": 11.16687735907231,
+   "shortfall_pred_mw": 12.479800834836487,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T21:00",
+   "hour": 21,
+   "temperature_c": 33.58753571534923,
+   "shortfall_actual_mw": 10.879971647447153,
+   "shortfall_pred_mw": 10.841390095652871,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T22:00",
+   "hour": 22,
+   "temperature_c": 33.10605042745173,
+   "shortfall_actual_mw": 9.718149223503417,
+   "shortfall_pred_mw": 9.275190862385925,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-17T23:00",
+   "hour": 23,
+   "temperature_c": 32.676166068775665,
+   "shortfall_actual_mw": 7.609376029036382,
+   "shortfall_pred_mw": 7.836485147756474,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T00:00",
+   "hour": 0,
+   "temperature_c": 30.94299234269567,
+   "shortfall_actual_mw": 5.403166067661725,
+   "shortfall_pred_mw": 5.910565669695628,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T01:00",
+   "hour": 1,
+   "temperature_c": 30.357500517961608,
+   "shortfall_actual_mw": 5.434445563877797,
+   "shortfall_pred_mw": 4.829928780659743,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T02:00",
+   "hour": 2,
+   "temperature_c": 31.309864322658335,
+   "shortfall_actual_mw": 5.01122884760927,
+   "shortfall_pred_mw": 4.848582799796518,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T03:00",
+   "hour": 3,
+   "temperature_c": 30.688684155305825,
+   "shortfall_actual_mw": 3.5398389617891137,
+   "shortfall_pred_mw": 4.396537360662168,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T04:00",
+   "hour": 4,
+   "temperature_c": 30.13247935026779,
+   "shortfall_actual_mw": 4.551082812491087,
+   "shortfall_pred_mw": 4.32651588085377,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T05:00",
+   "hour": 5,
+   "temperature_c": 30.867827536627424,
+   "shortfall_actual_mw": 4.387122534980055,
+   "shortfall_pred_mw": 5.2553682813016405,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T06:00",
+   "hour": 6,
+   "temperature_c": 31.236728934369538,
+   "shortfall_actual_mw": 6.436293956933066,
+   "shortfall_pred_mw": 6.291852867073891,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T07:00",
+   "hour": 7,
+   "temperature_c": 32.05354543890015,
+   "shortfall_actual_mw": 8.72485185635287,
+   "shortfall_pred_mw": 7.797615824964011,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T08:00",
+   "hour": 8,
+   "temperature_c": 32.219053473389096,
+   "shortfall_actual_mw": 8.758386448751143,
+   "shortfall_pred_mw": 9.132686875198143,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T09:00",
+   "hour": 9,
+   "temperature_c": 32.66034705585382,
+   "shortfall_actual_mw": 9.866271985944124,
+   "shortfall_pred_mw": 10.689275327730728,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T10:00",
+   "hour": 10,
+   "temperature_c": 32.70576312272225,
+   "shortfall_actual_mw": 10.191565952110805,
+   "shortfall_pred_mw": 12.030931422916193,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T11:00",
+   "hour": 11,
+   "temperature_c": 33.01425750892912,
+   "shortfall_actual_mw": 12.03267050800856,
+   "shortfall_pred_mw": 13.407130351844199,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T12:00",
+   "hour": 12,
+   "temperature_c": 34.071665487763426,
+   "shortfall_actual_mw": 15.029090015556577,
+   "shortfall_pred_mw": 14.98508085118089,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T13:00",
+   "hour": 13,
+   "temperature_c": 33.81717269656891,
+   "shortfall_actual_mw": 15.362654365552595,
+   "shortfall_pred_mw": 15.63318828731095,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T14:00",
+   "hour": 14,
+   "temperature_c": 34.902679092337635,
+   "shortfall_actual_mw": 17.58824873438836,
+   "shortfall_pred_mw": 16.663885489834346,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T15:00",
+   "hour": 15,
+   "temperature_c": 34.733445010981775,
+   "shortfall_actual_mw": 16.978990406013306,
+   "shortfall_pred_mw": 16.708926519507145,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T16:00",
+   "hour": 16,
+   "temperature_c": 34.518011083323834,
+   "shortfall_actual_mw": 17.278884694713856,
+   "shortfall_pred_mw": 16.381611580808666,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T17:00",
+   "hour": 17,
+   "temperature_c": 33.70930243249578,
+   "shortfall_actual_mw": 15.574439810911304,
+   "shortfall_pred_mw": 15.414984010482996,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T18:00",
+   "hour": 18,
+   "temperature_c": 32.97745992570498,
+   "shortfall_actual_mw": 15.57912599570103,
+   "shortfall_pred_mw": 14.191611812298554,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T19:00",
+   "hour": 19,
+   "temperature_c": 34.110597770399565,
+   "shortfall_actual_mw": 12.166534174045013,
+   "shortfall_pred_mw": 13.689929967167078,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T20:00",
+   "hour": 20,
+   "temperature_c": 32.85190629346032,
+   "shortfall_actual_mw": 10.691353382808241,
+   "shortfall_pred_mw": 11.791950945379165,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T21:00",
+   "hour": 21,
+   "temperature_c": 31.659950153623463,
+   "shortfall_actual_mw": 9.45948194292486,
+   "shortfall_pred_mw": 9.848827240771604,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T22:00",
+   "hour": 22,
+   "temperature_c": 31.512425390094254,
+   "shortfall_actual_mw": 9.462116296872392,
+   "shortfall_pred_mw": 8.454592779427864,
+   "split": "test"
+  },
+  {
+   "time": "2026-10-18T23:00",
+   "hour": 23,
+   "temperature_c": 31.145858109626072,
+   "shortfall_actual_mw": 6.178525536404323,
+   "shortfall_pred_mw": 7.048490639527668,
+   "split": "test"
+  }
+ ],
+ "residuals": {
+  "n": 96,
+  "std_mw": 1.0795267726370859,
+  "bins": [
+   {
+    "lo": -3.1825532097011893,
+    "hi": -2.5307734927290344,
+    "mid": -2.856663351215112,
+    "prob": 0.020833333333333332
+   },
+   {
+    "lo": -2.5307734927290344,
+    "hi": -1.87899377575688,
+    "mid": -2.2048836342429574,
+    "prob": 0.041666666666666664
+   },
+   {
+    "lo": -1.87899377575688,
+    "hi": -1.2272140587847253,
+    "mid": -1.5531039172708025,
+    "prob": 0.14583333333333334
+   },
+   {
+    "lo": -1.2272140587847253,
+    "hi": -0.5754343418125707,
+    "mid": -0.901324200298648,
+    "prob": 0.22916666666666666
+   },
+   {
+    "lo": -0.5754343418125707,
+    "hi": 0.07634537515958417,
+    "mid": -0.24954448332649326,
+    "prob": 0.22916666666666666
+   },
+   {
+    "lo": 0.07634537515958417,
+    "hi": 0.7281250921317386,
+    "mid": 0.4022352336456614,
+    "prob": 0.17708333333333334
+   },
+   {
+    "lo": 0.7281250921317386,
+    "hi": 1.379904809103894,
+    "mid": 1.0540149506178162,
+    "prob": 0.09375
+   },
+   {
+    "lo": 1.379904809103894,
+    "hi": 2.031684526076048,
+    "mid": 1.705794667589971,
+    "prob": 0.052083333333333336
+   },
+   {
+    "lo": 2.031684526076048,
+    "hi": 2.6834642430482027,
+    "mid": 2.3575743845621253,
+    "prob": 0.010416666666666666
+   }
+  ]
+ },
+ "day_ahead": [
+  {
+   "hour": 0,
+   "shortfall_pred_mw": 7.655803103095847,
+   "quota": 2
+  },
+  {
+   "hour": 1,
+   "shortfall_pred_mw": 6.692530557125039,
+   "quota": 2
+  },
+  {
+   "hour": 2,
+   "shortfall_pred_mw": 6.10504536286127,
+   "quota": 2
+  },
+  {
+   "hour": 3,
+   "shortfall_pred_mw": 5.933383665428433,
+   "quota": 2
+  },
+  {
+   "hour": 4,
+   "shortfall_pred_mw": 6.189243925822208,
+   "quota": 2
+  },
+  {
+   "hour": 5,
+   "shortfall_pred_mw": 6.855189690125831,
+   "quota": 2
+  },
+  {
+   "hour": 6,
+   "shortfall_pred_mw": 7.88583785502942,
+   "quota": 2
+  },
+  {
+   "hour": 7,
+   "shortfall_pred_mw": 9.210951451321415,
+   "quota": 2
+  },
+  {
+   "hour": 8,
+   "shortfall_pred_mw": 10.74022617726828,
+   "quota": 3
+  },
+  {
+   "hour": 9,
+   "shortfall_pred_mw": 12.369444487542719,
+   "quota": 3
+  },
+  {
+   "hour": 10,
+   "shortfall_pred_mw": 13.987577846710078,
+   "quota": 3
+  },
+  {
+   "hour": 11,
+   "shortfall_pred_mw": 15.48435314043491,
+   "quota": 4
+  },
+  {
+   "hour": 12,
+   "shortfall_pred_mw": 16.757767605988,
+   "quota": 4
+  },
+  {
+   "hour": 13,
+   "shortfall_pred_mw": 17.721040151958814,
+   "quota": 4
+  },
+  {
+   "hour": 14,
+   "shortfall_pred_mw": 18.30852534622258,
+   "quota": 4
+  },
+  {
+   "hour": 15,
+   "shortfall_pred_mw": 18.48018704365542,
+   "quota": 4
+  },
+  {
+   "hour": 16,
+   "shortfall_pred_mw": 18.224326783261645,
+   "quota": 4
+  },
+  {
+   "hour": 17,
+   "shortfall_pred_mw": 17.55838101895802,
+   "quota": 4
+  },
+  {
+   "hour": 18,
+   "shortfall_pred_mw": 16.527732854054435,
+   "quota": 4
+  },
+  {
+   "hour": 19,
+   "shortfall_pred_mw": 15.202619257762437,
+   "quota": 4
+  },
+  {
+   "hour": 20,
+   "shortfall_pred_mw": 13.67334453181557,
+   "quota": 3
+  },
+  {
+   "hour": 21,
+   "shortfall_pred_mw": 12.044126221541138,
+   "quota": 3
+  },
+  {
+   "hour": 22,
+   "shortfall_pred_mw": 10.425992862373779,
+   "quota": 3
+  },
+  {
+   "hour": 23,
+   "shortfall_pred_mw": 8.929217568648946,
+   "quota": 2
+  }
+ ],
+ "notes": "MOCK FIXTURE - invented numbers, not real results."
+}

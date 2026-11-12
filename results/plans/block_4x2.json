@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:02:03Z",
+  "seed": 7,
+  "source": "scripts/run_classical.py",
+  "data_provenance": "synthetic",
+  "scenario": "block_4x2",
+  "description": "Small block: 4 synthetic feeders x 2 hours, quotas 2 and 1, feeder 3 is a telecom tower and never cut. 8 variables, 9 valid plans: used for quantum counting and Grover Adaptive Search.",
+  "instance": {
+    "name": "block_4x2",
+    "n_feeders": 4,
+    "n_hours": 2,
+    "start_hour": 18,
+    "feeder_mw": 5.0,
+    "shortfall_mw": [
+      6.8,
+      3.7
+    ],
+    "quotas": [
+      2,
+      1
+    ],
+    "feeders": [
+      {
+        "id": 0,
+        "name": "F0 Lyari",
+        "zone": "Lyari",
+        "kind": "commercial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 0.85,
+        "lat": 24.871,
+        "lon": 66.997
+      },
+      {
+        "id": 1,
+        "name": "F1 Saddar",
+        "zone": "Saddar",
+        "kind": "commercial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 0.7,
+        "lat": 24.856,
+        "lon": 67.023
+      },
+      {
+        "id": 2,
+        "name": "F2 Civil Lines",
+        "zone": "Civil Lines",
+        "kind": "commercial",
+        "protected": false,
+        "population": 15000,
+        "heat_index": 1.0,
+        "lat": 24.846,
+        "lon": 67.033
+      },
+      {
+        "id": 3,
+        "name": "F3 Korangi",
+        "zone": "Korangi",
+        "kind": "telecom",
+        "protected": true,
+        "population": 10000,
+        "heat_index": 0.85,
+        "lat": 24.83,
+        "lon": 67.132
+      }
+    ],
+    "hardship": [
+      [
+        1.0,
+        0.5,
+        1.0,
+        2.5
+      ],
+      [
+        1.0,
+        0.5,
+        1.0,
+        2.0
+      ]
+    ],
+    "ledger_hours": [
+      3.0,
+      0.0,
+      2.0,
+      0.0
+    ],
+    "prev_off": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "weights": {
+      "hardship": 1.0,
+      "fairness": 1.0,
+      "consecutive": 2.0
+    },
+    "rules": {
+      "max_consecutive": 2,
+      "max_daily_hours": 5
+    },
+    "fairness_target": 2.6666666666666665,
+    "qubo": {
+      "n_vars": 8,
+      "var_order": "q = t*n_feeders + f ; bits[q] is variable q (index-ordered)",
+      "terms": {
+        "hardship": {
+          "offset": 0.0,
+          "linear": [
+            1.0,
+            0.5,
+            1.0,
+            0.0,
+            1.0,
+            0.5,
+            1.0,
+            0.0
+          ],
+          "quadratic": []
+        },
+        "fairness": {
+          "offset": 7.666666666666667,
+          "linear": [
+            1.666666666666667,
+            -4.333333333333333,
+            -0.33333333333333304,
+            0.0,
+            1.666666666666667,
+            -4.333333333333333,
+            -0.33333333333333304,
+            0.0
+          ],
+          "quadratic": [
+            [
+              0,
+              4,
+              2.0
+            ],
+            [
+              1,
+              5,
+              2.0
+            ],
+            [
+              2,
+              6,
+              2.0
+            ]
+          ]
+        },
+        "consecutive": {
+          "offset": 0.0,
+          "linear": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "quadratic": [
+            [
+              0,
+              4,
+              1.0
+            ],
+            [
+              1,
+              5,
+              1.0
+            ],
+            [
+              2,
+              6,
+              1.0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "exact": {
+    "method": "brute_force",
+    "cost_min": 4.666666666666667,
+    "cost_max": 17.666666666666668,
+    "n_valid": 9,
+    "n_optimal": 1,
+    "optimal_bits": [
+      "01100100"
+    ]
+  },
+  "plans": [
+    {
+      "method": "exact",
+      "label": "Exact optimum",
+      "kind": "classical",
+      "bits": "01100100",
+      "matrix": [
+        [
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ]
+      ],
+      "cost": 4.666666666666667,
+      "breakdown": {
+        "hardship": 2.0,
+        "fairness": 0.6666666666666667,
+        "consecutive": 1.0
+      },
+      "feasible": true,
+      "approx_ratio": 1.0,
+      "fairness_entropy": 0.9850568223215077,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "Exact optimum (brute force over 9 valid plans); first of 1 optimal plan(s) in sorted order. audit passes all four rules"
+    },
+    {
+      "method": "round_robin",
+      "label": "Round-robin",
+      "kind": "classical",
+      "bits": "11000010",
+      "matrix": [
+        [
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ]
+      ],
+      "cost": 7.166666666666667,
+      "breakdown": {
+        "hardship": 2.5,
+        "fairness": 4.666666666666667,
+        "consecutive": 0.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.8076923076923077,
+      "fairness_entropy": 0.8868595071429147,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "Hardship-blind rotating pointer from the first non-protected feeder; audit passes all four rules"
+    },
+    {
+      "method": "random_valid",
+      "label": "Random valid (one draw)",
+      "kind": "classical",
+      "bits": "01100010",
+      "matrix": [
+        [
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ]
+      ],
+      "cost": 9.166666666666666,
+      "breakdown": {
+        "hardship": 2.5,
+        "fairness": 4.666666666666666,
+        "consecutive": 1.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.653846153846154,
+      "fairness_entropy": 0.8868595071429147,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "One uniform valid plan, rng seed 7; audit passes all four rules"
+    }
+  ],
+  "random_valid_stats": {
+    "n_samples": 2000,
+    "mean_cost": 9.841416666666667,
+    "mean_approx_ratio": 0.6019423076923077,
+    "cap_violation_pct": 0.0,
+    "p_optimal": 0.107
+  }
+}

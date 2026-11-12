@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:03:43Z",
+  "seed": 0,
+  "source": "tests/conftest.py (pytest run)",
+  "data_provenance": "synthetic",
+  "checks": [
+    {
+      "id": "C01",
+      "name": "Cost model equals QUBO and Pauli forms on every bitstring",
+      "passed": true,
+      "detail": "5376 bitstrings over 3 instances (8-12 variables), max |diff| 1.8e-14",
+      "area": "classical",
+      "test": "tests/classical/test_cls_cost_model.py::test_cost_equals_qubo_and_pauli"
+    },
+    {
+      "id": "C02",
+      "name": "Brute force over valid plans equals the minimum over all 2^n bitstrings filtered by validity",
+      "passed": true,
+      "detail": "4x3_prevoff_protected: 27 valid of 4096; 5x2_prevoff_protected: 24 valid of 1024; block_4x2: 9 valid of 256",
+      "area": "classical",
+      "test": "tests/classical/test_cls_cost_model.py::test_brute_force_equals_filtered_full_enumeration"
+    },
+    {
+      "id": "C03",
+      "name": "MILP optimum equals brute-force optimum",
+      "passed": true,
+      "detail": "min and max agree with brute force on 10 instances (12-24 variables), all MILP plans valid",
+      "area": "classical",
+      "test": "tests/classical/test_cls_milp.py::test_milp_equals_brute_force"
+    },
+    {
+      "id": "C04",
+      "name": "Round-robin and random-valid baselines always return valid plans",
+      "passed": true,
+      "detail": "94 round-robin plans and 1350 random plans valid across 9 scenarios",
+      "area": "classical",
+      "test": "tests/classical/test_cls_baselines.py::test_baselines_always_valid"
+    },
+    {
+      "id": "C05",
+      "name": "Scenario heatwave_cap: round-robin and random fail the cap, the exact plan passes",
+      "passed": true,
+      "detail": "exact cost 40.67, audit passes; round-robin cost 121.17 (3.0x, approx ratio 0.70, 4 violations); random-valid breaks the cap in 99.6% of 2000 samples (mean ratio 0.64); 24 of 6000 valid plans pass the audit",
+      "area": "classical",
+      "test": "tests/classical/test_cls_baselines.py::test_heatwave_cap_baselines_fail"
+    },
+    {
+      "id": "C06",
+      "name": "Fixed seed reproduces identical instance and plans",
+      "passed": true,
+      "detail": "5 scenarios built twice with seed 7: instance and plans files identical after strip_volatile",
+      "area": "classical",
+      "test": "tests/classical/test_cls_baselines.py::test_fixed_seed_reproduces"
+    },
+    {
+      "id": "C07",
+      "name": "Audit flags each of the four rules and passes a clean plan",
+      "passed": true,
+      "detail": "clean plan scores 100; each rule flagged alone (quota 1, protected 1, cap 1, daily 1); all-ones schedule trips 14 of 14 checks, score 0",
+      "area": "classical",
+      "test": "tests/classical/test_cls_audit.py::test_audit_flags_each_rule"
+    },
+    {
+      "id": "C08",
+      "name": "Base instance matches the spec: 8x3, quotas 3,2,4, feeders 2 and 6 protected",
+      "passed": true,
+      "detail": "8x3, quotas [3, 2, 4], protected [2, 6], 24 variables (18 free), 4500 valid plans",
+      "area": "classical",
+      "test": "tests/classical/test_cls_cost_model.py::test_base_instance_spec"
+    },
+    {
+      "id": "C09",
+      "name": "Bit order: bits[t*N+f] equals matrix[t][f]",
+      "passed": true,
+      "detail": "1000 (hour, feeder) cells checked across 9 scenarios; index q = t*N + f",
+      "area": "classical",
+      "test": "tests/classical/test_cls_cost_model.py::test_bit_order"
+    },
+    {
+      "id": "C10",
+      "name": "Ridge forecast is reproducible and beats a mean predictor on the test set",
+      "passed": true,
+      "detail": "R2 0.875, MAE 1.25 MW vs 4.33 MW for a mean predictor on 168 held-out hours; two seed-7 runs identical",
+      "area": "classical",
+      "test": "tests/classical/test_forecast.py::test_ridge_forecast_reproducible_and_beats_mean_predictor"
+    },
+    {
+      "id": "C11",
+      "name": "Forecast file states weather provenance and synthetic demand",
+      "passed": true,
+      "detail": "open-meteo-snapshot=real; synthetic-scenario-file=synthetic; open-meteo-snapshot=real; results/forecast.json: open-meteo-snapshot=real; demand_provenance synthetic in every case",
+      "area": "classical",
+      "test": "tests/classical/test_forecast.py::test_forecast_states_weather_provenance_and_synthetic_demand"
+    },
+    {
+      "id": "C12",
+      "name": "Replay commits a valid, quota-exact, protected-safe plan every hour",
+      "passed": true,
+      "detail": "12 of 12 frames valid; quotas [1, 1, 1, 2, 2, 3, 3, 3, 4, 3, 2, 2]; protected feeders 2 and 6 never off; ledger_after equals the running sum; 12/12 match the exact optimum",
+      "area": "classical",
+      "test": "tests/classical/test_replay.py::test_replay_commits_valid_quota_exact_protected_safe_plans"
+    },
+    {
+      "id": "C13",
+      "name": "Replay falls back to exact when the quantum solver is unavailable or wrong",
+      "passed": true,
+      "detail": "8 failure modes fell back to exact (C:\\Users\\AHMED AYAN\\AppData\\Local\\Temp\\pytest-of-AHMED AYAN\\pytest-2\\test_replay_falls_back_to_exac0\\no_such_script.py not found; command not found; invalid plan returned (quota or protected rule broken); invalid plan returned (quota or protected rule broken); exit code 3; unreadable output file; no output file written; timeout after 1s); correct fake solver accepted on 3 of 3 frames with warm start passed",
+      "area": "classical",
+      "test": "tests/classical/test_replay.py::test_replay_falls_back_to_exact_and_accepts_a_correct_solver"
+    },
+    {
+      "id": "C14",
+      "name": "Replay with a fixed seed reproduces identical frames",
+      "passed": true,
+      "detail": "12 exact frames identical across two seed-7 runs; 3 fake-solver frames identical across two runs",
+      "area": "classical",
+      "test": "tests/classical/test_replay.py::test_replay_with_fixed_seed_reproduces_identical_frames"
+    }
+  ],
+  "summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0
+  }
+}

@@ -1,0 +1,46 @@
+/* Design tokens. Colours here are read by ui/tests/contrast.py - keep them as 6-digit hex.
+   Rule: colour carries meaning only for feeder state (on / off / protected) and errors (danger).
+   Exactly one accent (iris) is used for interface chrome. */
+:root {
+  /* surfaces */
+  --bg: #0B1220;
+  --panel: #121A2B;
+  --raised: #182238;
+  --border: #1F2A40;
+  --border-strong: #66769A;
+
+  /* text */
+  --text: #E6EAF2;
+  --text-dim: #B4BDCE;
+  --muted: #8A94A8;
+
+  /* feeder state (always paired with an icon and a text label) */
+  --on: #2DD4A7;
+  --off: #F5A524;
+  --protected: #4C9AFF;
+  --danger: #F26D6D;
+
+  /* flat chip tints for the four state colours */
+  --on-tint: #0F2E2D;
+  --off-tint: #32250F;
+  --protected-tint: #112848;
+  --danger-tint: #3A1A24;
+
+  /* the single interface accent */
+  --accent: #A99CFF;
+  --accent-tint: #221F40;
+
+  /* second data-series colour for charts (neutral, not a state colour) */
+  --series-b: #C9D2E3;
+
+  /* type */
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* shape and rhythm */
+  --radius: 6px;
+  --gap: 16px;
+  --target: 40px;
+  --rail-w: 88px;
+  --top-h: 56px;
+}

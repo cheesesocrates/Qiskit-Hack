@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lottery",
+  "description": "Sampled plans from the Grover-mixer circuit and per-feeder outage marginals.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "method": {
+      "type": "string"
+    },
+    "instance_name": {
+      "type": "string"
+    },
+    "shots": {
+      "type": "integer"
+    },
+    "n_qubits": {
+      "type": "integer"
+    },
+    "layers": {
+      "type": "integer"
+    },
+    "all_feasible": {
+      "type": "boolean"
+    },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bits": {
+            "type": "string",
+            "pattern": "^[01]+$"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "prob": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "cost": {
+            "type": "number"
+          },
+          "feasible": {
+            "type": "boolean"
+          },
+          "is_optimal": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bits",
+          "count",
+          "prob",
+          "cost",
+          "feasible",
+          "is_optimal"
+        ]
+      },
+      "minItems": 1
+    },
+    "marginals": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "expected_hours": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "tie_groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cost": {
+            "type": "number"
+          },
+          "n_plans": {
+            "type": "integer"
+          },
+          "prob_min": {
+            "type": "number"
+          },
+          "prob_max": {
+            "type": "number"
+          },
+          "prob_spread": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "cost",
+          "n_plans",
+          "prob_min",
+          "prob_max",
+          "prob_spread"
+        ]
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "method",
+    "instance_name",
+    "shots",
+    "n_qubits",
+    "layers",
+    "all_feasible",
+    "samples",
+    "marginals",
+    "expected_hours",
+    "tie_groups",
+    "notes"
+  ]
+}

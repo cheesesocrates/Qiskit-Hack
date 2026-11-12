@@ -1,0 +1,609 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:02:16Z",
+  "seed": 7,
+  "source": "scripts/run_classical.py",
+  "data_provenance": "synthetic",
+  "scenario": "scale_12x2",
+  "description": "Scaling instance: 12 synthetic feeders x 2 hours (24 variables, 10 non-protected), quotas 3 and 4. Protected: feeder 2 (hospital), feeder 6 (water_pump).",
+  "instance": {
+    "name": "scale_12x2",
+    "n_feeders": 12,
+    "n_hours": 2,
+    "start_hour": 18,
+    "feeder_mw": 5.0,
+    "shortfall_mw": [
+      12.6,
+      17.3
+    ],
+    "quotas": [
+      3,
+      4
+    ],
+    "feeders": [
+      {
+        "id": 0,
+        "name": "F0 Lyari",
+        "zone": "Lyari",
+        "kind": "residential",
+        "protected": false,
+        "population": 50000,
+        "heat_index": 1.0,
+        "lat": 24.871,
+        "lon": 66.997
+      },
+      {
+        "id": 1,
+        "name": "F1 Saddar",
+        "zone": "Saddar",
+        "kind": "commercial",
+        "protected": false,
+        "population": 20000,
+        "heat_index": 0.7,
+        "lat": 24.856,
+        "lon": 67.023
+      },
+      {
+        "id": 2,
+        "name": "F2 Civil Lines",
+        "zone": "Civil Lines",
+        "kind": "hospital",
+        "protected": true,
+        "population": 15000,
+        "heat_index": 0.7,
+        "lat": 24.846,
+        "lon": 67.033
+      },
+      {
+        "id": 3,
+        "name": "F3 Korangi",
+        "zone": "Korangi",
+        "kind": "residential",
+        "protected": false,
+        "population": 40000,
+        "heat_index": 1.0,
+        "lat": 24.83,
+        "lon": 67.132
+      },
+      {
+        "id": 4,
+        "name": "F4 Gulshan-e-Iqbal",
+        "zone": "Gulshan-e-Iqbal",
+        "kind": "residential",
+        "protected": false,
+        "population": 60000,
+        "heat_index": 0.7,
+        "lat": 24.918,
+        "lon": 67.097
+      },
+      {
+        "id": 5,
+        "name": "F5 North Nazimabad",
+        "zone": "North Nazimabad",
+        "kind": "commercial",
+        "protected": false,
+        "population": 5000,
+        "heat_index": 0.7,
+        "lat": 24.942,
+        "lon": 67.045
+      },
+      {
+        "id": 6,
+        "name": "F6 Dhabeji Pumping",
+        "zone": "Dhabeji Pumping",
+        "kind": "water_pump",
+        "protected": true,
+        "population": 10000,
+        "heat_index": 1.0,
+        "lat": 24.905,
+        "lon": 67.14
+      },
+      {
+        "id": 7,
+        "name": "F7 Orangi Town",
+        "zone": "Orangi Town",
+        "kind": "industrial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 1.0,
+        "lat": 24.951,
+        "lon": 66.985
+      },
+      {
+        "id": 8,
+        "name": "F8 Malir",
+        "zone": "Malir",
+        "kind": "industrial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 0.85,
+        "lat": 24.893,
+        "lon": 67.196
+      },
+      {
+        "id": 9,
+        "name": "F9 Landhi",
+        "zone": "Landhi",
+        "kind": "residential",
+        "protected": false,
+        "population": 55000,
+        "heat_index": 1.0,
+        "lat": 24.848,
+        "lon": 67.2
+      },
+      {
+        "id": 10,
+        "name": "F10 SITE",
+        "zone": "SITE",
+        "kind": "industrial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 1.0,
+        "lat": 24.899,
+        "lon": 66.99
+      },
+      {
+        "id": 11,
+        "name": "F11 Gulistan-e-Jauhar",
+        "zone": "Gulistan-e-Jauhar",
+        "kind": "residential",
+        "protected": false,
+        "population": 55000,
+        "heat_index": 0.7,
+        "lat": 24.914,
+        "lon": 67.13
+      }
+    ],
+    "hardship": [
+      [
+        4.0,
+        1.0,
+        3.5,
+        3.5,
+        3.0,
+        0.5,
+        3.5,
+        0.5,
+        0.5,
+        4.5,
+        0.5,
+        3.0
+      ],
+      [
+        4.0,
+        1.0,
+        3.0,
+        3.5,
+        3.0,
+        0.5,
+        3.5,
+        0.5,
+        0.5,
+        4.0,
+        0.5,
+        3.0
+      ]
+    ],
+    "ledger_hours": [
+      0.0,
+      0.0,
+      0.0,
+      3.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      2.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "prev_off": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "weights": {
+      "hardship": 1.0,
+      "fairness": 1.0,
+      "consecutive": 2.0
+    },
+    "rules": {
+      "max_consecutive": 2,
+      "max_daily_hours": 5
+    },
+    "fairness_target": 1.6,
+    "qubo": {
+      "n_vars": 24,
+      "var_order": "q = t*n_feeders + f ; bits[q] is variable q (index-ordered)",
+      "terms": {
+        "hardship": {
+          "offset": 0.0,
+          "linear": [
+            4.0,
+            1.0,
+            0.0,
+            3.5,
+            3.0,
+            0.5,
+            0.0,
+            0.5,
+            0.5,
+            4.5,
+            0.5,
+            3.0,
+            4.0,
+            1.0,
+            0.0,
+            3.5,
+            3.0,
+            0.5,
+            0.0,
+            0.5,
+            0.5,
+            4.0,
+            0.5,
+            3.0
+          ],
+          "quadratic": []
+        },
+        "fairness": {
+          "offset": 13.8,
+          "linear": [
+            -2.2,
+            -2.2,
+            0.0,
+            3.8,
+            -0.20000000000000018,
+            -2.2,
+            0.0,
+            -2.2,
+            1.7999999999999998,
+            -0.20000000000000018,
+            -0.20000000000000018,
+            -0.20000000000000018,
+            -2.2,
+            -2.2,
+            0.0,
+            3.8,
+            -0.20000000000000018,
+            -2.2,
+            0.0,
+            -2.2,
+            1.7999999999999998,
+            -0.20000000000000018,
+            -0.20000000000000018,
+            -0.20000000000000018
+          ],
+          "quadratic": [
+            [
+              0,
+              12,
+              2.0
+            ],
+            [
+              1,
+              13,
+              2.0
+            ],
+            [
+              3,
+              15,
+              2.0
+            ],
+            [
+              4,
+              16,
+              2.0
+            ],
+            [
+              5,
+              17,
+              2.0
+            ],
+            [
+              7,
+              19,
+              2.0
+            ],
+            [
+              8,
+              20,
+              2.0
+            ],
+            [
+              9,
+              21,
+              2.0
+            ],
+            [
+              10,
+              22,
+              2.0
+            ],
+            [
+              11,
+              23,
+              2.0
+            ]
+          ]
+        },
+        "consecutive": {
+          "offset": 0.0,
+          "linear": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "quadratic": [
+            [
+              0,
+              12,
+              1.0
+            ],
+            [
+              1,
+              13,
+              1.0
+            ],
+            [
+              3,
+              15,
+              1.0
+            ],
+            [
+              4,
+              16,
+              1.0
+            ],
+            [
+              5,
+              17,
+              1.0
+            ],
+            [
+              7,
+              19,
+              1.0
+            ],
+            [
+              8,
+              20,
+              1.0
+            ],
+            [
+              9,
+              21,
+              1.0
+            ],
+            [
+              10,
+              22,
+              1.0
+            ],
+            [
+              11,
+              23,
+              1.0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "exact": {
+    "method": "brute_force",
+    "cost_min": 15.9,
+    "cost_max": 56.900000000000006,
+    "n_valid": 25200,
+    "n_optimal": 23,
+    "optimal_bits": [
+      "000000011010110001010000",
+      "000001001010110001010000",
+      "000001010010110000011000",
+      "000001010010110001001000",
+      "000001010010110001010000",
+      "000001011000110000010010",
+      "000001011000110001000010",
+      "010000010010100001011000",
+      "010000011000100001010010",
+      "010001000010100001011000",
+      "010001001000100001010010",
+      "010001010000100000011010",
+      "010001010000100001001010",
+      "010001010000100001010010",
+      "100000010010010001011000",
+      "100000011000010001010010",
+      "100001000010010001011000",
+      "100001001000010001010010",
+      "100001010000010000011010",
+      "100001010000010001001010",
+      "100001010000010001010010",
+      "110000010000000001011010",
+      "110001000000000001011010"
+    ]
+  },
+  "plans": [
+    {
+      "method": "exact",
+      "label": "Exact optimum",
+      "kind": "classical",
+      "bits": "000000011010110001010000",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "cost": 15.9,
+      "breakdown": {
+        "hardship": 7.5,
+        "fairness": 6.4,
+        "consecutive": 1.0
+      },
+      "feasible": true,
+      "approx_ratio": 1.0,
+      "fairness_entropy": 0.9499420132200559,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "Exact optimum (brute force over 25200 valid plans); first of 23 optimal plan(s) in sorted order. audit passes all four rules"
+    },
+    {
+      "method": "round_robin",
+      "label": "Round-robin",
+      "kind": "classical",
+      "bits": "110100000000000011011000",
+      "matrix": [
+        [
+          1,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      ],
+      "cost": 23.4,
+      "breakdown": {
+        "hardship": 13.0,
+        "fairness": 10.399999999999999,
+        "consecutive": 0.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.8170731707317074,
+      "fairness_entropy": 0.9265160001059995,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "Hardship-blind rotating pointer from the first non-protected feeder; audit passes all four rules"
+    },
+    {
+      "method": "random_valid",
+      "label": "Random valid (one draw)",
+      "kind": "classical",
+      "bits": "000000011100100100011000",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      ],
+      "cost": 36.4,
+      "breakdown": {
+        "hardship": 14.0,
+        "fairness": 18.4,
+        "consecutive": 2.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.5000000000000001,
+      "fairness_entropy": 0.8278324880759481,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "One uniform valid plan, rng seed 7; audit passes all four rules"
+    }
+  ],
+  "random_valid_stats": {
+    "n_samples": 2000,
+    "mean_cost": 30.18424999999999,
+    "mean_approx_ratio": 0.6516036585365854,
+    "cap_violation_pct": 0.0,
+    "p_optimal": 0.0015
+  }
+}

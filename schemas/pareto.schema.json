@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pareto",
+  "description": "Precomputed plans across fairness weights (the dashboard's fairness slider).",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "instance_name": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "fairness_metric_name": {
+      "type": "string"
+    },
+    "default_index": {
+      "type": "integer"
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fairness_weight": {
+            "type": "number"
+          },
+          "plan": {
+            "type": "object",
+            "properties": {
+              "bits": {
+                "type": "string",
+                "pattern": "^[01]+$"
+              },
+              "matrix": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            },
+            "required": [
+              "bits",
+              "matrix"
+            ]
+          },
+          "cost": {
+            "type": "number"
+          },
+          "breakdown": {
+            "type": "object",
+            "properties": {
+              "hardship": {
+                "type": "number"
+              },
+              "fairness": {
+                "type": "number"
+              },
+              "consecutive": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "hardship",
+              "fairness",
+              "consecutive"
+            ],
+            "description": "Unweighted term values; cost = sum(weights[k] * breakdown[k])."
+          },
+          "fairness_metric": {
+            "type": "number"
+          },
+          "fairness_entropy": {
+            "type": "number"
+          },
+          "hardship_total": {
+            "type": "number"
+          },
+          "exact_cost": {
+            "type": "number"
+          },
+          "matches_exact": {
+            "type": "boolean"
+          },
+          "p_optimal": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "fairness_weight",
+          "plan",
+          "cost",
+          "breakdown",
+          "fairness_metric",
+          "fairness_entropy",
+          "hardship_total",
+          "exact_cost",
+          "matches_exact",
+          "p_optimal"
+        ]
+      },
+      "minItems": 1
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "instance_name",
+    "method",
+    "fairness_metric_name",
+    "default_index",
+    "points",
+    "notes"
+  ]
+}

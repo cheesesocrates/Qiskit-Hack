@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "checks": [
+  {
+   "id": "C01",
+   "name": "Cost model equals classical cost",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "classical",
+   "test": "tests/mock/test_c01.py"
+  },
+  {
+   "id": "C02",
+   "name": "QUBO equals direct cost on all bitstrings",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "classical",
+   "test": "tests/mock/test_c02.py"
+  },
+  {
+   "id": "C03",
+   "name": "Baselines are valid plans",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "classical",
+   "test": "tests/mock/test_c03.py"
+  },
+  {
+   "id": "Q01",
+   "name": "Dicke preparation gives uniform weight-m states",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "quantum",
+   "test": "tests/mock/test_q01.py"
+  },
+  {
+   "id": "Q02",
+   "name": "Sampled XY and Grover-mixer plans satisfy quota and protected rules",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "quantum",
+   "test": "tests/mock/test_q02.py"
+  },
+  {
+   "id": "Q03",
+   "name": "Equal-cost plans get equal Grover-mixer amplitude",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "quantum",
+   "test": "tests/mock/test_q03.py"
+  },
+  {
+   "id": "Q04",
+   "name": "Qubit-to-plan bit order is correct",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "quantum",
+   "test": "tests/mock/test_q04.py"
+  },
+  {
+   "id": "Q05",
+   "name": "Counting is within tolerance of enumeration",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "quantum",
+   "test": "tests/mock/test_q05.py"
+  },
+  {
+   "id": "Q06",
+   "name": "Risk estimate within tolerance of exact CVaR",
+   "passed": false,
+   "detail": "MOCK failure to exercise the UI.",
+   "area": "quantum",
+   "test": "tests/mock/test_q06.py"
+  },
+  {
+   "id": "S01",
+   "name": "All results JSON validates against schemas",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "shared",
+   "test": "tests/mock/test_s01.py"
+  },
+  {
+   "id": "U01",
+   "name": "Dashboard loads all seven screens with no console errors",
+   "passed": true,
+   "detail": "MOCK FIXTURE - invented numbers, not real results.",
+   "area": "ui",
+   "test": "tests/mock/test_u01.py"
+  }
+ ],
+ "summary": {
+  "total": 11,
+  "passed": 10,
+  "failed": 1
+ }
+}

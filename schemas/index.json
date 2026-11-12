@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "files": {
+    "instance.json": "instance",
+    "plans/*.json": "plans",
+    "ablation.json": "ablation",
+    "lottery.json": "lottery",
+    "pareto.json": "pareto",
+    "checks.json": "checks",
+    "audit_example.json": "audit_example",
+    "replay.json": "replay",
+    "risk.json": "risk",
+    "counting.json": "counting",
+    "scaling.json": "scaling",
+    "forecast.json": "forecast"
+  }
+}

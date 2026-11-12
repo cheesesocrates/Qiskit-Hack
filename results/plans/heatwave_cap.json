@@ -1,0 +1,596 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:02:02Z",
+  "seed": 7,
+  "source": "scripts/run_classical.py",
+  "data_provenance": "synthetic",
+  "scenario": "heatwave_cap",
+  "description": "Afternoon heatwave, 14:00-17:00, 8 synthetic feeders x 3 hours, quotas 2, 3, 3. Hardship is very unequal across feeders and peaks at 15:00. A feeder may not be off two hours running (max_consecutive = 1). Feeders 0 and 1 (dense hot residential zones) were cut in the hour before the window and already have 4 outage hours on the ledger (daily limit 5). Round-robin from feeder 0 and random-valid plans both ignore this; the exact plan respects the cap.",
+  "instance": {
+    "name": "heatwave_cap",
+    "n_feeders": 8,
+    "n_hours": 3,
+    "start_hour": 14,
+    "feeder_mw": 5.0,
+    "shortfall_mw": [
+      6.2,
+      12.3,
+      10.6
+    ],
+    "quotas": [
+      2,
+      3,
+      3
+    ],
+    "feeders": [
+      {
+        "id": 0,
+        "name": "F0 Lyari",
+        "zone": "Lyari",
+        "kind": "residential",
+        "protected": false,
+        "population": 55000,
+        "heat_index": 1.0,
+        "lat": 24.871,
+        "lon": 66.997
+      },
+      {
+        "id": 1,
+        "name": "F1 Saddar",
+        "zone": "Saddar",
+        "kind": "residential",
+        "protected": false,
+        "population": 50000,
+        "heat_index": 1.0,
+        "lat": 24.856,
+        "lon": 67.023
+      },
+      {
+        "id": 2,
+        "name": "F2 Civil Lines",
+        "zone": "Civil Lines",
+        "kind": "hospital",
+        "protected": true,
+        "population": 15000,
+        "heat_index": 0.7,
+        "lat": 24.846,
+        "lon": 67.033
+      },
+      {
+        "id": 3,
+        "name": "F3 Korangi",
+        "zone": "Korangi",
+        "kind": "industrial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 0.7,
+        "lat": 24.83,
+        "lon": 67.132
+      },
+      {
+        "id": 4,
+        "name": "F4 Gulshan-e-Iqbal",
+        "zone": "Gulshan-e-Iqbal",
+        "kind": "residential",
+        "protected": false,
+        "population": 60000,
+        "heat_index": 0.85,
+        "lat": 24.918,
+        "lon": 67.097
+      },
+      {
+        "id": 5,
+        "name": "F5 North Nazimabad",
+        "zone": "North Nazimabad",
+        "kind": "commercial",
+        "protected": false,
+        "population": 20000,
+        "heat_index": 0.85,
+        "lat": 24.942,
+        "lon": 67.045
+      },
+      {
+        "id": 6,
+        "name": "F6 Dhabeji Pumping",
+        "zone": "Dhabeji Pumping",
+        "kind": "water_pump",
+        "protected": true,
+        "population": 10000,
+        "heat_index": 0.85,
+        "lat": 24.905,
+        "lon": 67.14
+      },
+      {
+        "id": 7,
+        "name": "F7 Orangi Town",
+        "zone": "Orangi Town",
+        "kind": "residential",
+        "protected": false,
+        "population": 35000,
+        "heat_index": 1.0,
+        "lat": 24.951,
+        "lon": 66.985
+      }
+    ],
+    "hardship": [
+      [
+        3.0,
+        3.0,
+        3.0,
+        0.5,
+        3.0,
+        1.0,
+        2.5,
+        2.0
+      ],
+      [
+        5.5,
+        5.0,
+        5.0,
+        0.5,
+        5.0,
+        2.0,
+        4.0,
+        4.0
+      ],
+      [
+        4.0,
+        4.0,
+        4.0,
+        0.5,
+        4.0,
+        1.5,
+        3.5,
+        3.0
+      ]
+    ],
+    "ledger_hours": [
+      4.0,
+      4.0,
+      0.0,
+      1.0,
+      2.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "prev_off": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "weights": {
+      "hardship": 1.0,
+      "fairness": 2.0,
+      "consecutive": 25.0
+    },
+    "rules": {
+      "max_consecutive": 1,
+      "max_daily_hours": 5
+    },
+    "fairness_target": 3.3333333333333335,
+    "qubo": {
+      "n_vars": 24,
+      "var_order": "q = t*n_feeders + f ; bits[q] is variable q (index-ordered)",
+      "terms": {
+        "hardship": {
+          "offset": 0.0,
+          "linear": [
+            3.0,
+            3.0,
+            0.0,
+            0.5,
+            3.0,
+            1.0,
+            0.0,
+            2.0,
+            5.5,
+            5.0,
+            0.0,
+            0.5,
+            5.0,
+            2.0,
+            0.0,
+            4.0,
+            4.0,
+            4.0,
+            0.0,
+            0.5,
+            4.0,
+            1.5,
+            0.0,
+            3.0
+          ],
+          "quadratic": []
+        },
+        "fairness": {
+          "offset": 24.66666666666667,
+          "linear": [
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667,
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667,
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667
+          ],
+          "quadratic": [
+            [
+              0,
+              8,
+              2.0
+            ],
+            [
+              0,
+              16,
+              2.0
+            ],
+            [
+              8,
+              16,
+              2.0
+            ],
+            [
+              1,
+              9,
+              2.0
+            ],
+            [
+              1,
+              17,
+              2.0
+            ],
+            [
+              9,
+              17,
+              2.0
+            ],
+            [
+              3,
+              11,
+              2.0
+            ],
+            [
+              3,
+              19,
+              2.0
+            ],
+            [
+              11,
+              19,
+              2.0
+            ],
+            [
+              4,
+              12,
+              2.0
+            ],
+            [
+              4,
+              20,
+              2.0
+            ],
+            [
+              12,
+              20,
+              2.0
+            ],
+            [
+              5,
+              13,
+              2.0
+            ],
+            [
+              5,
+              21,
+              2.0
+            ],
+            [
+              13,
+              21,
+              2.0
+            ],
+            [
+              7,
+              15,
+              2.0
+            ],
+            [
+              7,
+              23,
+              2.0
+            ],
+            [
+              15,
+              23,
+              2.0
+            ]
+          ]
+        },
+        "consecutive": {
+          "offset": 0.0,
+          "linear": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "quadratic": [
+            [
+              0,
+              8,
+              1.0
+            ],
+            [
+              8,
+              16,
+              1.0
+            ],
+            [
+              1,
+              9,
+              1.0
+            ],
+            [
+              9,
+              17,
+              1.0
+            ],
+            [
+              3,
+              11,
+              1.0
+            ],
+            [
+              11,
+              19,
+              1.0
+            ],
+            [
+              4,
+              12,
+              1.0
+            ],
+            [
+              12,
+              20,
+              1.0
+            ],
+            [
+              5,
+              13,
+              1.0
+            ],
+            [
+              13,
+              21,
+              1.0
+            ],
+            [
+              7,
+              15,
+              1.0
+            ],
+            [
+              15,
+              23,
+              1.0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "exact": {
+    "method": "brute_force",
+    "cost_min": 40.66666666666667,
+    "cost_max": 307.16666666666663,
+    "n_valid": 6000,
+    "n_optimal": 2,
+    "optimal_bits": [
+      "000001010101100010000101",
+      "000100010100110010010001"
+    ]
+  },
+  "plans": [
+    {
+      "method": "exact",
+      "label": "Exact optimum",
+      "kind": "classical",
+      "bits": "000001010101100010000101",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ]
+      ],
+      "cost": 40.66666666666667,
+      "breakdown": {
+        "hardship": 22.0,
+        "fairness": 9.333333333333334,
+        "consecutive": 0.0
+      },
+      "feasible": true,
+      "approx_ratio": 1.0,
+      "fairness_entropy": 0.9615130960445009,
+      "audit_passed": true,
+      "n_violations": 0,
+      "notes": "Exact optimum (brute force over 6000 valid plans); first of 2 optimal plan(s) in sorted order. audit passes all four rules"
+    },
+    {
+      "method": "round_robin",
+      "label": "Round-robin",
+      "kind": "classical",
+      "bits": "110000000001110011000001",
+      "matrix": [
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "cost": 121.16666666666667,
+      "breakdown": {
+        "hardship": 24.5,
+        "fairness": 23.333333333333336,
+        "consecutive": 2.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.697936210131332,
+      "fairness_entropy": 0.9026073758112831,
+      "audit_passed": false,
+      "n_violations": 4,
+      "notes": "Hardship-blind rotating pointer from the first non-protected feeder; audit violations: max_consecutive x2, daily_hours x2"
+    },
+    {
+      "method": "random_valid",
+      "label": "Random valid (one draw)",
+      "kind": "classical",
+      "bits": "000011000001110011000001",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "cost": 99.16666666666667,
+      "breakdown": {
+        "hardship": 22.5,
+        "fairness": 13.333333333333334,
+        "consecutive": 2.0
+      },
+      "feasible": true,
+      "approx_ratio": 0.7804878048780487,
+      "fairness_entropy": 0.9374293327889572,
+      "audit_passed": false,
+      "n_violations": 2,
+      "notes": "One uniform valid plan, rng seed 7; audit violations: max_consecutive x2"
+    }
+  ],
+  "random_valid_stats": {
+    "n_samples": 2000,
+    "mean_cost": 137.8309166666667,
+    "mean_approx_ratio": 0.635406191369606,
+    "cap_violation_pct": 99.6,
+    "p_optimal": 0.0005
+  }
+}

@@ -1,0 +1,86 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "method": "iterative_amplitude_estimation",
+ "block": {
+  "n_feeders": 4,
+  "feeder_ids": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "critical_feeder_ids": [
+   1
+  ],
+  "description": "4-feeder block with the hospital feeder"
+ },
+ "alpha": 0.9,
+ "loss_unit": "customer-hours",
+ "residual_source": "forecast residuals (MOCK)",
+ "scenarios": [
+  {
+   "label": "Forecast",
+   "shortfall_extra_mw": 0.0,
+   "prob": 0.45,
+   "loss": 0.0
+  },
+  {
+   "label": "+10% shortfall",
+   "shortfall_extra_mw": 2.5,
+   "prob": 0.27,
+   "loss": 1.5
+  },
+  {
+   "label": "+20% shortfall",
+   "shortfall_extra_mw": 5.0,
+   "prob": 0.15,
+   "loss": 4.0
+  },
+  {
+   "label": "+35% shortfall",
+   "shortfall_extra_mw": 7.5,
+   "prob": 0.09,
+   "loss": 7.5
+  },
+  {
+   "label": "+50% shortfall",
+   "shortfall_extra_mw": 10.0,
+   "prob": 0.04,
+   "loss": 12.0
+  }
+ ],
+ "n_qubits": 7,
+ "epsilon_target": 0.01,
+ "confidence_alpha": 0.05,
+ "oracle_queries": 3340,
+ "exact": {
+  "expected_loss": 2.1599999999999997,
+  "tail_prob": 0.13,
+  "var": 7.5,
+  "cvar": 9.3
+ },
+ "estimated": {
+  "expected_loss": 2.1815999999999995,
+  "expected_loss_ci": [
+   2.0951999999999997,
+   2.268
+  ],
+  "tail_prob": 0.1274,
+  "tail_prob_ci": [
+   0.117,
+   0.14300000000000002
+  ],
+  "var": 7.5,
+  "cvar": 9.207,
+  "cvar_ci": [
+   8.649000000000001,
+   9.858
+  ]
+ },
+ "within_tolerance": true,
+ "notes": "MOCK FIXTURE - invented numbers, not real results."
+}

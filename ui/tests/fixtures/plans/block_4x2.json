@@ -1,0 +1,303 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "scenario": "block_4x2",
+ "description": "Small 4x2 block used for counting and the Grover comparator.",
+ "instance": {
+  "name": "block_4x2",
+  "n_feeders": 4,
+  "n_hours": 2,
+  "start_hour": 18,
+  "feeder_mw": 5.0,
+  "shortfall_mw": [
+   8.0,
+   3.0
+  ],
+  "quotas": [
+   2,
+   1
+  ],
+  "feeders": [
+   {
+    "id": 0,
+    "name": "F0 Lyari",
+    "zone": "Lyari",
+    "kind": "commercial",
+    "protected": false,
+    "population": 15000,
+    "heat_index": 1.0,
+    "lat": 24.871,
+    "lon": 66.997
+   },
+   {
+    "id": 1,
+    "name": "F1 Saddar",
+    "zone": "Saddar",
+    "kind": "hospital",
+    "protected": true,
+    "population": 10000,
+    "heat_index": 0.85,
+    "lat": 24.856,
+    "lon": 67.023
+   },
+   {
+    "id": 2,
+    "name": "F2 Civil Lines",
+    "zone": "Civil Lines",
+    "kind": "commercial",
+    "protected": false,
+    "population": 10000,
+    "heat_index": 1.0,
+    "lat": 24.846,
+    "lon": 67.033
+   },
+   {
+    "id": 3,
+    "name": "F3 Korangi",
+    "zone": "Korangi",
+    "kind": "residential",
+    "protected": false,
+    "population": 30000,
+    "heat_index": 0.7,
+    "lat": 24.83,
+    "lon": 67.132
+   }
+  ],
+  "hardship": [
+   [
+    1.0,
+    3.5,
+    1.0,
+    1.5
+   ],
+   [
+    1.0,
+    3.5,
+    1.0,
+    1.5
+   ]
+  ],
+  "ledger_hours": [
+   2.0,
+   0.0,
+   3.0,
+   1.0
+  ],
+  "prev_off": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "weights": {
+   "hardship": 1.0,
+   "fairness": 1.0,
+   "consecutive": 2.0
+  },
+  "rules": {
+   "max_consecutive": 2,
+   "max_daily_hours": 5
+  },
+  "fairness_target": 3.0,
+  "qubo": {
+   "n_vars": 8,
+   "var_order": "q = t*n_feeders + f ; bits[q] is variable q",
+   "terms": {
+    "hardship": {
+     "offset": 0.0,
+     "linear": [
+      1.0,
+      0.0,
+      1.0,
+      1.5,
+      1.0,
+      0.0,
+      1.0,
+      1.5
+     ],
+     "quadratic": []
+    },
+    "fairness": {
+     "offset": 5.0,
+     "linear": [
+      -1.0,
+      0.0,
+      1.0,
+      -3.0,
+      -1.0,
+      0.0,
+      1.0,
+      -3.0
+     ],
+     "quadratic": [
+      [
+       0,
+       4,
+       2.0
+      ],
+      [
+       2,
+       6,
+       2.0
+      ],
+      [
+       3,
+       7,
+       2.0
+      ]
+     ]
+    },
+    "consecutive": {
+     "offset": 0.0,
+     "linear": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quadratic": [
+      [
+       0,
+       4,
+       1.0
+      ],
+      [
+       2,
+       6,
+       1.0
+      ],
+      [
+       3,
+       7,
+       1.0
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "exact": {
+  "method": "brute_force",
+  "cost_min": 5.5,
+  "cost_max": 13.0,
+  "n_valid": 9,
+  "n_optimal": 3,
+  "optimal_bits": [
+   "10100001",
+   "10010010",
+   "00111000"
+  ]
+ },
+ "plans": [
+  {
+   "method": "exact",
+   "label": "Exact classical (brute force)",
+   "kind": "classical",
+   "bits": "10100001",
+   "matrix": [
+    [
+     1,
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     1
+    ]
+   ],
+   "cost": 5.5,
+   "breakdown": {
+    "hardship": 3.5,
+    "fairness": 2.0,
+    "consecutive": 0.0
+   },
+   "feasible": true,
+   "approx_ratio": 1.0,
+   "fairness_entropy": 0.965633607142825,
+   "audit_passed": true,
+   "n_violations": 0,
+   "notes": "Optimal among plans that also pass the audit rules."
+  },
+  {
+   "method": "round_robin",
+   "label": "Round-robin",
+   "kind": "classical",
+   "bits": "10100001",
+   "matrix": [
+    [
+     1,
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     1
+    ]
+   ],
+   "cost": 5.5,
+   "breakdown": {
+    "hardship": 3.5,
+    "fairness": 2.0,
+    "consecutive": 0.0
+   },
+   "feasible": true,
+   "approx_ratio": 1.0,
+   "fairness_entropy": 0.965633607142825,
+   "audit_passed": true,
+   "n_violations": 0,
+   "notes": "Rotates through eligible feeders; ignores hardship and caps."
+  },
+  {
+   "method": "random_valid",
+   "label": "Random valid plan",
+   "kind": "classical",
+   "bits": "10101000",
+   "matrix": [
+    [
+     1,
+     0,
+     1,
+     0
+    ],
+    [
+     1,
+     0,
+     0,
+     0
+    ]
+   ],
+   "cost": 11.0,
+   "breakdown": {
+    "hardship": 3.0,
+    "fairness": 6.0,
+    "consecutive": 1.0
+   },
+   "feasible": true,
+   "approx_ratio": 0.26666666666666666,
+   "fairness_entropy": 0.8783471047618534,
+   "audit_passed": true,
+   "n_violations": 0,
+   "notes": "One seeded draw from the valid plans."
+  }
+ ],
+ "random_valid_stats": {
+  "n_samples": 300,
+  "mean_cost": 8.375,
+  "mean_approx_ratio": 0.6166666666666664,
+  "cap_violation_pct": 0.0,
+  "p_optimal": 0.30666666666666664
+ }
+}

@@ -1,0 +1,744 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:02:18Z",
+  "seed": 7,
+  "source": "scripts/run_audit.py",
+  "data_provenance": "synthetic",
+  "scenario": "heatwave_cap",
+  "instance": {
+    "name": "heatwave_cap",
+    "n_feeders": 8,
+    "n_hours": 3,
+    "start_hour": 14,
+    "feeder_mw": 5.0,
+    "shortfall_mw": [
+      6.2,
+      12.3,
+      10.6
+    ],
+    "quotas": [
+      2,
+      3,
+      3
+    ],
+    "feeders": [
+      {
+        "id": 0,
+        "name": "F0 Lyari",
+        "zone": "Lyari",
+        "kind": "residential",
+        "protected": false,
+        "population": 55000,
+        "heat_index": 1.0,
+        "lat": 24.871,
+        "lon": 66.997
+      },
+      {
+        "id": 1,
+        "name": "F1 Saddar",
+        "zone": "Saddar",
+        "kind": "residential",
+        "protected": false,
+        "population": 50000,
+        "heat_index": 1.0,
+        "lat": 24.856,
+        "lon": 67.023
+      },
+      {
+        "id": 2,
+        "name": "F2 Civil Lines",
+        "zone": "Civil Lines",
+        "kind": "hospital",
+        "protected": true,
+        "population": 15000,
+        "heat_index": 0.7,
+        "lat": 24.846,
+        "lon": 67.033
+      },
+      {
+        "id": 3,
+        "name": "F3 Korangi",
+        "zone": "Korangi",
+        "kind": "industrial",
+        "protected": false,
+        "population": 10000,
+        "heat_index": 0.7,
+        "lat": 24.83,
+        "lon": 67.132
+      },
+      {
+        "id": 4,
+        "name": "F4 Gulshan-e-Iqbal",
+        "zone": "Gulshan-e-Iqbal",
+        "kind": "residential",
+        "protected": false,
+        "population": 60000,
+        "heat_index": 0.85,
+        "lat": 24.918,
+        "lon": 67.097
+      },
+      {
+        "id": 5,
+        "name": "F5 North Nazimabad",
+        "zone": "North Nazimabad",
+        "kind": "commercial",
+        "protected": false,
+        "population": 20000,
+        "heat_index": 0.85,
+        "lat": 24.942,
+        "lon": 67.045
+      },
+      {
+        "id": 6,
+        "name": "F6 Dhabeji Pumping",
+        "zone": "Dhabeji Pumping",
+        "kind": "water_pump",
+        "protected": true,
+        "population": 10000,
+        "heat_index": 0.85,
+        "lat": 24.905,
+        "lon": 67.14
+      },
+      {
+        "id": 7,
+        "name": "F7 Orangi Town",
+        "zone": "Orangi Town",
+        "kind": "residential",
+        "protected": false,
+        "population": 35000,
+        "heat_index": 1.0,
+        "lat": 24.951,
+        "lon": 66.985
+      }
+    ],
+    "hardship": [
+      [
+        3.0,
+        3.0,
+        3.0,
+        0.5,
+        3.0,
+        1.0,
+        2.5,
+        2.0
+      ],
+      [
+        5.5,
+        5.0,
+        5.0,
+        0.5,
+        5.0,
+        2.0,
+        4.0,
+        4.0
+      ],
+      [
+        4.0,
+        4.0,
+        4.0,
+        0.5,
+        4.0,
+        1.5,
+        3.5,
+        3.0
+      ]
+    ],
+    "ledger_hours": [
+      4.0,
+      4.0,
+      0.0,
+      1.0,
+      2.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "prev_off": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "weights": {
+      "hardship": 1.0,
+      "fairness": 2.0,
+      "consecutive": 25.0
+    },
+    "rules": {
+      "max_consecutive": 1,
+      "max_daily_hours": 5
+    },
+    "fairness_target": 3.3333333333333335,
+    "qubo": {
+      "n_vars": 24,
+      "var_order": "q = t*n_feeders + f ; bits[q] is variable q (index-ordered)",
+      "terms": {
+        "hardship": {
+          "offset": 0.0,
+          "linear": [
+            3.0,
+            3.0,
+            0.0,
+            0.5,
+            3.0,
+            1.0,
+            0.0,
+            2.0,
+            5.5,
+            5.0,
+            0.0,
+            0.5,
+            5.0,
+            2.0,
+            0.0,
+            4.0,
+            4.0,
+            4.0,
+            0.0,
+            0.5,
+            4.0,
+            1.5,
+            0.0,
+            3.0
+          ],
+          "quadratic": []
+        },
+        "fairness": {
+          "offset": 24.66666666666667,
+          "linear": [
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667,
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667,
+            2.333333333333333,
+            2.333333333333333,
+            0.0,
+            -3.666666666666667,
+            -1.666666666666667,
+            -3.666666666666667,
+            0.0,
+            -5.666666666666667
+          ],
+          "quadratic": [
+            [
+              0,
+              8,
+              2.0
+            ],
+            [
+              0,
+              16,
+              2.0
+            ],
+            [
+              8,
+              16,
+              2.0
+            ],
+            [
+              1,
+              9,
+              2.0
+            ],
+            [
+              1,
+              17,
+              2.0
+            ],
+            [
+              9,
+              17,
+              2.0
+            ],
+            [
+              3,
+              11,
+              2.0
+            ],
+            [
+              3,
+              19,
+              2.0
+            ],
+            [
+              11,
+              19,
+              2.0
+            ],
+            [
+              4,
+              12,
+              2.0
+            ],
+            [
+              4,
+              20,
+              2.0
+            ],
+            [
+              12,
+              20,
+              2.0
+            ],
+            [
+              5,
+              13,
+              2.0
+            ],
+            [
+              5,
+              21,
+              2.0
+            ],
+            [
+              13,
+              21,
+              2.0
+            ],
+            [
+              7,
+              15,
+              2.0
+            ],
+            [
+              7,
+              23,
+              2.0
+            ],
+            [
+              15,
+              23,
+              2.0
+            ]
+          ]
+        },
+        "consecutive": {
+          "offset": 0.0,
+          "linear": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "quadratic": [
+            [
+              0,
+              8,
+              1.0
+            ],
+            [
+              8,
+              16,
+              1.0
+            ],
+            [
+              1,
+              9,
+              1.0
+            ],
+            [
+              9,
+              17,
+              1.0
+            ],
+            [
+              3,
+              11,
+              1.0
+            ],
+            [
+              11,
+              19,
+              1.0
+            ],
+            [
+              4,
+              12,
+              1.0
+            ],
+            [
+              12,
+              20,
+              1.0
+            ],
+            [
+              5,
+              13,
+              1.0
+            ],
+            [
+              13,
+              21,
+              1.0
+            ],
+            [
+              7,
+              15,
+              1.0
+            ],
+            [
+              15,
+              23,
+              1.0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "rules": {
+    "max_consecutive": 1,
+    "max_daily_hours": 5
+  },
+  "examples": [
+    {
+      "label": "Exact optimum",
+      "method": "exact",
+      "bits": "000001010101100010000101",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ]
+      ],
+      "passed": true,
+      "score": 100.0,
+      "violations": [],
+      "per_rule": {
+        "quota": {
+          "passed": true,
+          "count": 0
+        },
+        "protected": {
+          "passed": true,
+          "count": 0
+        },
+        "max_consecutive": {
+          "passed": true,
+          "count": 0
+        },
+        "daily_hours": {
+          "passed": true,
+          "count": 0
+        }
+      }
+    },
+    {
+      "label": "Round-robin",
+      "method": "round_robin",
+      "bits": "110000000001110011000001",
+      "matrix": [
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "passed": false,
+      "score": 80.95238095238095,
+      "violations": [
+        {
+          "rule": "max_consecutive",
+          "hour": 0,
+          "feeder": 0,
+          "detail": "feeder 0 (F0 Lyari) is off 2 adjacent hours (counting the hour before the window), cap is 1; cap first exceeded at hour 0 (14:00)"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 0,
+          "feeder": 1,
+          "detail": "feeder 1 (F1 Saddar) is off 2 adjacent hours (counting the hour before the window), cap is 1; cap first exceeded at hour 0 (14:00)"
+        },
+        {
+          "rule": "daily_hours",
+          "hour": null,
+          "feeder": 0,
+          "detail": "feeder 0 (F0 Lyari): ledger 4 + plan 2 = 6 hours, daily limit is 5"
+        },
+        {
+          "rule": "daily_hours",
+          "hour": null,
+          "feeder": 1,
+          "detail": "feeder 1 (F1 Saddar): ledger 4 + plan 2 = 6 hours, daily limit is 5"
+        }
+      ],
+      "per_rule": {
+        "quota": {
+          "passed": true,
+          "count": 0
+        },
+        "protected": {
+          "passed": true,
+          "count": 0
+        },
+        "max_consecutive": {
+          "passed": false,
+          "count": 2
+        },
+        "daily_hours": {
+          "passed": false,
+          "count": 2
+        }
+      }
+    },
+    {
+      "label": "Random valid (one seeded draw)",
+      "method": "random_valid",
+      "bits": "000011000001110011000001",
+      "matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "passed": false,
+      "score": 90.47619047619048,
+      "violations": [
+        {
+          "rule": "max_consecutive",
+          "hour": 1,
+          "feeder": 4,
+          "detail": "feeder 4 (F4 Gulshan-e-Iqbal) is off 2 adjacent hours, cap is 1; cap first exceeded at hour 1 (15:00)"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 1,
+          "feeder": 5,
+          "detail": "feeder 5 (F5 North Nazimabad) is off 2 adjacent hours, cap is 1; cap first exceeded at hour 1 (15:00)"
+        }
+      ],
+      "per_rule": {
+        "quota": {
+          "passed": true,
+          "count": 0
+        },
+        "protected": {
+          "passed": true,
+          "count": 0
+        },
+        "max_consecutive": {
+          "passed": false,
+          "count": 2
+        },
+        "daily_hours": {
+          "passed": true,
+          "count": 0
+        }
+      }
+    },
+    {
+      "label": "Deliberately broken example",
+      "method": "hand_made",
+      "bits": "111000001001100010011000",
+      "matrix": [
+        [
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      ],
+      "passed": false,
+      "score": 66.66666666666667,
+      "violations": [
+        {
+          "rule": "quota",
+          "hour": 0,
+          "feeder": null,
+          "detail": "hour 0 (14:00): expected 2 feeders off, found 3"
+        },
+        {
+          "rule": "protected",
+          "hour": 0,
+          "feeder": 2,
+          "detail": "hour 0 (14:00): protected feeder 2 (F2 Civil Lines) is off"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 0,
+          "feeder": 0,
+          "detail": "feeder 0 (F0 Lyari) is off 4 adjacent hours (counting the hour before the window), cap is 1; cap first exceeded at hour 0 (14:00)"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 0,
+          "feeder": 1,
+          "detail": "feeder 1 (F1 Saddar) is off 2 adjacent hours (counting the hour before the window), cap is 1; cap first exceeded at hour 0 (14:00)"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 2,
+          "feeder": 3,
+          "detail": "feeder 3 (F3 Korangi) is off 2 adjacent hours, cap is 1; cap first exceeded at hour 2 (16:00)"
+        },
+        {
+          "rule": "max_consecutive",
+          "hour": 2,
+          "feeder": 4,
+          "detail": "feeder 4 (F4 Gulshan-e-Iqbal) is off 2 adjacent hours, cap is 1; cap first exceeded at hour 2 (16:00)"
+        },
+        {
+          "rule": "daily_hours",
+          "hour": null,
+          "feeder": 0,
+          "detail": "feeder 0 (F0 Lyari): ledger 4 + plan 3 = 7 hours, daily limit is 5"
+        }
+      ],
+      "per_rule": {
+        "quota": {
+          "passed": false,
+          "count": 1
+        },
+        "protected": {
+          "passed": false,
+          "count": 1
+        },
+        "max_consecutive": {
+          "passed": false,
+          "count": 4
+        },
+        "daily_hours": {
+          "passed": false,
+          "count": 1
+        }
+      }
+    }
+  ]
+}

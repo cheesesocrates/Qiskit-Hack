@@ -1,0 +1,314 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "instance_name": "base_8x3",
+ "method": "grover_mixer_qaoa",
+ "fairness_metric_name": "std of total outage hours (h)",
+ "default_index": 2,
+ "points": [
+  {
+   "fairness_weight": 0.0,
+   "plan": {
+    "bits": "110000010001100011000101",
+    "matrix": [
+     [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+     ],
+     [
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "cost": 13.0,
+   "breakdown": {
+    "hardship": 13.0,
+    "fairness": 11.333333333333334,
+    "consecutive": 0.0
+   },
+   "fairness_metric": 1.3743685418725535,
+   "fairness_entropy": 0.9101663100395064,
+   "hardship_total": 13.0,
+   "exact_cost": 13.0,
+   "matches_exact": true,
+   "p_optimal": 0.9
+  },
+  {
+   "fairness_weight": 0.5,
+   "plan": {
+    "bits": "100001010001100011000101",
+    "matrix": [
+     [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+     ],
+     [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+     ],
+     [
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "cost": 16.666666666666668,
+   "breakdown": {
+    "hardship": 14.0,
+    "fairness": 5.333333333333334,
+    "consecutive": 0.0
+   },
+   "fairness_metric": 0.9428090415820634,
+   "fairness_entropy": 0.954644448337665,
+   "hardship_total": 14.0,
+   "exact_cost": 16.666666666666668,
+   "matches_exact": true,
+   "p_optimal": 0.82
+  },
+  {
+   "fairness_weight": 1.0,
+   "plan": {
+    "bits": "100101000000100111010100",
+    "matrix": [
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     [
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+     ]
+    ]
+   },
+   "cost": 19.333333333333332,
+   "breakdown": {
+    "hardship": 16.0,
+    "fairness": 3.333333333333333,
+    "consecutive": 0.0
+   },
+   "fairness_metric": 0.7453559924999298,
+   "fairness_entropy": 0.9755037590061084,
+   "hardship_total": 16.0,
+   "exact_cost": 19.333333333333332,
+   "matches_exact": true,
+   "p_optimal": 0.74
+  },
+  {
+   "fairness_weight": 2.0,
+   "plan": {
+    "bits": "100101000000100110010101",
+    "matrix": [
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "cost": 20.666666666666668,
+   "breakdown": {
+    "hardship": 16.0,
+    "fairness": 1.3333333333333333,
+    "consecutive": 1.0
+   },
+   "fairness_metric": 0.4714045207910317,
+   "fairness_entropy": 0.9890498244170132,
+   "hardship_total": 16.0,
+   "exact_cost": 20.666666666666668,
+   "matches_exact": true,
+   "p_optimal": 0.66
+  },
+  {
+   "fairness_weight": 4.0,
+   "plan": {
+    "bits": "100101000000100110010101",
+    "matrix": [
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "cost": 23.333333333333332,
+   "breakdown": {
+    "hardship": 16.0,
+    "fairness": 1.3333333333333333,
+    "consecutive": 1.0
+   },
+   "fairness_metric": 0.4714045207910317,
+   "fairness_entropy": 0.9890498244170132,
+   "hardship_total": 16.0,
+   "exact_cost": 23.333333333333332,
+   "matches_exact": true,
+   "p_optimal": 0.58
+  },
+  {
+   "fairness_weight": 8.0,
+   "plan": {
+    "bits": "100101000000100110010101",
+    "matrix": [
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "cost": 28.666666666666664,
+   "breakdown": {
+    "hardship": 16.0,
+    "fairness": 1.3333333333333333,
+    "consecutive": 1.0
+   },
+   "fairness_metric": 0.4714045207910317,
+   "fairness_entropy": 0.9890498244170132,
+   "hardship_total": 16.0,
+   "exact_cost": 28.666666666666664,
+   "matches_exact": false,
+   "p_optimal": 0.5
+  }
+ ],
+ "notes": "MOCK FIXTURE."
+}

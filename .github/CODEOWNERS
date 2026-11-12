@@ -1,0 +1,33 @@
+# Placeholder owners: replace @quantum-owner, @data-docs-owner and @ui-owner
+# with the real GitHub usernames of the three area owners before enabling this.
+
+# Area 1: Quantum
+src/quantum/ @quantum-owner
+tests/quantum/ @quantum-owner
+scripts/run_quantum.py @quantum-owner
+
+# Area 2: Classical, data and report
+src/data/ @data-docs-owner
+src/cost/ @data-docs-owner
+src/classical/ @data-docs-owner
+src/export/ @data-docs-owner
+src/audit/ @data-docs-owner
+src/replan/ @data-docs-owner
+src/forecast/ @data-docs-owner
+results/ @data-docs-owner
+docs/report/ @data-docs-owner
+README.md @data-docs-owner
+
+# Area 3: UI and video
+ui/ @ui-owner
+media/ @ui-owner
+docs/demo_script.md @ui-owner
+
+# Shared files: changed rarely, approval needed from all three owners
+Makefile @quantum-owner @data-docs-owner @ui-owner
+requirements.txt @quantum-owner @data-docs-owner @ui-owner
+schemas/ @quantum-owner @data-docs-owner @ui-owner
+docs/CONTRACT.md @quantum-owner @data-docs-owner @ui-owner
+scripts/tasks.py @quantum-owner @data-docs-owner @ui-owner
+tests/conftest.py @quantum-owner @data-docs-owner @ui-owner
+.github/ @quantum-owner @data-docs-owner @ui-owner

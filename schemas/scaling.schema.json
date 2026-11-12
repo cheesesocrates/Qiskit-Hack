@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scaling",
+  "description": "MPS-simulator scaling: approximation ratio vs bond dimension vs feeders.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "method": {
+      "type": "string"
+    },
+    "layers": {
+      "type": "integer"
+    },
+    "shots": {
+      "type": "integer"
+    },
+    "parameter_source": {
+      "type": "string"
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "n_feeders": {
+            "type": "integer"
+          },
+          "n_hours": {
+            "type": "integer"
+          },
+          "n_qubits": {
+            "type": "integer"
+          },
+          "bond_dim": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "simulator": {
+            "type": "string"
+          },
+          "approx_ratio": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "feasibility_pct": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exact_cost_min": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exact_cost_max": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exact_method": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "best_sampled_cost": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "runtime_s": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "failed",
+              "skipped"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "n_feeders",
+          "n_hours",
+          "n_qubits",
+          "bond_dim",
+          "simulator",
+          "approx_ratio",
+          "feasibility_pct",
+          "exact_cost_min",
+          "exact_cost_max",
+          "exact_method",
+          "best_sampled_cost",
+          "runtime_s",
+          "status",
+          "notes"
+        ]
+      },
+      "minItems": 1
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "method",
+    "layers",
+    "shots",
+    "parameter_source",
+    "points",
+    "notes"
+  ]
+}

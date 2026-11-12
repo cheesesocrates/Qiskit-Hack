@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ablation",
+  "description": "Method comparison table (Area 1 writes).",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "instance_name": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "cost_min": {
+          "type": "number"
+        },
+        "cost_max": {
+          "type": "number"
+        },
+        "n_valid": {
+          "type": "integer"
+        },
+        "n_optimal": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "cost_min",
+        "cost_max",
+        "n_valid",
+        "n_optimal"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "classical",
+              "quantum"
+            ]
+          },
+          "instance": {
+            "type": "string"
+          },
+          "n_qubits": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "layers": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "shots": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "feasibility_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "p_optimal": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "approx_ratio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "fairness_entropy": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "runtime_s": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "best_cost": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "best_bits": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[01]+$"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "label",
+          "kind",
+          "instance",
+          "n_qubits",
+          "layers",
+          "shots",
+          "feasibility_pct",
+          "p_optimal",
+          "approx_ratio",
+          "fairness_entropy",
+          "runtime_s",
+          "best_cost",
+          "best_bits",
+          "notes"
+        ]
+      },
+      "minItems": 1
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "instance_name",
+    "reference",
+    "rows",
+    "notes"
+  ]
+}

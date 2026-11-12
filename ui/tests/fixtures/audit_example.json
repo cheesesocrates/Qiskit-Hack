@@ -1,0 +1,624 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-12T12:00:00Z",
+ "seed": 7,
+ "source": "ui/tests/make_fixtures.py (MOCK FIXTURE, not real results)",
+ "data_provenance": "synthetic",
+ "scenario": "heatwave_cap_8x3",
+ "instance": {
+  "name": "heatwave_cap_8x3",
+  "n_feeders": 8,
+  "n_hours": 3,
+  "start_hour": 14,
+  "feeder_mw": 5.0,
+  "shortfall_mw": [
+   13.0,
+   13.0,
+   13.0
+  ],
+  "quotas": [
+   3,
+   3,
+   3
+  ],
+  "feeders": [
+   {
+    "id": 0,
+    "name": "F0 Lyari",
+    "zone": "Lyari",
+    "kind": "residential",
+    "protected": false,
+    "population": 60000,
+    "heat_index": 0.85,
+    "lat": 24.871,
+    "lon": 66.997
+   },
+   {
+    "id": 1,
+    "name": "F1 Saddar",
+    "zone": "Saddar",
+    "kind": "residential",
+    "protected": false,
+    "population": 35000,
+    "heat_index": 0.7,
+    "lat": 24.856,
+    "lon": 67.023
+   },
+   {
+    "id": 2,
+    "name": "F2 Civil Lines",
+    "zone": "Civil Lines",
+    "kind": "hospital",
+    "protected": true,
+    "population": 25000,
+    "heat_index": 1.0,
+    "lat": 24.846,
+    "lon": 67.033
+   },
+   {
+    "id": 3,
+    "name": "F3 Korangi",
+    "zone": "Korangi",
+    "kind": "commercial",
+    "protected": false,
+    "population": 10000,
+    "heat_index": 0.7,
+    "lat": 24.83,
+    "lon": 67.132
+   },
+   {
+    "id": 4,
+    "name": "F4 Gulshan-e-Iqbal",
+    "zone": "Gulshan-e-Iqbal",
+    "kind": "residential",
+    "protected": false,
+    "population": 30000,
+    "heat_index": 0.7,
+    "lat": 24.918,
+    "lon": 67.097
+   },
+   {
+    "id": 5,
+    "name": "F5 North Nazimabad",
+    "zone": "North Nazimabad",
+    "kind": "residential",
+    "protected": false,
+    "population": 20000,
+    "heat_index": 1.0,
+    "lat": 24.942,
+    "lon": 67.045
+   },
+   {
+    "id": 6,
+    "name": "F6 Dhabeji Pumping",
+    "zone": "Dhabeji Pumping",
+    "kind": "water_pump",
+    "protected": true,
+    "population": 25000,
+    "heat_index": 0.85,
+    "lat": 24.905,
+    "lon": 67.14
+   },
+   {
+    "id": 7,
+    "name": "F7 Orangi Town",
+    "zone": "Orangi Town",
+    "kind": "commercial",
+    "protected": false,
+    "population": 10000,
+    "heat_index": 1.0,
+    "lat": 24.951,
+    "lon": 66.985
+   }
+  ],
+  "hardship": [
+   [
+    3.5,
+    2.0,
+    6.5,
+    0.5,
+    1.5,
+    2.0,
+    4.5,
+    1.0
+   ],
+   [
+    3.5,
+    2.0,
+    7.0,
+    0.5,
+    2.0,
+    2.0,
+    5.0,
+    1.0
+   ],
+   [
+    3.5,
+    2.0,
+    6.5,
+    0.5,
+    1.5,
+    2.0,
+    4.5,
+    1.0
+   ]
+  ],
+  "ledger_hours": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0
+  ],
+  "prev_off": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "weights": {
+   "hardship": 1.0,
+   "fairness": 1.0,
+   "consecutive": 3.0
+  },
+  "rules": {
+   "max_consecutive": 1,
+   "max_daily_hours": 2
+  },
+  "fairness_target": 1.8333333333333333,
+  "qubo": {
+   "n_vars": 24,
+   "var_order": "q = t*n_feeders + f ; bits[q] is variable q",
+   "terms": {
+    "hardship": {
+     "offset": 0.0,
+     "linear": [
+      3.5,
+      2.0,
+      0.0,
+      0.5,
+      1.5,
+      2.0,
+      0.0,
+      1.0,
+      3.5,
+      2.0,
+      0.0,
+      0.5,
+      2.0,
+      2.0,
+      0.0,
+      1.0,
+      3.5,
+      2.0,
+      0.0,
+      0.5,
+      1.5,
+      2.0,
+      0.0,
+      1.0
+     ],
+     "quadratic": []
+    },
+    "fairness": {
+     "offset": 14.833333333333332,
+     "linear": [
+      -2.6666666666666665,
+      -2.6666666666666665,
+      0.0,
+      -2.6666666666666665,
+      -2.6666666666666665,
+      -0.6666666666666665,
+      0.0,
+      -0.6666666666666665,
+      -2.6666666666666665,
+      -2.6666666666666665,
+      0.0,
+      -2.6666666666666665,
+      -2.6666666666666665,
+      -0.6666666666666665,
+      0.0,
+      -0.6666666666666665,
+      -2.6666666666666665,
+      -2.6666666666666665,
+      0.0,
+      -2.6666666666666665,
+      -2.6666666666666665,
+      -0.6666666666666665,
+      0.0,
+      -0.6666666666666665
+     ],
+     "quadratic": [
+      [
+       0,
+       8,
+       2.0
+      ],
+      [
+       0,
+       16,
+       2.0
+      ],
+      [
+       8,
+       16,
+       2.0
+      ],
+      [
+       1,
+       9,
+       2.0
+      ],
+      [
+       1,
+       17,
+       2.0
+      ],
+      [
+       9,
+       17,
+       2.0
+      ],
+      [
+       3,
+       11,
+       2.0
+      ],
+      [
+       3,
+       19,
+       2.0
+      ],
+      [
+       11,
+       19,
+       2.0
+      ],
+      [
+       4,
+       12,
+       2.0
+      ],
+      [
+       4,
+       20,
+       2.0
+      ],
+      [
+       12,
+       20,
+       2.0
+      ],
+      [
+       5,
+       13,
+       2.0
+      ],
+      [
+       5,
+       21,
+       2.0
+      ],
+      [
+       13,
+       21,
+       2.0
+      ],
+      [
+       7,
+       15,
+       2.0
+      ],
+      [
+       7,
+       23,
+       2.0
+      ],
+      [
+       15,
+       23,
+       2.0
+      ]
+     ]
+    },
+    "consecutive": {
+     "offset": 0.0,
+     "linear": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quadratic": [
+      [
+       0,
+       8,
+       1.0
+      ],
+      [
+       8,
+       16,
+       1.0
+      ],
+      [
+       1,
+       9,
+       1.0
+      ],
+      [
+       9,
+       17,
+       1.0
+      ],
+      [
+       3,
+       11,
+       1.0
+      ],
+      [
+       11,
+       19,
+       1.0
+      ],
+      [
+       4,
+       12,
+       1.0
+      ],
+      [
+       12,
+       20,
+       1.0
+      ],
+      [
+       5,
+       13,
+       1.0
+      ],
+      [
+       13,
+       21,
+       1.0
+      ],
+      [
+       7,
+       15,
+       1.0
+      ],
+      [
+       15,
+       23,
+       1.0
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "rules": {
+  "max_consecutive": 1,
+  "max_daily_hours": 2
+ },
+ "examples": [
+  {
+   "label": "Exact plan",
+   "method": "exact",
+   "bits": "010110001000010101011000",
+   "matrix": [
+    [
+     0,
+     1,
+     0,
+     1,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     1
+    ],
+    [
+     0,
+     1,
+     0,
+     1,
+     1,
+     0,
+     0,
+     0
+    ]
+   ],
+   "passed": true,
+   "score": 100.0,
+   "violations": [],
+   "per_rule": {
+    "quota": {
+     "passed": true,
+     "count": 0
+    },
+    "protected": {
+     "passed": true,
+     "count": 0
+    },
+    "max_consecutive": {
+     "passed": true,
+     "count": 0
+    },
+    "daily_hours": {
+     "passed": true,
+     "count": 0
+    }
+   }
+  },
+  {
+   "label": "Round-robin plan",
+   "method": "round_robin",
+   "bits": "110100000000110111010000",
+   "matrix": [
+    [
+     1,
+     1,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     1,
+     0,
+     1
+    ],
+    [
+     1,
+     1,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "passed": true,
+   "score": 100.0,
+   "violations": [],
+   "per_rule": {
+    "quota": {
+     "passed": true,
+     "count": 0
+    },
+    "protected": {
+     "passed": true,
+     "count": 0
+    },
+    "max_consecutive": {
+     "passed": true,
+     "count": 0
+    },
+    "daily_hours": {
+     "passed": true,
+     "count": 0
+    }
+   }
+  },
+  {
+   "label": "Hand-made plan",
+   "method": "manual",
+   "bits": "110100001011000000001101",
+   "matrix": [
+    [
+     1,
+     1,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     0,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     1,
+     0,
+     1
+    ]
+   ],
+   "passed": false,
+   "score": 50.0,
+   "violations": [
+    {
+     "rule": "protected",
+     "hour": 1,
+     "feeder": 2,
+     "detail": "F2 Civil Lines is protected but off"
+    },
+    {
+     "rule": "max_consecutive",
+     "hour": 1,
+     "feeder": 0,
+     "detail": "F0 Lyari off 2 hours in a row (max 1)"
+    },
+    {
+     "rule": "max_consecutive",
+     "hour": 1,
+     "feeder": 3,
+     "detail": "F3 Korangi off 2 hours in a row (max 1)"
+    }
+   ],
+   "per_rule": {
+    "quota": {
+     "passed": true,
+     "count": 0
+    },
+    "protected": {
+     "passed": false,
+     "count": 1
+    },
+    "max_consecutive": {
+     "passed": false,
+     "count": 2
+    },
+    "daily_hours": {
+     "passed": true,
+     "count": 0
+    }
+   }
+  }
+ ]
+}

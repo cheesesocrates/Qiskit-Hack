@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "counting",
+  "description": "Quantum counting of valid plans (the flexibility number), checked by enumeration.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "method": {
+      "type": "string"
+    },
+    "instance": {
+      "type": "object",
+      "properties": {
+        "n_feeders": {
+          "type": "integer"
+        },
+        "n_hours": {
+          "type": "integer"
+        },
+        "quotas": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "protected": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "n_feeders",
+        "n_hours",
+        "quotas",
+        "protected"
+      ]
+    },
+    "n_qubits_search": {
+      "type": "integer"
+    },
+    "n_qubits_total": {
+      "type": "integer"
+    },
+    "search_space": {
+      "type": "integer"
+    },
+    "exact_count": {
+      "type": "integer"
+    },
+    "estimated_count": {
+      "type": "number"
+    },
+    "estimated_count_rounded": {
+      "type": "integer"
+    },
+    "ci": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2
+    },
+    "tolerance": {
+      "type": "number"
+    },
+    "within_tolerance": {
+      "type": "boolean"
+    },
+    "epsilon_target": {
+      "type": "number"
+    },
+    "confidence_alpha": {
+      "type": "number"
+    },
+    "oracle_queries": {
+      "type": "integer"
+    },
+    "flexibility_bits": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "method",
+    "instance",
+    "n_qubits_search",
+    "n_qubits_total",
+    "search_space",
+    "exact_count",
+    "estimated_count",
+    "estimated_count_rounded",
+    "ci",
+    "tolerance",
+    "within_tolerance",
+    "epsilon_target",
+    "confidence_alpha",
+    "oracle_queries",
+    "flexibility_bits",
+    "notes"
+  ]
+}

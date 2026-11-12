@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "instance",
+  "description": "Base problem instance (Area 2 writes, Areas 1 and 3 read).",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "name": {
+      "type": "string"
+    },
+    "n_feeders": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "n_hours": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "start_hour": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 23
+    },
+    "feeder_mw": {
+      "type": "number"
+    },
+    "shortfall_mw": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "quotas": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "feeders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "residential",
+              "commercial",
+              "industrial",
+              "hospital",
+              "water_pump",
+              "telecom"
+            ]
+          },
+          "protected": {
+            "type": "boolean"
+          },
+          "population": {
+            "type": "integer"
+          },
+          "heat_index": {
+            "type": "number"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "zone",
+          "kind",
+          "protected",
+          "population",
+          "heat_index",
+          "lat",
+          "lon"
+        ]
+      },
+      "minItems": 1
+    },
+    "hardship": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    "ledger_hours": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "prev_off": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "weights": {
+      "type": "object",
+      "properties": {
+        "hardship": {
+          "type": "number"
+        },
+        "fairness": {
+          "type": "number"
+        },
+        "consecutive": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "hardship",
+        "fairness",
+        "consecutive"
+      ]
+    },
+    "rules": {
+      "type": "object",
+      "properties": {
+        "max_consecutive": {
+          "type": "integer"
+        },
+        "max_daily_hours": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_consecutive",
+        "max_daily_hours"
+      ]
+    },
+    "fairness_target": {
+      "type": "number"
+    },
+    "qubo": {
+      "type": "object",
+      "properties": {
+        "n_vars": {
+          "type": "integer"
+        },
+        "var_order": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "object",
+          "properties": {
+            "hardship": {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "type": "number"
+                },
+                "linear": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "quadratic": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              },
+              "required": [
+                "offset",
+                "linear",
+                "quadratic"
+              ],
+              "description": "value(x) = offset + sum_i linear[i]*x_i + sum_(i<j) w*x_i*x_j, quadratic rows are [i, j, w]."
+            },
+            "fairness": {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "type": "number"
+                },
+                "linear": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "quadratic": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              },
+              "required": [
+                "offset",
+                "linear",
+                "quadratic"
+              ],
+              "description": "value(x) = offset + sum_i linear[i]*x_i + sum_(i<j) w*x_i*x_j, quadratic rows are [i, j, w]."
+            },
+            "consecutive": {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "type": "number"
+                },
+                "linear": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "quadratic": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              },
+              "required": [
+                "offset",
+                "linear",
+                "quadratic"
+              ],
+              "description": "value(x) = offset + sum_i linear[i]*x_i + sum_(i<j) w*x_i*x_j, quadratic rows are [i, j, w]."
+            }
+          },
+          "required": [
+            "hardship",
+            "fairness",
+            "consecutive"
+          ]
+        }
+      },
+      "required": [
+        "n_vars",
+        "var_order",
+        "terms"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "name",
+    "n_feeders",
+    "n_hours",
+    "start_hour",
+    "feeder_mw",
+    "shortfall_mw",
+    "quotas",
+    "feeders",
+    "hardship",
+    "ledger_hours",
+    "prev_off",
+    "weights",
+    "rules",
+    "fairness_target",
+    "qubo"
+  ]
+}

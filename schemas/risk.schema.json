@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "risk",
+  "description": "Tail risk (VaR / CVaR) on a small feeder block by amplitude estimation.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source": {
+      "type": "string"
+    },
+    "data_provenance": {
+      "const": "synthetic"
+    },
+    "method": {
+      "type": "string"
+    },
+    "block": {
+      "type": "object",
+      "properties": {
+        "n_feeders": {
+          "type": "integer"
+        },
+        "feeder_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "critical_feeder_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "n_feeders",
+        "feeder_ids",
+        "critical_feeder_ids",
+        "description"
+      ]
+    },
+    "alpha": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "loss_unit": {
+      "type": "string"
+    },
+    "residual_source": {
+      "type": "string"
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "shortfall_extra_mw": {
+            "type": "number"
+          },
+          "prob": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "loss": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "label",
+          "shortfall_extra_mw",
+          "prob",
+          "loss"
+        ]
+      },
+      "minItems": 2
+    },
+    "n_qubits": {
+      "type": "integer"
+    },
+    "epsilon_target": {
+      "type": "number"
+    },
+    "confidence_alpha": {
+      "type": "number"
+    },
+    "oracle_queries": {
+      "type": "integer"
+    },
+    "exact": {
+      "type": "object",
+      "properties": {
+        "expected_loss": {
+          "type": "number"
+        },
+        "tail_prob": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "var": {
+          "type": "number"
+        },
+        "cvar": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "expected_loss",
+        "tail_prob",
+        "var",
+        "cvar"
+      ]
+    },
+    "estimated": {
+      "type": "object",
+      "properties": {
+        "expected_loss": {
+          "type": "number"
+        },
+        "expected_loss_ci": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2
+        },
+        "tail_prob": {
+          "type": "number"
+        },
+        "tail_prob_ci": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2
+        },
+        "var": {
+          "type": "number"
+        },
+        "cvar": {
+          "type": "number"
+        },
+        "cvar_ci": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "expected_loss",
+        "expected_loss_ci",
+        "tail_prob",
+        "tail_prob_ci",
+        "var",
+        "cvar",
+        "cvar_ci"
+      ]
+    },
+    "within_tolerance": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "seed",
+    "source",
+    "data_provenance",
+    "method",
+    "block",
+    "alpha",
+    "loss_unit",
+    "residual_source",
+    "scenarios",
+    "n_qubits",
+    "epsilon_target",
+    "confidence_alpha",
+    "oracle_queries",
+    "exact",
+    "estimated",
+    "within_tolerance",
+    "notes"
+  ]
+}

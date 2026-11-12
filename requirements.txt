@@ -1,0 +1,11 @@
+# Pinned to the versions this project was built and verified against (Python 3.11).
+# Every Qiskit API used in src/quantum was checked against these exact versions.
+qiskit==2.6.2
+qiskit-aer==0.18.2
+qiskit-algorithms==0.4.0
+qiskit-optimization==0.7.0
+numpy==2.4.6
+scipy==1.17.1
+jsonschema==4.26.0
+pytest==9.2.0
+matplotlib==3.11.2

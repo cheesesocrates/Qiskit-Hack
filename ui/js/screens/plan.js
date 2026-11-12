@@ -1,7 +1,7 @@
 // Screen 1: Plan. First view shows only the map, the hour control and one headline number.
 // Everything else (method, scenario, KPIs, fairness slider, debug) sits behind the Details toggle.
-import { el, clear, fmt, fmtTrim, clock, clockRange, sum, KIND_LABEL, PROTECTED_WHY } from '../util.js';
-import { icon, svgEl, iconSvg, STATE, stateOf, stateChip } from '../icons.js';
+import { el, fmt, fmtTrim, clock, clockRange, sum, KIND_LABEL, PROTECTED_WHY } from '../util.js';
+import { icon, stateOf, stateChip } from '../icons.js';
 import { createFeederMap } from '../components/map.js';
 import { naPanel, segmented, tickSlider, kpi, passChip } from '../components/common.js';
 import { debugBox } from '../components/planGrid.js';

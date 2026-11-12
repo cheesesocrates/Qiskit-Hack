@@ -23,7 +23,7 @@ def _scs(qc: QuantumCircuit, m: int, k: int) -> None:
     # three-qubit gates (ii)_l: |011> -> sqrt(l/m)|011> + sqrt((m-l)/m)|110>
     for l in range(2, k + 1):
         qc.cx(m - l - 1, m - 1)
-        ccry = RYGate(2.0 * np.arccos(np.sqrt(l / m))).control(2)
+        ccry = RYGate(2.0 * np.arccos(np.sqrt(l / m))).control(2, annotated=False)
         qc.append(ccry, [m - 1, m - l, m - l - 1])
         qc.cx(m - l - 1, m - 1)
 

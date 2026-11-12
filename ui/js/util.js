@@ -97,3 +97,10 @@ export const KIND_LABEL = {
 export function findRow(rows, re) {
   return rows.find((r) => re.test(r.method) || re.test(r.label || ''));
 }
+
+/** Tiny and large numbers: 1.2e-17 stays readable, ordinary numbers use fixed decimals. */
+export function fmtSmart(v, d = 3) {
+  if (v === null || v === undefined || Number.isNaN(v)) return 'n/a';
+  if (v !== 0 && Math.abs(v) < 10 ** -d) return Number(v).toExponential(1);
+  return fmt(v, d);
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:01:05Z",
+  "generated_at": "2026-11-12T12:08:53Z",
   "seed": 7,
   "source": "scripts/run_replay.py",
   "data_provenance": "synthetic",
@@ -140,7 +140,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 0.07395369978621602,
+      "runtime_s": 0.1418066001497209,
       "audit_passed": true
     },
     {
@@ -189,7 +189,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 0.07717709988355637,
+      "runtime_s": 0.14828369999304414,
       "audit_passed": true
     },
     {
@@ -238,7 +238,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 0.07263510022312403,
+      "runtime_s": 0.16523619974032044,
       "audit_passed": true
     },
     {
@@ -287,7 +287,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 0.28439270006492734,
+      "runtime_s": 0.504888900090009,
       "audit_passed": true
     },
     {
@@ -337,7 +337,7 @@
         0.0,
         0.0
       ],
-      "runtime_s": 0.33411499997600913,
+      "runtime_s": 0.6747165000997484,
       "audit_passed": true
     },
     {
@@ -388,7 +388,7 @@
         0.0,
         1.0
       ],
-      "runtime_s": 0.4627068997360766,
+      "runtime_s": 0.8693292001262307,
       "audit_passed": true
     },
     {
@@ -437,7 +437,7 @@
         0.0,
         1.0
       ],
-      "runtime_s": 0.43698110012337565,
+      "runtime_s": 0.9413171000778675,
       "audit_passed": true
     },
     {
@@ -486,7 +486,7 @@
         0.0,
         2.0
       ],
-      "runtime_s": 0.4841323997825384,
+      "runtime_s": 0.9141080998815596,
       "audit_passed": true
     },
     {
@@ -536,7 +536,7 @@
         0.0,
         2.0
       ],
-      "runtime_s": 0.3509428002871573,
+      "runtime_s": 0.7246468001976609,
       "audit_passed": true
     },
     {
@@ -584,7 +584,7 @@
         0.0,
         3.0
       ],
-      "runtime_s": 0.37672709999606013,
+      "runtime_s": 0.6540133999660611,
       "audit_passed": true
     },
     {
@@ -634,7 +634,7 @@
         0.0,
         3.0
       ],
-      "runtime_s": 0.11510379984974861,
+      "runtime_s": 0.16601269971579313,
       "audit_passed": true
     },
     {
@@ -684,7 +684,7 @@
         0.0,
         4.0
       ],
-      "runtime_s": 0.04060309985652566,
+      "runtime_s": 0.06063659954816103,
       "audit_passed": true
     }
   ],
@@ -705,5 +705,5 @@
       4.0
     ]
   },
-  "notes": "Synthetic feeders (8 illustrative Karachi zones; feeder 2 hospital and feeder 6 water pump protected). Receding horizon: 12 hourly frames from 12:00 on 2026-10-28 (the last test day of the classical ridge forecast; weather source open-meteo-snapshot, demand and shortfall series synthetic). Each step solves a 3-hour window and commits only its first hour. The first window hour uses the actual shortfall (known when the hour starts); the later hours use the forecast. Hours past 23:00 wrap onto the same forecast day because no next-day forecast exists. Quotas are ceil(MW / 5) clipped to 0..4. The ledger starts at zero at 12:00 (earlier cuts that day are not modelled). Solver requested: exact. Frames solved by the quantum command: 0; by exact after a quantum failure: 0; by exact directly: 12. Every plan was re-evaluated here and checked for validity; exact_cost is the brute-force optimum of the same window. warm_started is true only when the solver that produced the plan was given the previous window's plan shifted by one hour (the exact solver never is). audit_passed is the audit of the window plan, including the daily-hours rule applied to the replay ledger."
+  "notes": "Synthetic feeders (8 illustrative Karachi zones; feeder 2 hospital and feeder 6 water pump protected). Receding horizon: 12 hourly frames from 12:00 on 2026-10-28 (the last test day of the classical ridge forecast; weather source open-meteo-snapshot, demand and shortfall series synthetic). Each step solves a 3-hour window and commits only its first hour. The first window hour uses the actual shortfall (known when the hour starts); the later hours use the forecast. Hours past 23:00 wrap onto the same forecast day because no next-day forecast exists. Quotas are ceil(MW / 5) clipped to 0..4. The ledger starts at zero at 12:00 (earlier cuts that day are not modelled). Solver requested: exact. Frames solved by the quantum command: 0; by exact as a fallback after a quantum failure: 0; by exact directly: 12. Every plan was re-evaluated here and checked for validity; exact_cost is the brute-force optimum of the same window. warm_started is true only when the solver that produced the plan was given the previous window's plan shifted by one hour (the exact solver never is). audit_passed is the audit of the window plan, including the daily-hours rule applied to the replay ledger."
 }

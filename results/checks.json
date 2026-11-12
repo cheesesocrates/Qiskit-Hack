@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:03:43Z",
+  "generated_at": "2026-11-12T12:09:21Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -105,7 +105,7 @@
       "id": "C13",
       "name": "Replay falls back to exact when the quantum solver is unavailable or wrong",
       "passed": true,
-      "detail": "8 failure modes fell back to exact (C:\\Users\\AHMED AYAN\\AppData\\Local\\Temp\\pytest-of-AHMED AYAN\\pytest-2\\test_replay_falls_back_to_exac0\\no_such_script.py not found; command not found; invalid plan returned (quota or protected rule broken); invalid plan returned (quota or protected rule broken); exit code 3; unreadable output file; no output file written; timeout after 1s); correct fake solver accepted on 3 of 3 frames with warm start passed",
+      "detail": "8 failure modes fell back to exact (no_such_script.py not found; command not found; invalid plan returned (quota or protected rule broken); invalid plan returned (quota or protected rule broken); exit code 3; unreadable output file; no output file written; timeout after 1s); correct fake solver accepted on 3 of 3 frames with warm start passed",
       "area": "classical",
       "test": "tests/classical/test_replay.py::test_replay_falls_back_to_exact_and_accepts_a_correct_solver"
     },
@@ -116,11 +116,83 @@
       "detail": "12 exact frames identical across two seed-7 runs; 3 fake-solver frames identical across two runs",
       "area": "classical",
       "test": "tests/classical/test_replay.py::test_replay_with_fixed_seed_reproduces_identical_frames"
+    },
+    {
+      "id": "Q01",
+      "name": "Quantum cost table and Ising form equal the contract cost on every bitstring",
+      "passed": true,
+      "detail": "832 bitstrings over 3 instances: table = Ising = direct formula",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_cost_table_matches_contract"
+    },
+    {
+      "id": "Q02",
+      "name": "Dicke preparation gives uniform weight-m states",
+      "passed": true,
+      "detail": "35 (n, k) pairs up to n=7, max amplitude error 1.7e-16; block product uniform over 27 valid plans",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_dicke_states"
+    },
+    {
+      "id": "Q03",
+      "name": "Bit order: Qiskit count keys map to the right (hour, feeder) cell",
+      "passed": true,
+      "detail": "9 single-qubit flips: key[n-1-c] -> bits[t*N+f] -> matrix[t][f], protected stay 0",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_bit_order"
+    },
+    {
+      "id": "Q04",
+      "name": "Every sampled bitstring from the Dicke + XY-mixer circuit is a valid plan",
+      "passed": true,
+      "detail": "6000 of 6000 samples valid at random angles; probability outside the valid subspace < 1e-12",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_xy_samples_valid"
+    },
+    {
+      "id": "Q05",
+      "name": "Every sampled bitstring from the Grover-mixer circuit is a valid plan",
+      "passed": true,
+      "detail": "6000 of 6000 samples valid at random angles; probability outside the valid subspace < 1e-12",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_grover_samples_valid"
+    },
+    {
+      "id": "Q06",
+      "name": "Equal-cost plans get equal Grover-mixer amplitude",
+      "passed": true,
+      "detail": "10 tie groups, max complex-amplitude difference 2.1e-16 (XY mixer on the same instance: probability spread 1.2e-01)",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_grover_equal_amplitude"
+    },
+    {
+      "id": "Q07",
+      "name": "Fixed seed reproduces QAOA angles and samples",
+      "passed": true,
+      "detail": "two runs: identical angles [-0.6916, 1.3253] and identical counts over 500 shots",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_seed_reproducible"
+    },
+    {
+      "id": "Q08",
+      "name": "Penalty-QAOA objective equals cost plus quota penalty on every bitstring",
+      "passed": true,
+      "detail": "64 bitstrings; at sample angles the X mixer leaves 94% probability on invalid plans",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_penalty_objective"
+    },
+    {
+      "id": "Q09",
+      "name": "Quantum-side reference equals the classical exact reference in plans/base.json",
+      "passed": true,
+      "detail": "18 qubits for 24 variables; cost_min 10.5, cost_max 41.5, 4500 valid, 4 optimal: identical on both sides",
+      "area": "quantum",
+      "test": "tests/quantum/test_core.py::test_reference_matches_area2"
     }
   ],
   "summary": {
-    "total": 14,
-    "passed": 14,
+    "total": 23,
+    "passed": 23,
     "failed": 0
   }
 }

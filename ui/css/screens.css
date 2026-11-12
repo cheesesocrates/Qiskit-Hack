@@ -6,7 +6,7 @@
 .plan-map { position: absolute; inset: 0; }
 .map-caption { padding: 6px 20px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); background: var(--bg); }
 
-.headline { position: absolute; top: 16px; left: 16px; z-index: 800; background: var(--panel); border: 1px solid var(--border-strong);
+.headline { position: absolute; top: 16px; left: 16px; z-index: 650; background: var(--panel); border: 1px solid var(--border-strong);
   border-radius: var(--radius); padding: 14px 20px 14px; width: 300px; max-width: calc(100% - 140px); }
 .hl-num { display: flex; align-items: baseline; gap: 2px; color: var(--accent); line-height: 1; }
 .hl-val { font-size: 64px; font-weight: 600; letter-spacing: -0.02em; font-family: var(--font-ui); }
@@ -14,7 +14,8 @@
 .hl-text { font-size: 17px; font-weight: 500; margin-top: 6px; }
 .hl-sub { font-size: 12.5px; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
 .hl-src { font-size: 11.5px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-.details-toggle { position: absolute; top: 16px; right: 16px; z-index: 800; }
+.details-toggle { position: absolute; top: 16px; right: 16px; z-index: 650; }
+.details-b > :empty { display: none; }
 
 .dock { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 12px 24px 4px;
   background: var(--panel); border-top: 1px solid var(--border); }
@@ -98,3 +99,10 @@ button.pg-cell:hover { filter: brightness(1.2); }
 .pg-cell.viol { outline: 3px solid var(--danger); outline-offset: -3px; }
 .pg-warn { position: absolute; top: 4px; right: 4px; color: var(--danger); }
 .pg-dbg { font-family: var(--font-mono); font-size: 10.5px; font-weight: 400; color: var(--text-dim); }
+
+/* ===== Compare ===== */
+.m-name { font-weight: 500; }
+.sec-h { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+.check-sum { font-size: 15px; color: var(--text-dim); }
+.cs-n { font-size: 34px; font-weight: 500; color: var(--accent); }
+.cs-of { font-size: 15px; }

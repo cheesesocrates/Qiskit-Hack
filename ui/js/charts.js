@@ -95,3 +95,26 @@ export const bandPlugin = {
     ctx.restore();
   },
 };
+
+/** Print each bar's value just past its end (so values never depend on reading the axis). */
+export function valueLabels(format) {
+  return {
+    id: 'valueLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const v = ds.data[i];
+          if (v === null || v === undefined) return;
+          ctx.save();
+          ctx.fillStyle = COLORS.text;
+          ctx.font = '12px "IBM Plex Mono", monospace';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(format(v), bar.x + 8, bar.y);
+          ctx.restore();
+        });
+      });
+    },
+  };
+}

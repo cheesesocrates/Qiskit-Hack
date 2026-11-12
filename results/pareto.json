@@ -1,0 +1,314 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-12T12:09:36Z",
+  "seed": 7,
+  "source": "scripts/run_quantum.py",
+  "data_provenance": "synthetic",
+  "instance_name": "base",
+  "method": "Grover-mixer QAOA, p=2",
+  "fairness_metric_name": "Std-dev of total outage hours (ledger + plan) across non-protected feeders",
+  "default_index": 3,
+  "points": [
+    {
+      "fairness_weight": 0.0,
+      "plan": {
+        "bits": "010110001000010001011100",
+        "matrix": [
+          [
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 9.0,
+      "breakdown": {
+        "hardship": 7.0,
+        "fairness": 3.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.7637626158259734,
+      "fairness_entropy": 0.9852547526828269,
+      "hardship_total": 7.0,
+      "exact_cost": 9.0,
+      "matches_exact": true,
+      "p_optimal": 0.013029503759632088
+    },
+    {
+      "fairness_weight": 0.25,
+      "plan": {
+        "bits": "100110000100010010011100",
+        "matrix": [
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 9.375,
+      "breakdown": {
+        "hardship": 7.0,
+        "fairness": 1.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.5,
+      "fairness_entropy": 0.9942854629567635,
+      "hardship_total": 7.0,
+      "exact_cost": 9.375,
+      "matches_exact": true,
+      "p_optimal": 0.006210968509617528
+    },
+    {
+      "fairness_weight": 0.5,
+      "plan": {
+        "bits": "100101000100100010011100",
+        "matrix": [
+          [
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 9.75,
+      "breakdown": {
+        "hardship": 7.0,
+        "fairness": 1.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.5,
+      "fairness_entropy": 0.9942854629567635,
+      "hardship_total": 7.0,
+      "exact_cost": 9.75,
+      "matches_exact": true,
+      "p_optimal": 0.005893393186194277
+    },
+    {
+      "fairness_weight": 1.0,
+      "plan": {
+        "bits": "110010000001010011001100",
+        "matrix": [
+          [
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 11.0,
+      "breakdown": {
+        "hardship": 7.5,
+        "fairness": 1.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.5,
+      "fairness_entropy": 0.9942854629567635,
+      "hardship_total": 7.5,
+      "exact_cost": 10.5,
+      "matches_exact": false,
+      "p_optimal": 0.005353747719771024
+    },
+    {
+      "fairness_weight": 2.0,
+      "plan": {
+        "bits": "100110000100010010011100",
+        "matrix": [
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 12.0,
+      "breakdown": {
+        "hardship": 7.0,
+        "fairness": 1.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.5,
+      "fairness_entropy": 0.9942854629567635,
+      "hardship_total": 7.0,
+      "exact_cost": 12.0,
+      "matches_exact": true,
+      "p_optimal": 0.004698819661081917
+    },
+    {
+      "fairness_weight": 4.0,
+      "plan": {
+        "bits": "100101000100100010011100",
+        "matrix": [
+          [
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "cost": 15.0,
+      "breakdown": {
+        "hardship": 7.0,
+        "fairness": 1.5,
+        "consecutive": 1.0
+      },
+      "fairness_metric": 0.5,
+      "fairness_entropy": 0.9942854629567635,
+      "hardship_total": 7.0,
+      "exact_cost": 15.0,
+      "matches_exact": true,
+      "p_optimal": 0.004141968449839689
+    }
+  ],
+  "notes": "Each point: best valid plan among 256 Aer shots of the optimised circuit; p_optimal is the exact simulated probability of an optimal plan per shot; exact_cost is the brute-force optimum for that weight. Angles are warm-started from the previous weight."
+}

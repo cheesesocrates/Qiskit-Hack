@@ -108,6 +108,26 @@
           },
           "notes": {
             "type": "string"
+          },
+          "fidelity": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "max_bond_dim_used": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "mps_memory_mb": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -130,6 +150,9 @@
       "minItems": 1
     },
     "notes": {
+      "type": "string"
+    },
+    "layout": {
       "type": "string"
     }
   },

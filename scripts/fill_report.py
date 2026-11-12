@@ -377,7 +377,7 @@ def build() -> list:
     # ---------------------------------------------------------------- 1. summary
     B += [("title", "FairShed: fair and auditable load-shedding with Qiskit"),
           ("meta", TEAM_LINE),
-          ("meta", f"Repository: {REPO_URL}. Demo video: [link].")]
+          ("meta", f"Repository: {REPO_URL}.")]
     B += [("h1", "1. Summary"),
           ("p", "When there is not enough electricity, a utility switches whole [[feeders|feeder]] (the power lines that supply "
                 "one neighbourhood) off for an hour at a time. FairShed decides which feeders go off in each hour. "

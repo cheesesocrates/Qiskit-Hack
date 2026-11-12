@@ -2,7 +2,7 @@
 
 Team: Hello Child. Members: Raahim Babar, Zarrar Nadeem, Ahmed Ayan Arsalan. Domain: Energy and Smart Infrastructure.
 
-Repository: https://github.com/cheesesocrates/Qiskit-Hack. Demo video: [link].
+Repository: https://github.com/cheesesocrates/Qiskit-Hack.
 
 ## 1. Summary
 

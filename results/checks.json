@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:25:13Z",
+  "generated_at": "2026-11-12T12:39:47Z",
   "seed": 0,
   "source": "tests/conftest.py (pytest run)",
   "data_provenance": "synthetic",
@@ -190,6 +190,22 @@
       "test": "tests/quantum/test_core.py::test_reference_matches_area2"
     },
     {
+      "id": "Q10",
+      "name": "Quantum counting (IAE) of valid plans is within tolerance of exact enumeration",
+      "passed": true,
+      "detail": "4x2: exact 9, estimate 9.07; 3x2: exact 9, estimate 9.01",
+      "area": "quantum",
+      "test": "tests/quantum/test_counting_gas.py::test_counting_within_tolerance"
+    },
+    {
+      "id": "Q11",
+      "name": "Grover Adaptive Search returns plans scored with the true cost",
+      "passed": true,
+      "detail": "2 runs: 100% valid, P(optimal) 1.00, best cost 4.666666666666668 vs exact 4.6667",
+      "area": "quantum",
+      "test": "tests/quantum/test_counting_gas.py::test_gas_rows_consistent"
+    },
+    {
       "id": "S01",
       "name": "Committed schemas match schemas/build_schemas.py",
       "passed": true,
@@ -209,14 +225,14 @@
       "id": "S03",
       "name": "All results JSON files validate against their schemas",
       "passed": true,
-      "detail": "17 files valid, 3 not generated yet",
+      "detail": "19 files valid, 1 not generated yet",
       "area": "shared",
       "test": "tests/test_schemas.py::test_results_validate"
     }
   ],
   "summary": {
-    "total": 26,
-    "passed": 26,
+    "total": 28,
+    "passed": 28,
     "failed": 0
   }
 }

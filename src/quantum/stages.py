@@ -52,7 +52,7 @@ def optimised_runner(qp: QProblem, kind: str, p: int, seed: int, maxiter: int = 
     key = _cache_key(qp, kind, p, seed)
     cached = _cache_get(key) if (use_cache and init is None) else None
     if cached and len(cached["theta"]) == 2 * p:
-        return runner, cached
+        return runner, {**cached, "from_cache": True}
     opt = runner.optimize(init=init, maxiter=maxiter)
     if init is None:
         _cache_put(key, opt)
@@ -128,6 +128,8 @@ def quantum_row(qp: QProblem, kind: str, p: int, seed: int, name: str, ref: dict
     m = sample_metrics(qp, counts, ref)
     ex = exact_state_metrics(qp, runner.probabilities(opt["theta"]), ref)
     runtime = time.perf_counter() - t0
+    if opt.get("from_cache"):          # report the optimiser time even when the angles were reused
+        runtime += float(opt.get("runtime_s") or 0.0)
     label = "Dicke state only (uniform over valid plans)" if p == 0 else f"{LABELS[kind]}, p={p}"
     notes = (f"Exact simulated state: P(optimal)={ex['p_optimal']:.4f}, approx ratio={ex['approx_ratio']:.4f}, "
              f"valid probability={ex['feasible_prob']:.4f}. Optimiser evaluations: {opt['nfev']}. "

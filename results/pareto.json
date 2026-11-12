@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-12T12:09:36Z",
+  "generated_at": "2026-11-12T12:38:03Z",
   "seed": 7,
   "source": "scripts/run_quantum.py",
   "data_provenance": "synthetic",
@@ -57,7 +57,7 @@
       "hardship_total": 7.0,
       "exact_cost": 9.0,
       "matches_exact": true,
-      "p_optimal": 0.013029503759632088
+      "p_optimal": 0.013059544277141774
     },
     {
       "fairness_weight": 0.25,
@@ -107,7 +107,7 @@
       "hardship_total": 7.0,
       "exact_cost": 9.375,
       "matches_exact": true,
-      "p_optimal": 0.006210968509617528
+      "p_optimal": 0.006210513857924182
     },
     {
       "fairness_weight": 0.5,
@@ -157,7 +157,7 @@
       "hardship_total": 7.0,
       "exact_cost": 9.75,
       "matches_exact": true,
-      "p_optimal": 0.005893393186194277
+      "p_optimal": 0.005893046827660473
     },
     {
       "fairness_weight": 1.0,
@@ -207,7 +207,7 @@
       "hardship_total": 7.5,
       "exact_cost": 10.5,
       "matches_exact": false,
-      "p_optimal": 0.005353747719771024
+      "p_optimal": 0.005353775673918752
     },
     {
       "fairness_weight": 2.0,
@@ -257,7 +257,7 @@
       "hardship_total": 7.0,
       "exact_cost": 12.0,
       "matches_exact": true,
-      "p_optimal": 0.004698819661081917
+      "p_optimal": 0.004698553205581682
     },
     {
       "fairness_weight": 4.0,
@@ -307,7 +307,7 @@
       "hardship_total": 7.0,
       "exact_cost": 15.0,
       "matches_exact": true,
-      "p_optimal": 0.004141968449839689
+      "p_optimal": 0.004142051037639826
     }
   ],
   "notes": "Each point: best valid plan among 256 Aer shots of the optimised circuit; p_optimal is the exact simulated probability of an optimal plan per shot; exact_cost is the brute-force optimum for that weight. Angles are warm-started from the previous weight."

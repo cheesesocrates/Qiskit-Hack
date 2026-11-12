@@ -15,7 +15,10 @@ method="matrix_product_state", matrix_product_state_max_bond_dimension=<chi>,
 matrix_product_state_truncation_threshold (left at its default 1e-16),
 mps_swap_direction="mps_swap_right", mps_log_data=True (peak bond dimension, for the notes).
 mps_swap_direction is set because Aer's default ("mps_swap_left") kills the Python process with
-an access violation on this Windows install for 16 or more qubits.
+an access violation on this Windows install for 16 or more qubits. The "interleaved" layout also
+crashes Aer at 16 qubits on Windows (exit code 0xC0000409, session 2), so the stage uses the
+default layout. max_memory_mb is raised because Aer's MPS memory estimate is far too high (see
+MPS_MAX_MEMORY_MB).
 
 Isolation
 ---------
@@ -56,6 +59,11 @@ MPS_SWAP = "mps_swap_right"
 GROWTH = 2.5                    # assumed run-time growth per doubling of chi when pre-checking the budget
 COST_TOL = 1e-6
 ORDERINGS = ("default", "interleaved")
+# Aer's pre-run memory check for the MPS method assumes far more memory than the run uses
+# (28 qubits: "required 57345M" on a 32 GB machine, yet the run completes in about 1 s at chi=32).
+# The real footprint is bounded by n * chi^2 amplitudes, so the check is raised; each point still
+# runs in an isolated worker with a time limit, so a real out-of-memory costs one point.
+MPS_MAX_MEMORY_MB = 1 << 22
 
 
 # ---------------------------------------------------------------------------------------------
@@ -113,7 +121,8 @@ def mps_simulator(bond_dim: int) -> AerSimulator:
     return AerSimulator(method="matrix_product_state",
                         matrix_product_state_max_bond_dimension=int(bond_dim),
                         matrix_product_state_truncation_threshold=MPS_TRUNCATION,
-                        mps_swap_direction=MPS_SWAP, mps_log_data=True)
+                        mps_swap_direction=MPS_SWAP, mps_log_data=True,
+                        max_memory_mb=MPS_MAX_MEMORY_MB)
 
 
 def _peak_bond_dim(result) -> int | None:
@@ -315,3 +324,83 @@ class _Worker:
             except Exception:
                 self.kill()
         self.proc = None
+
+
+# ---------------------------------------------------------------------------------------------
+# the stage
+# ---------------------------------------------------------------------------------------------
+def _empty_point(case: Case, bond_dim, status: str, note: str) -> dict:
+    return {"n_feeders": case.qp.N, "n_hours": case.qp.T, "n_qubits": case.qp.n, "bond_dim": bond_dim,
+            "simulator": "statevector" if bond_dim is None else "matrix_product_state",
+            "approx_ratio": None, "feasibility_pct": None, "exact_cost_min": case.exact["cost_min"],
+            "exact_cost_max": case.exact["cost_max"], "exact_method": case.exact["method"],
+            "best_sampled_cost": None, "runtime_s": None, "status": status, "notes": note}
+
+
+def run_scaling(seed: int = 7, scenarios: tuple = DEFAULT_SCENARIOS, bond_dims: tuple = DEFAULT_BOND_DIMS,
+                shots: int = 512, point_timeout: float = 120.0, total_budget: float = 900.0,
+                ordering: str = "default") -> Path:
+    """Write results/scaling.json. Every point is either measured ('ok') or says why it has no numbers."""
+    t_start = time.perf_counter()
+    cases = sorted((Case(name) for name in scenarios), key=lambda c: c.qp.n)
+    theta, source = train_angles(cases, seed)
+    worker, points = _Worker(), []
+    try:
+        for case in cases:
+            last_runtime = None
+            dims = ([None] if case.qp.n <= STATEVECTOR_MAX_QUBITS else []) + list(bond_dims)
+            for chi in dims:
+                remaining = total_budget - (time.perf_counter() - t_start)
+                limit = min(point_timeout, remaining)
+                if limit < 5:
+                    points.append(_empty_point(case, chi, "skipped", f"skipped: total budget of {total_budget:.0f} s used up"))
+                    continue
+                if chi is not None and last_runtime is not None and last_runtime * GROWTH > limit:
+                    points.append(_empty_point(case, chi, "skipped",
+                                               f"skipped: the previous bond dimension took {last_runtime:.1f} s, so this "
+                                               f"one is predicted to exceed the {limit:.0f} s limit"))
+                    continue
+                task = {"id": len(points), "scenario": case.name, "theta": theta, "bond_dim": chi,
+                        "shots": shots, "seed": seed, "ordering": ordering}
+                status, res = worker.call(task, timeout=limit)
+                if status == "ok":
+                    pt = _empty_point(case, chi, "ok", res["notes"])
+                    for k in ("approx_ratio", "feasibility_pct", "best_sampled_cost", "runtime_s"):
+                        pt[k] = res[k]
+                    pt["approx_ratio"] = min(max(pt["approx_ratio"], 0.0), 1.0)
+                    points.append(pt)
+                    if chi is not None:
+                        last_runtime = res["runtime_s"]
+                else:
+                    points.append(_empty_point(case, chi, "failed" if status == "failed" else "skipped",
+                                               f"{status}: {res}"))
+                    last_runtime = None      # a failed point says nothing about the next chi: try it
+                p = points[-1]
+                print(f"  scaling {case.name} ({case.qp.n} q) chi={chi}: {p['status']} "
+                      f"ratio={p['approx_ratio']} valid={p['feasibility_pct']} t={p['runtime_s']}", flush=True)
+    finally:
+        worker.close()
+    if not any(p["status"] == "ok" for p in points):
+        raise RuntimeError("no scaling point ran successfully")
+    payload = {
+        "method": f"Dicke + XY-mixer QAOA, p={LAYERS}, Aer matrix_product_state simulator ({ordering} qubit layout)",
+        "layers": LAYERS, "shots": shots, "parameter_source": source, "points": points,
+        "notes": (f"approx_ratio is the mean over {shots} shots with invalid samples scored 0, against the exact "
+                  "classical optimum in each plans file (brute force up to 20 qubits, MILP above). bond_dim null is "
+                  "the untruncated statevector reference (only up to 20 qubits). Per-point limit "
+                  f"{point_timeout:.0f} s, total budget {total_budget:.0f} s; points that did not run carry no "
+                  "numbers. Simulator only: this curve shows how far a truncated classical simulation of the "
+                  "circuit can go, not a quantum advantage."),
+    }
+    return write_result("scaling.json", payload, seed, "src/quantum/scaling.py")
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description="MPS scaling stage (Area 1)")
+    ap.add_argument("--worker", action="store_true", help="internal: run as the point-evaluation worker")
+    ap.add_argument("--seed", type=int, default=7)
+    args = ap.parse_args()
+    if args.worker:
+        _worker_loop()
+    else:
+        print(run_scaling(args.seed))

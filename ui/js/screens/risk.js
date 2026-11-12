@@ -1,82 +1,99 @@
-// Screen 5: Risk and counting. Quantum counting of valid plans (counting.json) and tail risk by
-// amplitude estimation (risk.json), each next to the exact classical value.
-import { el, fmt, fmtSmart } from '../util.js';
-import { naPanel, panel, pageHead, table, kpi, passChip } from '../components/common.js';
-import { makeChart, axis, COLORS, valueLabels } from '../charts.js';
+// Results > Uncertainty and counting (was Risk and counting). Amplitude-estimation results next to the
+// exact values, drawn as a ruler: interval band, estimate dot, exact tick. Reads counting.json and risk.json.
+import { el, fmt } from '../util.js';
+import { naPanel, panel, table, passChip } from '../components/common.js';
+import { makeChart, axis, COLORS } from '../charts.js';
+import { explainPanel, pageHeader, chartBlock, rawJson } from '../explain.js';
+import { term } from '../glossary.js';
+import { pct } from '../metrics.js';
+
+/** Ruler: lo..hi is the visible range; ci is [a, b]; est and exact are values. */
+function ruler({ label, est, ci, exact, unit, digits = 2 }) {
+  const lo0 = Math.min(ci ? ci[0] : est, est, exact), hi0 = Math.max(ci ? ci[1] : est, est, exact);
+  const pad = Math.max((hi0 - lo0) * 0.6, Math.abs(exact) * 0.02, 1e-6);
+  const lo = lo0 - pad, hi = hi0 + pad;
+  const x = (v) => `${(100 * (v - lo)) / (hi - lo)}%`;
+  const u = unit ? ` ${unit}` : '';
+  return el('div', { class: 'stack-s' },
+    el('div', { class: 'row' }, el('b', null, label)),
+    el('div', { class: 'target', role: 'img', 'aria-label': `${label}: estimate ${fmt(est, digits)}${u}${ci ? `, 95% interval ${fmt(ci[0], digits)} to ${fmt(ci[1], digits)}` : ''}, exact ${fmt(exact, digits)}${u}` },
+      el('div', { class: 'target-axis' }),
+      ci ? el('div', { class: 'target-band', style: `left:${x(ci[0])};width:calc(${x(ci[1])} - ${x(ci[0])})` }) : null,
+      el('div', { class: 'target-exact', style: `left:${x(exact)}` }),
+      el('div', { class: 'target-est', style: `left:${x(est)}` }),
+      el('span', { class: 'target-lab target-lab--top', style: `left:${x(exact)}` }, `exact ${fmt(exact, digits)}${u}`),
+      el('span', { class: 'target-lab target-lab--bot', style: `left:${x(est)}` }, `estimate ${fmt(est, digits)}${u}`)),
+    ci ? el('p', { class: 'subtle' }, `The shaded band is the 95% interval: ${fmt(ci[0], digits)} to ${fmt(ci[1], digits)}${u}. The exact value ${ci[0] <= exact && exact <= ci[1] ? 'falls inside it' : 'falls outside it'}.`) : null);
+}
 
 function countingPanel(c) {
-  const inst = c.instance;
-  return panel('How many valid plans are there?',
-    `Quantum counting by iterative amplitude estimation on a ${inst.n_feeders} feeder x ${inst.n_hours} hour block (quotas ${inst.quotas.join(', ')}, protected ${inst.protected.length ? inst.protected.join(', ') : 'none'}).`,
+  const i = c.instance;
+  const block = `${i.n_feeders} feeder by ${i.n_hours} hour block`;
+  return panel(`How many valid plans are there? (small ${block})`,
+    `Shown on a small ${block}, quotas ${i.quotas.join(', ')}, because the counting circuit needs extra qubits. There are ${c.search_space} possible switch settings in this block.`,
     el('div', { class: 'stack' },
-      el('div', { class: 'kpis' },
-        kpi('Exact count (enumeration)', String(c.exact_count), `of ${c.search_space} on/off patterns`),
-        kpi('Quantum estimate', fmt(c.estimated_count, 2), `rounds to ${c.estimated_count_rounded}`),
-        kpi('95% interval', `${fmt(c.ci[0], 2)} to ${fmt(c.ci[1], 2)}`, `tolerance ${fmt(c.tolerance, 2)}`),
-        kpi('Check', null, `${c.oracle_queries} oracle queries`, passChip(c.within_tolerance, 'Within tolerance', 'Outside tolerance')),
-        kpi('Flexibility', `${fmt(c.flexibility_bits, 2)} bits`, 'log2 of the number of valid plans')),
-      el('p', { class: 'subtle' }, `${c.n_qubits_search} search qubits, ${c.n_qubits_total} qubits in total including the validity check.`),
-      el('details', { class: 'disc' }, el('summary', null, 'Method notes'), el('p', { class: 'subtle' }, c.notes))));
+      el('h3', { class: 'takeaway' }, `The quantum estimate is ${fmt(c.estimated_count, 2)} valid plans; the exact count is ${c.exact_count}.`),
+      ruler({ label: 'Number of valid plans', est: c.estimated_count, ci: c.ci, exact: c.exact_count, digits: 2 }),
+      el('div', { class: 'row' }, passChip(c.within_tolerance, 'Within tolerance of the exact count', 'Outside tolerance')),
+      el('ul', { class: 'plain-list' },
+        el('li', null, `A valid plan has exactly the right number of feeders off each hour and no protected feeder cut. ${c.exact_count} of the ${c.search_space} settings are valid.`),
+        el('li', null, 'The count says how much freedom the planner has: more valid plans means more ways to be fair.'),
+        el('li', { class: 'expert-only' }, `${c.n_qubits_search} search qubits, ${c.n_qubits_total} qubits in total, ${c.oracle_queries} oracle queries, ${fmt(c.flexibility_bits, 2)} bits of flexibility.`)),
+      rawJson('results/counting.json', c)));
 }
 
 function riskPanel(r, host) {
   const ex = r.exact, es = r.estimated;
-  const rows = [
-    { name: 'Expected loss', unit: 'MW', e: ex.expected_loss, q: es.expected_loss, ci: es.expected_loss_ci },
-    { name: 'Probability of an unplanned cut, P(loss > 0)', unit: '', e: ex.tail_prob, q: es.tail_prob, ci: es.tail_prob_ci },
-    { name: `Value at risk (${fmt(r.alpha * 100, 0)}%)`, unit: 'MW', e: ex.var, q: es.var, ci: null },
-    { name: `Conditional value at risk (${fmt(r.alpha * 100, 0)}%)`, unit: 'MW', e: ex.cvar, q: es.cvar, ci: es.cvar_ci },
-  ];
-  const tbl = table([
-    { label: 'Measure', render: (x) => x.name },
-    { label: 'Exact', num: true, render: (x) => `${fmt(x.e, 4)}${x.unit ? ' ' + x.unit : ''}` },
-    { label: 'Amplitude estimation', num: true, render: (x) => `${fmt(x.q, 4)}${x.unit ? ' ' + x.unit : ''}` },
-    { label: '95% interval', num: true, render: (x) => (x.ci ? `${fmt(x.ci[0], 4)} to ${fmt(x.ci[1], 4)}` : 'found by search') },
-  ], rows);
-  const canvas = el('canvas', { role: 'img', 'aria-label': 'Probability of each residual scenario' });
-  const box = el('div', { class: 'chart-box' }, canvas);
-  host.append(panel('Tail risk of the peak hour', r.block.description,
+  const a = fmt(r.alpha * 100, 0);
+  const canvas = el('canvas', { role: 'img', 'aria-label': `Chance of each forecast-error scenario: ${r.scenarios.map((s) => `${fmt(s.shortfall_extra_mw, 2)} MW: ${fmt(s.prob, 3)}`).join('; ')}` });
+  host.append(panel(`Tail risk at the peak hour (${r.block.n_feeders}-feeder replay cluster)`, r.block.description,
     el('div', { class: 'stack' },
-      el('div', { class: 'row' }, passChip(r.within_tolerance, 'All estimates within tolerance of exact', 'Some estimates outside tolerance'),
-        el('span', { class: 'subtle' }, `${r.n_qubits} qubits, ${r.oracle_queries} oracle queries, loss unit: ${r.loss_unit}.`)),
-      tbl,
-      el('div', null, el('h3', { class: 'sec-h' }, 'Scenario distribution'), el('p', { class: 'subtle' }, `${r.residual_source}. Amber bars are scenarios with a non-zero loss.`), box),
-      el('details', { class: 'disc' }, el('summary', null, 'Method notes'), el('p', { class: 'subtle' }, r.notes)))));
+      el('h3', { class: 'takeaway' }, `In the worst ${fmt(100 - r.alpha * 100, 0)}% of cases the peak-hour plan misses ${fmt(ex.cvar, 2)} MW on average (estimate ${fmt(es.cvar, 2)} MW). In ${pct(1 - ex.tail_prob)} of cases it misses nothing.`),
+      el('div', { class: 'row' }, passChip(r.within_tolerance, 'Every estimate is within tolerance of the exact value', 'Some estimates are outside tolerance')),
+      ruler({ label: 'Average shortfall the plan misses (expected loss)', est: es.expected_loss, ci: es.expected_loss_ci, exact: ex.expected_loss, unit: 'MW', digits: 3 }),
+      ruler({ label: 'Chance the plan falls short (needs an unplanned cut)', est: es.tail_prob, ci: es.tail_prob_ci, exact: ex.tail_prob, digits: 3 }),
+      ruler({ label: `CVaR ${a}: average miss in the worst ${fmt(100 - r.alpha * 100, 0)}%`, est: es.cvar, ci: es.cvar_ci, exact: ex.cvar, unit: 'MW', digits: 3 }),
+      el('ul', { class: 'plain-list' },
+        el('li', null, el('span', null, term('var', `VaR ${a}`), `: the miss that is exceeded only in the worst ${fmt(100 - r.alpha * 100, 0)}% of cases. Exact ${fmt(ex.var, 3)} MW, estimate ${fmt(es.var, 3)} MW.`)),
+        el('li', null, el('span', null, term('cvar', `CVaR ${a}`), `: the average miss inside that worst ${fmt(100 - r.alpha * 100, 0)}%.`)),
+        el('li', null, `Loss is ${r.loss_unit}.`)),
+      chartBlock({ takeaway: `${r.scenarios.filter((s) => s.loss > 0).length} of ${r.scenarios.length} forecast-error scenarios leave part of the shortage uncovered; together they have a ${pct(ex.tail_prob)} chance.`,
+        chart: el('div', { class: 'chart-box' }, canvas),
+        howto: 'Each bar is one forecast-error scenario, from "real shortage lower than forecast" on the left to "higher" on the right. Bar height is how likely it is. Orange bars leave part of the shortage uncovered.',
+        plain: [`${r.scenarios.filter((s) => s.loss > 0).length} of ${r.scenarios.length} scenarios leave a shortfall uncovered.`] }),
+      el('div', { class: 'expert-only' }, table([
+        { label: 'Measure', render: (x) => x[0] }, { label: 'Exact', num: true, render: (x) => fmt(x[1], 4) },
+        { label: 'Estimate', num: true, render: (x) => fmt(x[2], 4) }, { label: '95% interval', num: true, render: (x) => (x[3] ? `${fmt(x[3][0], 4)} to ${fmt(x[3][1], 4)}` : 'found by search') },
+      ], [['Expected loss (MW)', ex.expected_loss, es.expected_loss, es.expected_loss_ci], ['P(loss > 0)', ex.tail_prob, es.tail_prob, es.tail_prob_ci],
+        [`VaR ${a} (MW)`, ex.var, es.var, null], [`CVaR ${a} (MW)`, ex.cvar, es.cvar, es.cvar_ci]]),
+      el('p', { class: 'subtle' }, `${r.n_qubits} qubits, ${r.oracle_queries} oracle queries. ${r.notes}`)),
+      rawJson('results/risk.json', r))));
   makeChart(canvas, {
     type: 'bar',
-    data: {
-      labels: r.scenarios.map((s) => `${s.shortfall_extra_mw >= 0 ? '+' : ''}${fmt(s.shortfall_extra_mw, 2)} MW`),
-      datasets: [{ data: r.scenarios.map((s) => s.prob), backgroundColor: r.scenarios.map((s) => (s.loss > 0 ? COLORS.off : COLORS.seriesB)), borderWidth: 0 }],
-    },
-    options: {
-      layout: { padding: { top: 18 } },
-      scales: { x: axis({ title: { display: true, text: 'Residual scenario (actual minus forecast)', color: COLORS.muted } }), y: axis({ beginAtZero: true, title: { display: true, text: 'Probability', color: COLORS.muted } }) },
-      plugins: { tooltip: { callbacks: { label: (c) => `p = ${fmt(c.parsed.y, 3)}, loss ${fmtSmart(r.scenarios[c.dataIndex].loss, 3)} MW` } } },
-    },
-    plugins: [{
-      id: 'topLabels',
-      afterDatasetsDraw(chart) {
-        const { ctx } = chart;
-        chart.getDatasetMeta(0).data.forEach((bar, i) => {
-          ctx.save(); ctx.fillStyle = COLORS.text; ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center';
-          ctx.fillText(fmt(r.scenarios[i].prob, 3), bar.x, bar.y - 6); ctx.restore();
-        });
-      },
-    }],
+    data: { labels: r.scenarios.map((s) => `${s.shortfall_extra_mw >= 0 ? '+' : ''}${fmt(s.shortfall_extra_mw, 1)}`),
+      datasets: [{ data: r.scenarios.map((s) => s.prob), backgroundColor: r.scenarios.map((s) => (s.loss > 0 ? COLORS.classical : COLORS.quantum)), borderWidth: 0 }] },
+    options: { layout: { padding: { top: 24 } },
+      scales: { x: axis({ title: { display: true, text: 'Forecast error: real minus forecast shortage (MW)' } }), y: axis({ beginAtZero: true, title: { display: true, text: 'Chance' } }) },
+      plugins: { tooltip: { callbacks: { label: (c) => `chance ${fmt(c.parsed.y, 3)}, uncovered ${fmt(r.scenarios[c.dataIndex].loss, 2)} MW` } } } },
   });
 }
 
 export default {
-  id: 'risk',
-  title: 'Risk and counting',
   async mount({ root, results }) {
-    const page = el('div', { class: 'page' }, pageHead('Risk and counting', 'Two amplitude-estimation results, each checked against the exact classical answer.'),
-      el('div', { class: 'callout' }, 'Simulator only. Both problems are small enough to solve exactly by enumeration; these panels show that the quantum estimators give the right numbers, not that they are faster.'));
+    const page = el('div', { class: 'page' }, pageHeader('How sure are we, and how much choice is there?', 'Results: uncertainty and counting (was Risk and counting)',
+      'Two uses of amplitude estimation, each checked against the exact answer from a normal computer.'));
     root.append(page);
     const c = results.ok('counting');
-    page.append(c ? countingPanel(c) : panel('How many valid plans are there?', null, naPanel(results.get('counting'))));
     const r = results.ok('risk');
-    if (r) riskPanel(r, page); else page.append(panel('Tail risk of the peak hour', null, naPanel(results.get('risk'))));
+    page.append(explainPanel('uncertainty', {
+      what: [el('span', null, 'Two quantum estimates made with ', term('ae', 'amplitude estimation'), ': how many valid plans exist (', term('counting'), '), and how much shortage the peak-hour plan may miss (risk).')],
+      how: ['On each ruler the black tick is the exact value, the blue dot is the quantum estimate and the shaded band is its 95% interval.', 'The closer the dot to the tick, the better the estimate.'],
+      notice: c || r ? [c ? `Counting: estimate ${fmt(c.estimated_count, 2)} against an exact ${c.exact_count}, on a small ${c.instance.n_feeders} feeder by ${c.instance.n_hours} hour block.` : 'Counting: not available.',
+        r ? `Risk: estimates ${r.within_tolerance ? 'all within' : 'not all within'} tolerance of the exact values, on the ${r.block.n_feeders}-feeder replay cluster.` : 'Risk: not available.'] : null,
+      not: ['A speed-up: both problems are small enough to solve exactly by enumeration.', 'Real outages: demand and shortfall are synthetic.'],
+    }));
+    page.append(c ? countingPanel(c) : panel('How many valid plans are there?', null, naPanel(results.get('counting'))));
+    if (r) riskPanel(r, page); else page.append(panel('Tail risk at the peak hour', null, naPanel(results.get('risk'))));
     return { destroy() {} };
   },
 };

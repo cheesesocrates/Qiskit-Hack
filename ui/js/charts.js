@@ -1,42 +1,78 @@
 // Chart.js wrapper: house styling, a registry so charts are destroyed on route change, and small plugins.
-import { reduced } from './motion.js';
 
 const registry = new Set();
 
-export const COLORS = {
-  text: '#E6EAF2', dim: '#B4BDCE', muted: '#8A94A8', grid: '#1F2A40', edge: '#66769A',
-  accent: '#A99CFF', seriesB: '#C9D2E3', panel: '#121A2B', bg: '#0B1220',
-  on: '#2DD4A7', off: '#F5A524', protected: '#4C9AFF', danger: '#F26D6D',
-};
+/** Colours come from the CSS tokens, so charts follow the light or dark theme. Call refreshColors() after a theme change. */
+export const COLORS = {};
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+export function refreshColors() {
+  Object.assign(COLORS, {
+    text: cssVar('--text'), dim: cssVar('--text-dim'), muted: cssVar('--text-dim'), grid: cssVar('--grid'), edge: cssVar('--border-strong'),
+    accent: cssVar('--accent'), panel: cssVar('--panel'), bg: cssVar('--bg'),
+    on: cssVar('--on'), off: cssVar('--off'), protected: cssVar('--protected'), danger: cssVar('--danger'),
+    quantum: cssVar('--c1'), classical: cssVar('--c2'), seriesB: cssVar('--c2'),
+    series: ['--c1', '--c2', '--c3', '--c4', '--c5', '--c6', '--c7'].map(cssVar),
+  });
+  return COLORS;
+}
+const FONT = '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif';
 
 export function setupDefaults() {
   const C = window.Chart;
+  refreshColors();
   if (!C) return;
-  C.defaults.font.family = '"IBM Plex Sans", system-ui, sans-serif';
-  C.defaults.font.size = 12;
-  C.defaults.color = COLORS.muted;
+  C.defaults.font.family = FONT;
+  C.defaults.font.size = 15;
+  C.defaults.color = COLORS.text;
   C.defaults.borderColor = COLORS.grid;
   C.defaults.maintainAspectRatio = false;
   C.defaults.responsive = true;
   C.defaults.plugins.legend.display = false;
-  C.defaults.plugins.tooltip.backgroundColor = COLORS.bg;
+  C.defaults.plugins.legend.labels.font = { family: FONT, size: 15 };
+  C.defaults.plugins.tooltip.backgroundColor = COLORS.panel;
   C.defaults.plugins.tooltip.borderColor = COLORS.edge;
-  C.defaults.plugins.tooltip.borderWidth = 1;
+  C.defaults.plugins.tooltip.borderWidth = 2;
   C.defaults.plugins.tooltip.titleColor = COLORS.text;
-  C.defaults.plugins.tooltip.bodyColor = COLORS.dim;
-  C.defaults.plugins.tooltip.padding = 10;
+  C.defaults.plugins.tooltip.bodyColor = COLORS.text;
+  C.defaults.plugins.tooltip.padding = 12;
   C.defaults.plugins.tooltip.cornerRadius = 4;
-  C.defaults.plugins.tooltip.bodyFont = { family: '"IBM Plex Mono", monospace', size: 12 };
+  C.defaults.plugins.tooltip.titleFont = { family: FONT, size: 15, weight: 'bold' };
+  C.defaults.plugins.tooltip.bodyFont = { family: FONT, size: 15 };
   C.defaults.plugins.tooltip.displayColors = true;
 }
+
+/** Label each line at its last point (direct labels instead of a legend box). */
+export const endLabelsPlugin = {
+  id: 'endLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea } = chart;
+    const placed = [];
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if (meta.hidden) return;
+      let last = null;
+      meta.data.forEach((pt, i) => { if (ds.data[i] !== null && ds.data[i] !== undefined) last = pt; });
+      if (!last) return;
+      let y = last.y;
+      for (const p of placed) if (Math.abs(p - y) < 18) y = p + 18;
+      placed.push(y);
+      ctx.save();
+      ctx.font = `bold 14px ${FONT}`;
+      ctx.fillStyle = ds.borderColor;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ds.label, Math.min(last.x + 10, chartArea.right + 10), y);
+      ctx.restore();
+    });
+  },
+};
 
 /** Axis options in house style. */
 export function axis(extra = {}) {
   return {
     grid: { color: COLORS.grid, drawTicks: false },
     border: { color: COLORS.edge },
-    ticks: { color: COLORS.muted, font: { family: '"IBM Plex Mono", monospace', size: 11 }, padding: 6 },
-    title: { color: COLORS.muted, font: { family: '"IBM Plex Sans", sans-serif', size: 12 } },
+    ticks: { color: COLORS.text, font: { family: FONT, size: 14 }, padding: 6 },
+    title: { color: COLORS.text, font: { family: FONT, size: 15, weight: 'bold' } },
     ...extra,
   };
 }
@@ -46,7 +82,7 @@ export function makeChart(canvas, config) {
   const C = window.Chart;
   if (!C) throw new Error('Chart.js is not loaded');
   config.options = config.options || {};
-  config.options.animation = reduced() ? false : { duration: 250, easing: 'easeOutQuad' };
+  config.options.animation = false; // no decorative animation: charts appear in their final state
   const chart = new C(canvas, config);
   registry.add(chart);
   return chart;
@@ -86,10 +122,10 @@ export const bandPlugin = {
     const x0 = scales.x.getPixelForValue(opts.from);
     const x1 = Math.min(chartArea.right, scales.x.getPixelForValue(opts.to));
     ctx.save();
-    ctx.fillStyle = '#182238';
+    ctx.fillStyle = COLORS.grid;
     ctx.fillRect(x0, chartArea.top, x1 - x0, chartArea.bottom - chartArea.top);
-    ctx.fillStyle = COLORS.muted;
-    ctx.font = '12px "IBM Plex Sans", sans-serif';
+    ctx.fillStyle = COLORS.text;
+    ctx.font = `bold 14px ${FONT}`;
     ctx.textBaseline = 'top';
     ctx.fillText(opts.label, x0 + 8, chartArea.top + 6);
     ctx.restore();
@@ -109,7 +145,7 @@ export function valueLabels(format) {
           if (v === null || v === undefined) return;
           ctx.save();
           ctx.fillStyle = COLORS.text;
-          ctx.font = '12px "IBM Plex Mono", monospace';
+          ctx.font = `bold 14px ${FONT}`;
           ctx.textBaseline = 'middle';
           ctx.fillText(format(v), bar.x + 8, bar.y);
           ctx.restore();

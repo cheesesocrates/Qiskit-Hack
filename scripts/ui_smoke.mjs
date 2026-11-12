@@ -18,31 +18,104 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SCREENS = ['plan', 'compare', 'audit', 'replay', 'risk', 'scale', 'forecast'];
-const OUT = join(ROOT, 'results', 'tmp', 'ui_smoke');
+const SCREENS = ['home', 'schedule', 'replay/watch', 'replay/rules', 'results/scoreboard', 'results/lottery',
+  'results/uncertainty', 'results/scale', 'results/forecast', 'learn/how', 'learn/algorithms', 'learn/glossary'];
+const shotName = (s) => s.replace('/', '-');
 const args = process.argv.slice(2);
-const resultsArg = args.includes('--results') ? args[args.indexOf('--results') + 1] : null;
+const argv = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
+const resultsArg = argv('--results');
+const OUT = argv('--out') ? resolve(ROOT, argv('--out')) : join(ROOT, 'results', 'tmp', 'ui_smoke');
+const [VW, VH] = (argv('--viewport') || '1440x900').split('x').map(Number);
+const FULL = args.includes('--full');
+const SCALE = Number(argv('--scale') || 1);          // screenshot scale (0.5 keeps committed PNGs small)
+const QUICK = args.includes('--no-checks');          // skip the size, target, keyboard and flow checks
+
+// Runs in the page: text under 14px and interactive targets under 44px (48px for the primary action).
+// Inline glossary terms and links inside running text are exempt (WCAG 2.5.8 inline exception).
+const SIZE_CHECK = `(() => {
+  const vis = (n) => { const r = n.getBoundingClientRect(); const cs = getComputedStyle(n);
+    return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+  const small = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const t = walker.currentNode; const p = t.parentElement;
+    if (!p || !t.textContent.trim() || !vis(p) || p.closest('script,style,.leaflet-control-attribution,.sr-only,.skip')) continue;
+    const fs = parseFloat(getComputedStyle(p).fontSize);
+    if (fs < 13.95) small.push(fs.toFixed(1) + 'px "' + t.textContent.trim().slice(0, 30) + '"');
+  }
+  const tiny = [];
+  const sel = 'a[href], button, input, select, summary, [role=radio], [role=button]';
+  for (const n of document.querySelectorAll(sel)) {
+    if (!vis(n) || n.closest('.sr-only') || n.classList.contains('gl-term') || n.matches('a.skip')) continue;
+    if (n.closest('p, li, dd, .lede, .subtle, .howto, .leaflet-control-attribution, .crumbs ol')) continue;
+    const r = n.getBoundingClientRect();
+    const min = n.classList.contains('btn--primary') ? 47.5 : 43.5;
+    if (r.height < min || r.width < 43.5) tiny.push(Math.round(r.width) + 'x' + Math.round(r.height) + ' ' + (n.getAttribute('aria-label') || n.textContent.trim().slice(0, 24) || n.tagName));
+  }
+  return { small: small.slice(0, 6), nSmall: small.length, tiny: tiny.slice(0, 6), nTiny: tiny.length };
+})()`;
+
 const WAIT_MS = Number(process.env.SMOKE_WAIT_MS || 2500);
+
+const FOCUS_PROBE = `(() => { const a = document.activeElement; if (!a || a === document.body) return null;
+  const cs = getComputedStyle(a); const r = a.getBoundingClientRect();
+  return { id: a.tagName + '|' + (a.textContent || '').trim().slice(0, 20) + '|' + Math.round(r.top + window.scrollY) + '|' + Math.round(r.left),
+           ring: (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 2) || cs.boxShadow !== 'none' }; })()`;
+
+const FLOW_SCRIPT = `(async () => {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const out = [];
+  const shown = () => [...document.querySelectorAll('.expert-only')].some((n) => n.getBoundingClientRect().height > 0);
+  const exp = document.querySelector('[role=radio][data-mode="expert"]');
+  if (!exp) return ['no Expert switch'];
+  exp.click(); await wait(900);
+  if (document.body.dataset.mode !== 'expert') out.push('Expert mode did not switch');
+  if (!shown()) out.push('Expert mode shows no expert detail');
+  document.querySelector('[role=radio][data-mode="beginner"]').click(); await wait(900);
+  if (shown()) out.push('Beginner mode still shows expert detail');
+  const g = document.querySelector('#main .gl-term');
+  if (!g) out.push('no glossary term on the Scoreboard'); else {
+    g.click(); await wait(200);
+    if (!document.querySelector('.gl-pop')) out.push('glossary term did not open');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await wait(100);
+    if (document.querySelector('.gl-pop')) out.push('Escape did not close the glossary card');
+  }
+  const tb = document.getElementById('tour-btn');
+  if (!tb) out.push('no Tour button'); else {
+    tb.click(); await wait(1500);
+    if (!document.querySelector('.tour-card')) out.push('tour did not open');
+    for (let i = 0; i < 7; i++) {
+      const nx = [...document.querySelectorAll('.tour-card button')].find((b) => /Next|Finish/.test(b.textContent));
+      if (nx) nx.click();
+      await wait(1000);
+    }
+    const last = document.querySelector('.tour-card .tour-step');
+    if (!last || !/8 of 8/.test(last.textContent)) out.push('tour did not reach step 8 (at ' + (last ? last.textContent : 'none') + ')');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await wait(200);
+    if (document.querySelector('.tour-card')) out.push('Escape did not close the tour');
+  }
+  return out;
+})()`;
 
 // Per-screen interactions (run in the page; `main`, `byText`, `wait` are in scope). Each returns
 // a short description of what it did. A missing control is not an error when the screen shows
 // "not available" instead (the control does not exist then).
 const INTERACT = {
-  plan: `const play = main.querySelector('.play-btn'); if (!play) return 'no play button';
+  schedule: `const play = main.querySelector('.play-btn'); if (!play) return 'no play button';
          play.click(); await wait(2200); play.click();
          const d = main.querySelector('.details-toggle'); if (d) { d.click(); await wait(400); }
          return 'played hours, opened details';`,
-  compare: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened details';`,
-  audit: `const edit = byText('button', /Edit this plan/); if (!edit) return 'no edit button';
+  'results/scoreboard': `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened details';`,
+  'replay/rules': `const edit = byText('button', /Edit this plan/); if (!edit) return 'no edit button';
           edit.click(); await wait(200);
           const cell = main.querySelector('button.pg-cell'); if (!cell) return 'interaction error: no editable cell';
           cell.click(); await wait(200);
           const rr = byText('button', /Round-robin/); if (rr) rr.click(); await wait(200);
           return 'edited a cell, switched example';`,
-  replay: `const play = main.querySelector('.btn--primary'); if (!play) return 'no play button';
+  'replay/watch': `const play = main.querySelector('.btn--primary'); if (!play) return 'no play button';
            play.click(); await wait(3500); play.click(); return 'played frames';`,
-  risk: `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
-  forecast: `const all = byText('button', /All hours/); if (!all) return 'no period control';
+  'results/uncertainty': `main.querySelectorAll('details').forEach((x) => { x.open = true; }); return 'opened notes';`,
+  'results/forecast': `const all = byText('button', /All hours/); if (!all) return 'no period control';
              all.click(); await wait(600); return 'switched to all hours';`,
 };
 
@@ -182,6 +255,7 @@ async function main() {
   await S('Log.enable');
   await S('Network.enable');
   await S('Page.enable');
+  await S('Emulation.setDeviceMetricsOverride', { width: VW, height: VH, deviceScaleFactor: 1, mobile: VW < 600 });
 
   const query = new URLSearchParams({ tiles: 'off' });
   if (resultsArg) query.set('results', resultsArg);
@@ -189,7 +263,7 @@ async function main() {
   console.log(`ui_smoke: ${browser}`);
   for (const screen of SCREENS) {
     events = [];
-    query.set('smoke', screen);  // unique query string forces a full load per screen
+    query.set('smoke', shotName(screen));  // unique query string forces a full load per screen
     const url = `http://127.0.0.1:${port}/ui/?${query}#/${screen}`;
     await S('Page.navigate', { url });
     // wait until the app has loaded results and mounted something in <main>
@@ -213,8 +287,11 @@ async function main() {
     const r2 = await S('Runtime.evaluate', { returnByValue: true, expression: `(() => { const m = document.getElementById('main');
       return { text: m ? m.innerText.length : 0, failedRender: !!(m && /This screen failed to render/.test(m.innerText)), na: m ? m.querySelectorAll('.na').length : 0 }; })()` });
     Object.assign(state || {}, r2.result.value);
-    const shot = await S('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
-    writeFileSync(join(OUT, `${screen}.png`), Buffer.from(shot.data, 'base64'));
+    let clipH = VH;
+    if (FULL && SCALE !== 1) clipH = Math.min(6000, (await S('Runtime.evaluate', { returnByValue: true, expression: 'document.documentElement.scrollHeight' })).result.value);
+    const shot = await S('Page.captureScreenshot', SCALE === 1 ? { format: 'png', captureBeyondViewport: FULL }
+      : { format: 'png', captureBeyondViewport: FULL, clip: { x: 0, y: 0, width: VW, height: clipH, scale: SCALE } });
+    writeFileSync(join(OUT, `${shotName(screen)}.png`), Buffer.from(shot.data, 'base64'));
 
     // exercise the main controls of the screen; any console error they cause fails the screen
     let interaction = '';
@@ -232,6 +309,29 @@ async function main() {
       if (r3.result.value && state) state.failedRender = true;
     }
 
+    // legibility, target size and keyboard checks
+    const checkProblems = [];
+    if (!QUICK) {
+      await S('Runtime.evaluate', { expression: 'window.scrollTo(0, 0); document.querySelectorAll(".gl-pop").forEach((n) => n.remove());' });
+      const sz = (await S('Runtime.evaluate', { returnByValue: true, expression: SIZE_CHECK })).result.value;
+      if (sz.nSmall) checkProblems.push(`${sz.nSmall} text runs under 14px: ${sz.small.join('; ')}`);
+      if (sz.nTiny) checkProblems.push(`${sz.nTiny} targets under 44px: ${sz.tiny.join('; ')}`);
+      // keyboard only: Tab through the page; every stop must be visible and show a focus ring
+      await S('Runtime.evaluate', { expression: 'document.activeElement && document.activeElement.blur(); window.scrollTo(0, 0);' });
+      const seen = new Set();
+      let noRing = 0;
+      for (let k = 0; k < 18; k++) {
+        await S('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+        await S('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+        const f = (await S('Runtime.evaluate', { returnByValue: true, expression: FOCUS_PROBE })).result.value;
+        if (!f) continue;
+        seen.add(f.id);
+        if (!f.ring) noRing++;
+      }
+      if (seen.size < 6) checkProblems.push(`keyboard: only ${seen.size} distinct focus stops in 18 Tab presses`);
+      if (noRing) checkProblems.push(`keyboard: ${noRing} focus stops without a visible focus ring`);
+    }
+
     // a 404 for a results file is how the dashboard learns that a file is absent: allowed, reported
     const fatal = events.filter((e) => !((e.kind === 'http' || e.kind === 'log.error') && /\/results\/.*\.json/.test(e.url || '') && /404/.test(e.text + (e.kind === 'log.error' ? ' 404' : ''))));
     const problems = [];
@@ -240,17 +340,31 @@ async function main() {
     if (state && state.failedRender) problems.push('"This screen failed to render" shown');
     if (state && state.text < 40) problems.push(`screen almost empty (${state.text} characters)`);
     problems.push(...fatal.map((e) => `${e.kind}: ${e.text}`));
+    problems.push(...checkProblems);
     const ok = problems.length === 0;
     if (!ok) failed++;
-    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(9)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}${interaction ? `; ${interaction}` : ''}`);
+    console.log(`${ok ? 'PASS' : 'FAIL'}  ${screen.padEnd(20)} ${state ? `${state.text} chars, ${state.na} not-available notices` : ''}${interaction ? `; ${interaction}` : ''}`);
     for (const p of problems) console.log(`        ${p}`);
+  }
+  if (!QUICK) {
+    // flows: Beginner and Expert toggle, a glossary term, the guided tour (on the Scoreboard)
+    events = [];
+    query.set('smoke', 'flows');
+    await S('Page.navigate', { url: `http://127.0.0.1:${port}/ui/?${query}#/results/scoreboard` });
+    await sleep(WAIT_MS + 800);
+    const flow = (await S('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: FLOW_SCRIPT })).result.value;
+    const flowFatal = events.filter((e) => !((e.kind === 'http' || e.kind === 'log.error') && /\/results\/.*\.json/.test(e.url || '')));
+    const fp = [...(flow || ['flow script failed']), ...flowFatal.map((e) => `${e.kind}: ${e.text}`)];
+    if (fp.length) failed++;
+    console.log(`${fp.length ? 'FAIL' : 'PASS'}  ${'flows'.padEnd(20)} Expert and Beginner, glossary card, 8-step tour`);
+    for (const p of fp) console.log(`        ${p}`);
   }
   if (resultsArg === null) {
     const r = await S('Runtime.evaluate', { returnByValue: true, expression: 'document.getElementById("status").textContent' });
     console.log(`status bar: ${r.result.value}`);
   }
   console.log(`screenshots: ${OUT}${sep}`);
-  console.log(failed ? `ui_smoke: ${failed} of ${SCREENS.length} screens FAILED` : `ui_smoke: all ${SCREENS.length} screens passed`);
+  console.log(failed ? `ui_smoke: ${failed} check(s) FAILED` : `ui_smoke: all ${SCREENS.length} screens passed${QUICK ? '' : ' (size, target, keyboard and flow checks included)'}`);
   try { await cdp.send('Browser.close'); } catch (e) { /* already closing */ }
   proc.kill();
   server.close();

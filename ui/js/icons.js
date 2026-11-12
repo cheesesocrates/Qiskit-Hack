@@ -3,8 +3,8 @@ import { svgEl } from './util.js';
 
 const P = {
   // feeder states
-  on: '<path d="M13 3 5 13.5h5.5L9.5 21 19 9.5h-5.8z" fill="currentColor" stroke="currentColor" stroke-linejoin="round"/>',
-  off: '<path d="M13 3 5 13.5h5.5L9.5 21 19 9.5h-5.8z" fill="none" stroke-linejoin="round"/><path d="M3.5 3.5 20.5 20.5"/>',
+  on: '<circle cx="12" cy="12" r="8.5"/><path d="m8 12.3 2.8 2.8 5.2-5.6" stroke-width="2.25"/>',
+  off: '<path d="M12 3.5v8" stroke-width="2.25"/><path d="M7.2 6.6a7.5 7.5 0 1 0 9.6 0" stroke-width="2.25"/>',
   protected: '<path d="M12 3 4.5 6v5.5c0 4.4 3.1 8.2 7.5 9.5 4.4-1.3 7.5-5.1 7.5-9.5V6z" fill="currentColor" fill-opacity="0.18" stroke-linejoin="round"/><path d="m8.8 12 2.4 2.4 4.2-4.6"/>',
   // status
   pass: '<circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.3 2.7 2.7 5-5.4"/>',
@@ -30,6 +30,14 @@ const P = {
   replay: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5v7l5.5-3.5z" fill="currentColor" stroke-linejoin="round"/>',
   risk: '<path d="M3.5 18.5c3-1 4.5-12 8.5-12s5.500 11 8.500 12"/><path d="M3 20.5h18"/>',
   scale: '<path d="M4 19.5 9 14l3.500 3.500L20 8.500"/><path d="M15 8.500h5v5"/>',
+  home: '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+  learn: '<path d="M4 5.5c3-1 6-1 8 .8 2-1.8 5-1.8 8-.8v13c-3-1-6-1-8 .8-2-1.8-5-1.8-8-.8z" stroke-linejoin="round"/><path d="M12 6.3v13"/>',
+  tour: '<circle cx="12" cy="12" r="8.5"/><path d="m9.5 14.5 1.6-4.4 4.4-1.6-1.6 4.4z" fill="currentColor" stroke-linejoin="round"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+  moon: '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z" stroke-linejoin="round"/>',
+  bolt: '<path d="M13 3 5 13.5h5.5L9.5 21 19 9.5h-5.8z" stroke-linejoin="round"/>',
+  arrowr: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  arrowl: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
   forecast: '<path d="M3.500 15c2.500 0 2.500-6 5-6s2.500 8 5 8 2.500-5 7-5"/><path d="M3.500 20.500h17"/>',
 };
 
@@ -41,7 +49,7 @@ export function icon(name, size = 20) { return svgEl(iconSvg(name, size)); }
 /** Feeder state vocabulary: icon + text label + css class, used by map, grids and popovers. */
 export const STATE = {
   on: { key: 'on', label: 'On', icon: 'on', cls: 'is-on' },
-  off: { key: 'off', label: 'Off (shed)', icon: 'off', cls: 'is-off' },
+  off: { key: 'off', label: 'Off', icon: 'off', cls: 'is-off' },
   protected: { key: 'protected', label: 'Protected', icon: 'protected', cls: 'is-protected' },
 };
 

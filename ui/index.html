@@ -4,37 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FairShed - fair load-shedding planner</title>
-  <meta name="description" content="FairShed dashboard. Simulator only, synthetic data.">
-  <meta name="color-scheme" content="dark">
+  <meta name="description" content="FairShed dashboard: who loses power, why, and what the quantum part does. Simulator only, synthetic data.">
   <link rel="icon" href="data:,">
+  <script>
+    // theme before first paint (no flash); localStorage can be unavailable in private mode
+    try { var t = localStorage.getItem('fairshed-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/screens.css">
-  <link rel="preload" href="vendor/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="vendor/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/atkinson-hyperlegible-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body>
+<body data-mode="beginner">
   <a class="skip" href="#main">Skip to content</a>
   <div class="app">
-    <nav class="rail" id="rail" aria-label="Screens">
-      <div class="rail-brand" aria-hidden="true">FairShed</div>
-    </nav>
-    <div class="col">
-      <header class="topbar">
-        <div class="screen-title" id="screen-title">Plan</div>
-        <span class="sep" aria-hidden="true"></span>
-        <span class="badge" id="badge-sim" title="Every feeder, demand figure and ledger value is synthetic">Simulator - synthetic data</span>
+    <header class="topbar">
+      <a class="brand" href="#/home" aria-label="FairShed, start here"><span id="brand-icon"></span>FairShed</a>
+      <nav class="nav" id="nav" aria-label="Sections"></nav>
+      <span class="tb-spacer"></span>
+      <div class="tb-controls" id="tb-controls">
+        <span class="badge" id="badge-sim" title="Every feeder, demand figure and ledger value is synthetic. Quantum results come from a simulator.">Simulator - synthetic data</span>
         <span id="badge-mock-slot"></span>
-        <span class="spacer"></span>
-        <span class="status" id="status" role="status" aria-live="polite">Loading results...</span>
-        <button type="button" class="btn" id="reload" title="Re-read the results files">Reload</button>
-      </header>
-      <div id="banner"></div>
-      <main id="main" tabindex="-1" aria-live="off"></main>
+      </div>
+    </header>
+    <div class="crumbs" id="crumbs">
+      <nav aria-label="You are here" class="row" style="gap:8px"><span class="crumb-k">You are here:</span><ol id="crumb-list"></ol></nav>
+      <span class="status" id="status" role="status" aria-live="polite">Loading results...</span>
     </div>
+    <div id="banner"></div>
+    <main id="main" tabindex="-1"></main>
   </div>
 
   <script src="vendor/gsap.min.js"></script>

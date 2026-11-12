@@ -58,7 +58,7 @@
 .range::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
   border: 3px solid var(--panel); box-shadow: 0 0 0 2px var(--accent); margin-top: -11px; box-sizing: border-box; }
 .range::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); box-shadow: 0 0 0 2px var(--accent); box-sizing: border-box; }
-.range:focus-visible { outline: none; }
+.range:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
 .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 5px var(--accent-tint), 0 0 0 7px var(--accent); }
 .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 5px var(--accent-tint), 0 0 0 7px var(--accent); }
 .ticks { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; }

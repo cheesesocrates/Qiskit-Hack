@@ -14,13 +14,13 @@ const STEPS = [
   { hash: '#/schedule', sel: '.dock', title: 'Step through the hours',
     text: 'Press Play or drag the slider to move hour by hour. The quota on the right says how many feeders must be off in that hour.' },
   { hash: '#/replay/watch', sel: '[data-tour="replay"]', title: 'Re-planning every hour',
-    text: 'Every hour the planner solves the next three hours again with the real shortage, keeps only the first hour, and moves on.' },
-  { hash: '#/results/scoreboard', sel: '[data-tour="scoreboard"]', title: 'Did the quantum part work?',
-    text: 'The scoreboard compares every method on the same problem, and says plainly where the quantum circuit loses to the exact classical answer.' },
+    text: 'Every hour the planner solves the next few hours again with the real shortage, keeps only the first hour, and moves on.' },
+  { hash: '#/results/scoreboard', sel: '[data-tour="scoreboard"]', title: 'Does the quantum part work?',
+    text: 'The method comparison puts normal methods and the quantum planner side by side, and says plainly where the quantum circuit does not beat the exact answer.' },
   { hash: '#/results/lottery', sel: '[data-tour="lottery"]', title: 'A fair lottery for ties',
     text: 'When several plans are equally good, the Grover mixer gives each exactly the same chance. That is what fair means for ties.' },
-  { hash: '#/learn/glossary', sel: '.seg[aria-label="Explanation level"]', title: 'More detail when you want it',
-    text: 'Switch to Expert for qubit counts, formulas and raw data. Any dotted-underlined word opens a short explanation, and Learn has the full glossary.' },
+  { hash: '#/results/scoreboard', sel: '#inner-btn', title: 'Inner working: the explanation is one button away',
+    text: 'On every screen, this button opens how the screen was made, what the numbers mean, the questions judges ask, and the technical details. It also leads to the six-step story and the glossary.' },
 ];
 
 let state = null;

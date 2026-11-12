@@ -47,14 +47,25 @@ export function passChip(passed, passLabel = 'Pass', failLabel = 'Fail') {
 
 /**
  * Segmented control (radiogroup). options: [{value,label,disabled,title}]. Arrow keys move and select.
- * Returns {root, set(value), setDisabled(value, bool)}.
+ * onChange fires only when the value really changes, so clicking the option that is already on does
+ * nothing (it used to re-run the change and reset whatever depended on it). `value` may be null (none
+ * selected); the first enabled option then takes the Tab stop so the group stays keyboard-reachable.
+ * Returns {root, set(value), get(), setDisabled(value, bool)}.
  */
 export function segmented({ label, options, value, onChange }) {
   const root = el('div', { class: 'seg', role: 'radiogroup', 'aria-label': label });
   const btns = new Map();
+  let current;
+  const paint = () => {
+    const enabled = options.filter((o) => btns.has(o.value) && !btns.get(o.value).disabled);
+    const stop = btns.has(current) && !btns.get(current).disabled ? current : (enabled[0] ? enabled[0].value : null);
+    for (const [val, b] of btns) { b.setAttribute('aria-checked', String(val === current)); b.tabIndex = val === stop ? 0 : -1; }
+  };
   const select = (v, fire = true) => {
-    for (const [val, b] of btns) { const on = val === v; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; }
-    if (fire && onChange) onChange(v);
+    const changed = v !== current;
+    current = v;
+    paint();
+    if (fire && changed && onChange) onChange(v);
   };
   options.forEach((o) => {
     const b = el('button', { type: 'button', class: 'seg-item', role: 'radio', 'aria-checked': 'false', title: o.title || null, disabled: o.disabled || null }, o.label);
@@ -74,7 +85,8 @@ export function segmented({ label, options, value, onChange }) {
   return {
     root,
     set: (v) => select(v, false),
-    setDisabled: (v, d) => { const b = btns.get(v); if (b) b.disabled = d; },
+    get: () => current,
+    setDisabled: (v, d) => { const b = btns.get(v); if (b) { b.disabled = d; paint(); } },
   };
 }
 

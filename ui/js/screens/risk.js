@@ -2,8 +2,8 @@
 // exact values, drawn as a ruler: interval band, estimate dot, exact tick. Reads counting.json and risk.json.
 import { el, fmt } from '../util.js';
 import { naPanel, panel, table, passChip } from '../components/common.js';
-import { makeChart, axis, COLORS } from '../charts.js';
-import { explainPanel, pageHeader, chartBlock, rawJson } from '../explain.js';
+import { makeChart, axis, COLORS, valueLabelsTop } from '../charts.js';
+import { explainPanel, pageHeader, chartBlock, rawJson, lookAt } from '../explain.js';
 import { term } from '../glossary.js';
 import { pct } from '../metrics.js';
 
@@ -34,11 +34,14 @@ function countingPanel(c) {
     el('div', { class: 'stack' },
       el('h3', { class: 'takeaway' }, `The quantum estimate is ${fmt(c.estimated_count, 2)} valid plans; the exact count is ${c.exact_count}.`),
       ruler({ label: 'Number of valid plans', est: c.estimated_count, ci: c.ci, exact: c.exact_count, digits: 2 }),
+      lookAt('whether the blue dot (quantum estimate) sits next to the black tick (exact answer), inside the shaded band. When it is, the quantum estimate agrees with the exact answer.'),
       el('div', { class: 'row' }, passChip(c.within_tolerance, 'Within tolerance of the exact count', 'Outside tolerance')),
       el('ul', { class: 'plain-list' },
         el('li', null, `A valid plan has exactly the right number of feeders off each hour and no protected feeder cut. ${c.exact_count} of the ${c.search_space} settings are valid.`),
         el('li', null, 'The count says how much freedom the planner has: more valid plans means more ways to be fair.'),
-        el('li', { class: 'expert-only' }, `${c.n_qubits_search} search qubits, ${c.n_qubits_total} qubits in total, ${c.oracle_queries} oracle queries, ${fmt(c.flexibility_bits, 2)} bits of flexibility.`)),
+        null),
+      el('div', { class: 'expert-only stack-s' }, el('h3', null, 'Counting circuit size'),
+        el('p', null, `${c.n_qubits_search} search qubits, ${c.n_qubits_total} qubits in total, ${c.oracle_queries} oracle queries, ${fmt(c.flexibility_bits, 2)} bits of flexibility.`)),
       rawJson('results/counting.json', c)));
 }
 
@@ -59,6 +62,7 @@ function riskPanel(r, host) {
         el('li', null, `Loss is ${r.loss_unit}.`)),
       chartBlock({ takeaway: `${r.scenarios.filter((s) => s.loss > 0).length} of ${r.scenarios.length} forecast-error scenarios leave part of the shortage uncovered; together they have a ${pct(ex.tail_prob)} chance.`,
         chart: el('div', { class: 'chart-box' }, canvas),
+        look: 'the orange bars on the right. They are the evenings when the real shortage is bigger than forecast and the plan does not cut enough; the risk numbers above measure exactly those.',
         howto: 'Each bar is one forecast-error scenario, from "real shortage lower than forecast" on the left to "higher" on the right. Bar height is how likely it is. Orange bars leave part of the shortage uncovered.',
         plain: [`${r.scenarios.filter((s) => s.loss > 0).length} of ${r.scenarios.length} scenarios leave a shortfall uncovered.`] }),
       el('div', { class: 'expert-only' }, table([
@@ -73,19 +77,27 @@ function riskPanel(r, host) {
     data: { labels: r.scenarios.map((s) => `${s.shortfall_extra_mw >= 0 ? '+' : ''}${fmt(s.shortfall_extra_mw, 1)}`),
       datasets: [{ data: r.scenarios.map((s) => s.prob), backgroundColor: r.scenarios.map((s) => (s.loss > 0 ? COLORS.classical : COLORS.quantum)), borderWidth: 0 }] },
     options: { layout: { padding: { top: 24 } },
-      scales: { x: axis({ title: { display: true, text: 'Forecast error: real minus forecast shortage (MW)' } }), y: axis({ beginAtZero: true, title: { display: true, text: 'Chance' } }) },
-      plugins: { tooltip: { callbacks: { label: (c) => `chance ${fmt(c.parsed.y, 3)}, uncovered ${fmt(r.scenarios[c.dataIndex].loss, 2)} MW` } } } },
+      scales: { x: axis({ title: { display: true, text: 'Real shortage minus forecast (MW): left = smaller than forecast, right = bigger' } }),
+        y: axis({ beginAtZero: true, title: { display: true, text: 'Chance of this scenario' }, ticks: { color: COLORS.text, font: { size: 14 }, callback: (v) => `${fmt(v * 100, 0)}%` } }) },
+      plugins: { tooltip: { callbacks: { label: (c) => `chance ${fmt(c.parsed.y * 100, 1)}%, uncovered ${fmt(r.scenarios[c.dataIndex].loss, 2)} MW` } } } },
+    plugins: [valueLabelsTop((v) => `${fmt(v * 100, 0)}%`)],
   });
 }
 
 export default {
   async mount({ root, results }) {
-    const page = el('div', { class: 'page' }, pageHeader('How sure are we, and how much choice is there?', 'Results: uncertainty and counting (was Risk and counting)',
+    const page = el('div', { class: 'page' }, pageHeader('How sure are we, and how much choice is there?', null,
       'Two uses of amplitude estimation, each checked against the exact answer from a normal computer.'));
     root.append(page);
     const c = results.ok('counting');
     const r = results.ok('risk');
     page.append(explainPanel('uncertainty', {
+      say: 'Two uses of amplitude estimation, a quantum way to estimate a probability, each checked against the exact answer from a normal computer.',
+      made: [{ kind: 'quantum', text: 'Counting: an amplitude-estimation circuit estimates the share of switch settings that are valid plans, on a small block.' },
+        { kind: 'quantum', text: 'Risk: forecast errors become scenarios, and amplitude estimation estimates expected loss, VaR and CVaR for the peak-hour plan.' },
+        { kind: 'classical', text: 'The exact values are computed by enumeration and drawn as the black tick on each ruler.' }],
+      qa: [{ q: 'Why count valid plans?', a: 'The count says how much freedom the planner has: more valid plans means more ways to be fair.' },
+        { q: 'Is this faster than counting directly?', a: 'No, not at this size. Both problems are small enough to enumerate. It shows that the quantum estimate is correct, which is the first thing to establish.' }],
       what: [el('span', null, 'Two quantum estimates made with ', term('ae', 'amplitude estimation'), ': how many valid plans exist (', term('counting'), '), and how much shortage the peak-hour plan may miss (risk).')],
       how: ['On each ruler the black tick is the exact value, the blue dot is the quantum estimate and the shaded band is its 95% interval.', 'The closer the dot to the tick, the better the estimate.'],
       notice: c || r ? [c ? `Counting: estimate ${fmt(c.estimated_count, 2)} against an exact ${c.exact_count}, on a small ${c.instance.n_feeders} feeder by ${c.instance.n_hours} hour block.` : 'Counting: not available.',

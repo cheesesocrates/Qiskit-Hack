@@ -104,3 +104,15 @@ export function fmtSmart(v, d = 3) {
   if (v !== 0 && Math.abs(v) < 10 ** -d) return Number(v).toExponential(1);
   return fmt(v, d);
 }
+
+/** Bytes, given megabytes (MB = 2^20 bytes), in the largest unit that keeps the number readable. */
+export function fmtBytesMb(mb) {
+  if (mb === null || mb === undefined || !Number.isFinite(mb)) return 'n/a';
+  const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  let v = mb * 2 ** 20;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i += 1; }
+  return `${fmt(v, v < 10 ? 1 : 0)} ${units[i]}`;
+}
+/** Memory of a full (statevector) simulation of n qubits, in MB: one complex number (16 bytes) per basis state. */
+export const fullStateMb = (n) => (2 ** n) * 16 / 2 ** 20;

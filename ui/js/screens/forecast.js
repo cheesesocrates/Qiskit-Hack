@@ -5,11 +5,22 @@ import { explainPanel, pageHeader, chartBlock, rawJson } from '../explain.js';
 import { term } from '../glossary.js';
 import { makeChart, axis, COLORS, bandPlugin, endLabelsPlugin } from '../charts.js';
 
+/** The chosen period, kept for the session (a theme switch re-renders the screen). */
+let lastPeriod = 'test';
+
+/** "2026-10-22T19:00" -> "Thu 22 Oct, 19:00" (the data's own clock, no time-zone shift). */
+function niceTime(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T?\s?(\d{2}):(\d{2})/.exec(iso || '');
+  if (!m) return iso;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })}, ${m[4]}:${m[5]}`;
+}
+
 export default {
   id: 'forecast',
   title: 'Forecast',
   async mount({ root, results }) {
-    const page = el('div', { class: 'page' }, pageHeader('How big will the shortage be?', 'Results: shortage forecast (was Forecast, classical)',
+    const page = el('div', { class: 'page' }, pageHeader('How big will the shortage be?', null,
       'A classical model predicts the hourly shortage. Its forecast sets how many feeders must be off, and its errors feed the risk estimate.'));
     root.append(page);
     const fc = results.ok('forecast');
@@ -20,6 +31,11 @@ export default {
     const testPts = fc.series.filter((p) => p.split === 'test');
     const peak = testPts.length ? Math.max(...testPts.map((p) => p.shortfall_actual_mw)) : null;
     page.append(explainPanel('forecast', {
+      say: 'A classical forecast of the hourly shortage. It sets the quotas the quantum planner works to, and its errors feed the risk estimate.',
+      made: [{ kind: 'classical', text: 'A real weather snapshot (temperature, humidity and so on) is combined with synthetic demand.' },
+        { kind: 'classical', text: 'A ridge regression learns from the earlier weeks and is tested on a week it never saw.' }],
+      qa: [{ q: 'Why is the forecast not quantum?', a: 'A straight-line forecast has no reason to be. Quantum is used where the choice among plans is hard, not here.' },
+        { q: 'How good is it?', a: 'See the numbers above: the typical miss on the test week is a few megawatts, and the planner copes by re-planning every hour in the replay.' }],
       what: [el('span', null, 'A classical ', term('ridge', 'ridge regression'), ' forecast of the hourly shortage, against the shortage that actually happened.')],
       how: ['Time runs left to right. The blue line is what happened, the orange line is the forecast.', 'The model learned on the earlier weeks and never saw the test week while learning.'],
       notice: [`On the test week the forecast is off by ${fmt(fc.metrics.mae_mw, 2)} MW per hour on average${peak !== null ? `, against shortages of up to ${fmt(peak, 1)} MW` : ''}.`,
@@ -51,7 +67,7 @@ export default {
       chart = makeChart(canvas, {
         type: 'line',
         data: {
-          labels: pts.map((p) => p.time.replace('T', ' ')),
+          labels: pts.map((p) => niceTime(p.time)),
           datasets: [
             { label: 'Happened', data: pts.map((p) => p.shortfall_actual_mw), borderColor: COLORS.quantum, backgroundColor: COLORS.quantum, pointRadius: 0, borderWidth: 2.5, tension: 0 },
             { label: 'Forecast', data: pts.map((p) => p.shortfall_pred_mw), borderColor: COLORS.classical, backgroundColor: COLORS.classical, pointRadius: 0, borderWidth: 2.5, borderDash: [8, 4], tension: 0 },
@@ -66,12 +82,13 @@ export default {
         plugins: [bandPlugin, endLabelsPlugin],
       });
     };
-    const seg = segmented({ label: 'Period', options: [{ value: 'test', label: 'Test week' }, { value: 'all', label: 'All hours' }], value: 'test', onChange: draw });
+    const seg = segmented({ label: 'Period', options: [{ value: 'test', label: 'Test week' }, { value: 'all', label: 'All hours' }], value: lastPeriod, onChange: (v) => { lastPeriod = v; draw(v); } });
     page.append(panel(null, null, el('div', { class: 'stack' }, el('div', null, el('span', { class: 'field-label' }, 'Period'), seg.root),
       chartBlock({ takeaway: `On the test week the forecast is off by ${fmt(fc.metrics.mae_mw, 2)} MW per hour on average.`, chart: chartBox,
+        look: 'the evening peaks, where the two lines separate most. That gap is the forecast error the planner absorbs by re-planning every hour, and what the risk estimate measures.',
         howto: 'Time runs left to right. The solid blue line is the shortage that happened (synthetic); the dashed orange line is the forecast. Where they overlap, the forecast was right.',
         plain: ['MW is megawatts. One feeder carries a fixed number of megawatts, so the forecast decides how many feeders must be off.'] }))));
-    draw('test');
+    draw(lastPeriod);
 
     const da = fc.day_ahead;
     const dCanvas = el('canvas', { role: 'img', 'aria-label': 'Day-ahead predicted shortfall by hour' });
@@ -79,7 +96,7 @@ export default {
     const pk = da.reduce((a, b) => (b.shortfall_pred_mw > a.shortfall_pred_mw ? b : a), da[0]);
     page.append(el('div', { class: 'grid-2' },
       panel(null, null, chartBlock({ takeaway: `The day-ahead forecast needs feeders off in ${withQ.length} of ${da.length} hours, peaking at ${fmt(pk.shortfall_pred_mw, 1)} MW at ${pad2(pk.hour)}:00.`,
-        chart: el('div', { class: 'chart-box' }, dCanvas), howto: 'One bar per hour of the day. Taller bars mean a bigger shortage, so more feeders off. Grey bars need no cuts.' })),
+        chart: el('div', { class: 'chart-box' }, dCanvas), look: 'the tallest bars: those hours get the biggest quota, so the most feeders are off.', howto: 'One bar per hour of the day. Taller bars mean a bigger shortage, so more feeders off. Grey bars need no cuts.' })),
       panel('Hours with a quota', null, table([
         { label: 'Hour', render: (d) => `${pad2(d.hour)}:00` },
         { label: 'Predicted shortfall', num: true, render: (d) => `${fmt(d.shortfall_pred_mw, 2)} MW` },

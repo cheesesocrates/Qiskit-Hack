@@ -48,7 +48,7 @@ def test_every_screen_loads(check_detail):
         pytest.skip("ui smoke test could not start: " + out.strip().splitlines()[-1])
     assert proc.returncode == 0, out
     passed = sum(1 for line in out.splitlines() if line.startswith("PASS"))
-    check_detail(f"{passed} screens and flows pass at 1440x900 (console, 14px text, 44px targets, keyboard, modes, glossary, tour)")
+    check_detail(f"{passed} screens and flows pass at 1440x900 (console, 14px text, 44px targets, keyboard, Inner working drawer, glossary, tour)")
 
 
 @pytest.mark.check(id="U03", name="Missing or invalid results files show 'Not available' without errors")

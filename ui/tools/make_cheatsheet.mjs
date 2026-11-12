@@ -12,8 +12,17 @@ const NA = 'not available (results file missing)';
 
 const abl = load('ablation.json'), lot = load('lottery.json'), cnt = load('counting.json'), rsk = load('risk.json');
 const rep = load('replay.json'), sca = load('scaling.json'), fc = load('forecast.json'), chk = load('checks.json');
+const par = load('pareto.json'), base = load('plans/base.json');
 
 const nums = [];
+if (par && base) {
+  // The plan FairShed delivers: the default point of the fairness sweep, scored with the base weights.
+  const pt = par.points[par.default_index] || par.points[0];
+  const w = base.instance.weights;
+  const cost = Object.keys(w).reduce((a, k) => a + w[k] * (pt.breakdown[k] || 0), 0);
+  const ratio = (base.exact.cost_max - cost) / (base.exact.cost_max - base.exact.cost_min);
+  nums.push([`FairShed's plan scores ${f(cost)} against the exact best ${f(base.exact.cost_min)} (${(ratio * 100).toFixed(0)}% of the way); it matches the exact best at ${par.points.filter((p) => p.matches_exact).length} of ${par.points.length} fairness settings.`, 'Results > Compare methods, the FairShed row']);
+} else nums.push([`FairShed's plan: ${NA}`, 'Results > Compare methods']);
 if (abl) {
   const ref = abl.reference;
   const rows = abl.rows.filter((r) => r.instance === abl.instance_name);
@@ -23,17 +32,17 @@ if (abl) {
   const br = q.reduce((a, b) => (b.approx_ratio > a.approx_ratio ? b : a));
   const rr = rows.find((r) => r.method === 'round_robin');
   const pen = q.filter((r) => r.method.startsWith('penalty'));
-  nums.push([`${ref.n_valid} valid plans in the base case, ${ref.n_optimal} tie for best (${br.n_qubits} qubits).`, 'Results > Scoreboard, summary box']);
-  nums.push([`Best circuit (${bp.label}): one try finds a best plan ${pct(bp.p_optimal)} of the time, ${(bp.p_optimal / guess).toFixed(1)} times a random guess (${pct(guess)}).`, 'Results > Scoreboard, "Chance one try finds the best plan"']);
-  nums.push([`Average quantum try reaches ${(br.approx_ratio * 100).toFixed(0)}% of the way to the best plan${rr ? `; round-robin reaches ${(rr.approx_ratio * 100).toFixed(0)}%` : ''}. Exact search: 100%.`, 'Results > Scoreboard, "How close to best"']);
-  if (pen.length) nums.push([`Penalty QAOA gives valid plans in only ${pen.map((r) => `${r.feasibility_pct.toFixed(1)}%`).join(' and ')} of tries.`, 'Results > Scoreboard, "Valid tries"']);
-} else nums.push([`Scoreboard numbers: ${NA}`, 'Results > Scoreboard']);
+  nums.push([`${ref.n_valid} valid plans in the base case, ${ref.n_optimal} tie for best (${br.n_qubits} qubits).`, 'Results > Compare methods, table subtitle']);
+  nums.push([`Best circuit (${bp.label}): one try finds a best plan ${pct(bp.p_optimal)} of the time, ${(bp.p_optimal / guess).toFixed(1)} times a random guess (${pct(guess)}).`, 'Results > Compare methods, card 4 "Keep the best of many tries"']);
+  nums.push([`Average quantum try reaches ${(br.approx_ratio * 100).toFixed(0)}% of the way to the best plan${rr ? `; round-robin reaches ${(rr.approx_ratio * 100).toFixed(0)}%` : ''}. Exact search: 100%.`, 'Results > Compare methods, cards 2 to 4; every run in the Inner working drawer']);
+  if (pen.length) nums.push([`Penalty QAOA gives valid plans in only ${pen.map((r) => `${r.feasibility_pct.toFixed(1)}%`).join(' and ')} of tries.`, 'Results > Compare methods, card 1 "Stay inside the rules"']);
+} else nums.push([`Method comparison numbers: ${NA}`, 'Results > Compare methods']);
 if (lot && lot.tie_groups.length) {
   const g = lot.tie_groups[0];
-  nums.push([`${g.n_plans} tied best plans each get ${pct(g.prob_min)} per try; the largest difference is ${g.prob_spread.toExponential(1)}.`, 'Results > Fair lottery']);
-} else nums.push([`Fair lottery: ${NA}`, 'Results > Fair lottery']);
-nums.push([cnt ? `Counting on a ${cnt.instance.n_feeders} x ${cnt.instance.n_hours} block: estimate ${f(cnt.estimated_count)}, exact ${cnt.exact_count}, interval ${f(cnt.ci[0])} to ${f(cnt.ci[1])}.` : `Counting: ${NA}`, 'Results > Uncertainty and counting']);
-nums.push([rsk ? `CVaR ${(rsk.alpha * 100).toFixed(0)}: exact ${f(rsk.exact.cvar, 3)} MW, estimate ${f(rsk.estimated.cvar, 3)} MW; chance of an unplanned cut ${f(rsk.exact.tail_prob, 3)}.` : `Risk: ${NA}`, 'Results > Uncertainty and counting']);
+  nums.push([`${g.n_plans} tied best plans each get ${pct(g.prob_min)} per try; the largest difference is ${g.prob_spread.toExponential(1)}.`, 'Results > Fair tie-breaks']);
+} else nums.push([`Fair lottery: ${NA}`, 'Results > Fair tie-breaks']);
+nums.push([cnt ? `Counting on a ${cnt.instance.n_feeders} x ${cnt.instance.n_hours} block: estimate ${f(cnt.estimated_count)}, exact ${cnt.exact_count}, interval ${f(cnt.ci[0])} to ${f(cnt.ci[1])}.` : `Counting: ${NA}`, 'Results > Risk and counting']);
+nums.push([rsk ? `CVaR ${(rsk.alpha * 100).toFixed(0)}: exact ${f(rsk.exact.cvar, 3)} MW, estimate ${f(rsk.estimated.cvar, 3)} MW; chance of an unplanned cut ${f(rsk.exact.tail_prob, 3)}.` : `Risk: ${NA}`, 'Results > Risk and counting']);
 if (rep) {
   const s = rep.summary; const nq = rep.frames.filter((x) => /quantum/i.test(x.solver_used)).length;
   nums.push([`Replay: ${nq} of ${s.n_frames} hours planned by the quantum circuit; ${s.matches_exact_count} matched the best plan; ${rep.frames.filter((x) => x.audit_passed).length} passed every rule.`, 'Replay and rules > Watch it hour by hour']);
@@ -42,10 +51,10 @@ if (sca) {
   const ok = sca.points.filter((p) => p.status === 'ok');
   const big = Math.max(...ok.map((p) => p.n_qubits));
   const hi = ok.filter((p) => p.n_qubits === big && p.bond_dim !== null).sort((a, b) => b.bond_dim - a.bond_dim)[0];
-  nums.push([`Bigger problems: ${ok.length} of ${sca.points.length} points ran, up to ${big} qubits; ${hi ? `${(hi.approx_ratio * 100).toFixed(0)}% at bond dimension ${hi.bond_dim}` : 'n/a'}.`, 'Results > Bigger problems']);
-} else nums.push([`Bigger problems: ${NA}`, 'Results > Bigger problems']);
+  nums.push([`Bigger problems: ${ok.length} of ${sca.points.length} points ran, up to ${big} qubits; ${hi ? `${(hi.approx_ratio * 100).toFixed(0)}% at bond dimension ${hi.bond_dim}` : 'n/a'}.`, 'Results > Bigger cities']);
+} else nums.push([`Bigger problems: ${NA}`, 'Results > Bigger cities']);
 nums.push([fc ? `Forecast misses by ${f(fc.metrics.mae_mw)} MW per hour on average in the test week (R squared ${f(fc.metrics.r2)}).` : `Forecast: ${NA}`, 'Results > Shortage forecast']);
-if (chk) nums.push([`${chk.summary.passed} of ${chk.summary.total} automated proof checks pass.`, 'Results > Scoreboard, bottom']);
+if (chk) nums.push([`${chk.summary.passed} of ${chk.summary.total} automated proof checks pass.`, 'Results > Compare methods, proof checklist']);
 
 const md = `# FairShed team cheatsheet
 
@@ -77,7 +86,7 @@ Re-run it after \`python scripts/tasks.py demo\`. Do not edit the numbers by han
 
 | # | Number | Where on the dashboard |
 |---|---|---|
-${nums.slice(0, 10).map((n, i) => `| ${i + 1} | ${n[0]} | ${n[1]} |`).join('\n')}
+${nums.map((n, i) => `| ${i + 1} | ${n[0]} | ${n[1]} |`).join('\n')}
 
 ## Honest limits (say these before anyone asks)
 

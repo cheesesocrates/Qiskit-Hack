@@ -2,22 +2,15 @@
 // A "Show" switch moves between plan quality, the memory the MPS simulator saves against a full
 // simulation, and accuracy (fidelity). The memory and accuracy views appear only when the file has
 // the optional fields mps_memory_mb and fidelity (docs/CONTRACT.md), so older files render as before.
-import { el, fmt, fmtSec } from '../util.js';
-import { naPanel, panel, segmented, table } from '../components/common.js';
+import { el, fmt, fmtSec, fmtBytesMb, fullStateMb as fullMb } from '../util.js';
+import { icon } from '../icons.js';
+import { naPanel, panel, segmented, table, kpi } from '../components/common.js';
 import { makeChart, axis, COLORS, endLabelsPlugin } from '../charts.js';
 import { explainPanel, pageHeader, rawJson } from '../explain.js';
 import { term } from '../glossary.js';
 
-/** Bytes, given megabytes (MB = 2^20 bytes), in the largest unit that keeps the number readable. */
-function fmtBytesMb(mb) {
-  if (mb === null || mb === undefined || !Number.isFinite(mb)) return 'n/a';
-  const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  let v = mb * 2 ** 20;
-  let i = 0;
-  while (v >= 1024 && i < units.length - 1) { v /= 1024; i += 1; }
-  return `${fmt(v, v < 10 ? 1 : 0)} ${units[i]}`;
-}
-const fullMb = (n) => (2 ** n) * 16 / 2 ** 20; // a full simulation stores one complex number (16 bytes) per basis state
+/** The chart view, kept for the session so a re-render (theme switch, coming back) does not reset it. */
+let lastView = 'quality';
 /** Axis label for a power of 1000 bytes (decimal units: 1 KB = 1000 bytes), or null between them. */
 function decimalBytesTick(bytes) {
   const e = Math.log10(bytes);
@@ -29,8 +22,8 @@ function decimalBytesTick(bytes) {
 
 export default {
   async mount({ root, results, params }) {
-    const page = el('div', { class: 'page' }, pageHeader('What happens on bigger problems?', 'Results: bigger problems (was Scale, MPS simulator)',
-      'The same kind of circuit on larger cities, run with a simulator that keeps only part of the links between qubits.'));
+    const page = el('div', { class: 'page' }, pageHeader('What happens in bigger cities?', null,
+      'The same circuit on larger cities, up to the biggest we could simulate. It shows how quality and memory change as the city grows.'));
     root.append(page);
     page.append(el('div', { class: 'callout callout--honest' }, el('b', null, 'This is not a quantum advantage. '),
       'The MPS simulator is a normal computer program. These curves show how the circuit behaves as it grows and how much memory a faithful simulation needs, not that quantum is faster.'));
@@ -48,9 +41,11 @@ export default {
     const ok = pts.filter((p) => p.status === 'ok');
     const big = sizes[sizes.length - 1];
     const bigLo = at(big, dims[0]), bigHi = at(big, dims[dims.length - 1]);
+    const picks = [...new Set([dims[dims.length - 1], dims[0]])]; // most and least detail: two lines are easier to read than three
+    const detailName = (d) => (d === dims[0] ? `Least detail (${d})` : d === dims[dims.length - 1] ? `Most detail (${d})` : `Medium detail (${d})`);
     const takeaway = bigLo && bigHi && bigLo.status === 'ok' && bigHi.status === 'ok'
-      ? `Bigger problems need more simulator memory: the ${big}-qubit problem gets ${fmt(bigLo.approx_ratio * 100, 0)}% of the way to the best plan at bond dimension ${dims[0]}, and ${fmt(bigHi.approx_ratio * 100, 0)}% at ${dims[dims.length - 1]}.`
-      : 'How close each size gets to the best plan as the simulator keeps more links between qubits.';
+      ? `Quality falls as the city grows, and more simulator detail helps: at ${big} qubits the plans are ${fmt(bigLo.approx_ratio * 100, 0)}% of the way to the best with the least detail and ${fmt(bigHi.approx_ratio * 100, 0)}% with the most.`
+      : 'How close each city size gets to the best plan as the simulator keeps more detail.';
     /** The point with the largest bond dimension that ran, per size (the most accurate MPS run). */
     const topMps = (n) => [...dims].reverse().map((d) => at(n, d)).find((p) => p && p.status === 'ok') || null;
     const hasMem = pts.some((p) => typeof p.mps_memory_mb === 'number');
@@ -58,32 +53,39 @@ export default {
     const fidSizes = sizes.filter((n) => dims.some((d) => { const p = at(n, d); return p && typeof p.fidelity === 'number'; }));
 
     page.append(explainPanel('scale', {
+      say: 'The same circuit run on cities up to the biggest we could simulate, with a shortcut simulator that trades accuracy for memory. It is a classical simulation, not a quantum advantage.',
+      made: [{ kind: 'quantum', text: `The circuit (${sc.method.split(',').slice(0, 2).join(',')}) is built for each city size, from the smallest to the largest.` },
+        { kind: 'classical', text: 'A matrix product state simulator runs it, keeping only part of the links between qubits (the bond dimension) to save memory.' },
+        { kind: 'classical', text: 'Each result is scored against the exact best plan: brute force on small cities, a mixed-integer solver on big ones.' }],
+      qa: [{ q: 'Is this a quantum advantage?', a: 'No. It is a normal computer simulating the circuit. It shows how quality and memory behave as the city grows, and how far a truncated simulation can go.' },
+        { q: 'Why does quality drop for big cities?', a: 'The circuit settings were tuned on the two smallest problems and reused unchanged, so larger sizes include a transfer loss. Re-tuning at each size is future work.' },
+        { q: 'What is bond dimension?', a: () => [term('bond', 'Bond dimension'), ' is how many links between qubits the shortcut simulator remembers. More is more accurate and uses more memory.'] }],
       what: [el('span', null, 'How close the circuit gets to the best plan (the ', term('ratio', 'approximation ratio'), ') on problems from ', name(sizes[0]), ' to ', name(big), '.')],
-      how: [el('span', null, 'Left to right: more ', term('bond', 'bond dimension'), ', meaning the simulator remembers more and is more accurate, but slower.'),
-        'Up is better: 100% would be the best plan every try. Each line is one problem size; darker lines are bigger problems.',
+      how: ['The three tiles give the headline: the biggest city simulated, the memory it took, and how good its plans were.',
+        el('span', null, 'Plan quality chart: left to right the city gets bigger; up is closer to the best plan. One line keeps the most simulator detail (', term('bond', 'bond dimension'), '), the other the least.'),
         hasMem ? 'The Show switch also gives the memory a full simulation would need against what the MPS used, and how faithful the MPS state is.' : null].filter(Boolean),
       notice: [`${ok.length} of ${pts.length} points ran; points that crashed or ran out of time are listed at the bottom with no numbers.`, takeaway],
       not: ['A speed-up or advantage: this is a classical simulation.', 'Re-tuned circuits: the step sizes were tuned on the small problems and reused unchanged on the big ones.'],
     }));
 
-    // what the MPS simulator buys: one row per size, built only from the file
-    if (hasMem) {
-      const tops = sizes.map((n) => ({ n, p: topMps(n) })).filter((r) => r.p && typeof r.p.mps_memory_mb === 'number');
-      const last = tops[tops.length - 1];
-      const buyTake = last
-        ? `At ${last.n} qubits a full simulation would store ${fmtBytesMb(fullMb(last.n))}; the MPS at bond dimension ${last.p.bond_dim} stored ${fmtBytesMb(last.p.mps_memory_mb)}, and ${fmt(last.p.feasibility_pct, 0)}% of its tries were valid plans.`
-        : 'No MPS point ran.';
-      page.append(panel('What the MPS simulator buys', 'A full simulation stores one number for every possible on/off pattern: 2 to the power of the qubit count. The MPS stores a small block per qubit, so its memory grows slowly. The price is accuracy, shown as fidelity: how much the simulated state overlaps the exact one (100% is exact).',
-        el('div', { class: 'stack' },
-          el('p', { class: 'takeaway' }, buyTake),
-          table([
-            { label: 'Problem', render: (r) => name(r.n) },
-            { label: 'Full simulation would store', num: true, render: (r) => fmtBytesMb(fullMb(r.n)) },
-            { label: 'MPS stored', num: true, render: (r) => el('span', null, fmtBytesMb(r.p.mps_memory_mb), el('span', { class: 'subtle' }, ` (bond dimension ${r.p.bond_dim})`)) },
-            { label: 'Fidelity', num: true, render: (r) => (typeof r.p.fidelity === 'number' ? `${fmt(r.p.fidelity * 100, 1)}%` : el('span', { class: 'subtle', title: 'The exact state is too big to compare with at this size' }, 'not measured')) },
-            { label: 'Valid tries', num: true, render: (r) => `${fmt(r.p.feasibility_pct, 0)}%` },
-            { label: 'Way to the best plan', num: true, render: (r) => `${fmt(r.p.approx_ratio * 100, 0)}%` },
-          ], tops))));
+    // headline tiles, then the table behind them for specialists (shown in the Inner working drawer)
+    const tops = sizes.map((n) => ({ n, p: topMps(n) })).filter((r) => r.p && typeof r.p.mps_memory_mb === 'number');
+    const last = tops[tops.length - 1];
+    const first = tops[0];
+    if (last) {
+      page.append(el('div', { class: 'kpis' },
+        kpi('Biggest city simulated', `${last.n} qubits`, name(last.n)),
+        kpi('Memory it took', fmtBytesMb(last.p.mps_memory_mb), `A full simulation would need ${fmtBytesMb(fullMb(last.n))}: one number for every on/off pattern.`),
+        kpi('Plan quality there', `${fmt(last.p.approx_ratio * 100, 0)}%`, `of the way to the best plan${first && first.n !== last.n ? `, against ${fmt(first.p.approx_ratio * 100, 0)}% on the smallest city` : ''}. Settings were tuned on small cities and reused.`)));
+      page.append(el('div', { class: 'expert-only' }, panel('What the MPS simulator buys', 'A full simulation stores one number for every possible on/off pattern: 2 to the power of the qubit count. The MPS stores a small block per qubit, so its memory grows slowly. The price is accuracy, shown as fidelity: how much the simulated state overlaps the exact one (100% is exact).',
+        table([
+          { label: 'Problem', render: (r) => name(r.n) },
+          { label: 'Full simulation would store', num: true, render: (r) => fmtBytesMb(fullMb(r.n)) },
+          { label: 'MPS stored', num: true, render: (r) => el('span', null, fmtBytesMb(r.p.mps_memory_mb), el('span', { class: 'subtle' }, ` (bond dimension ${r.p.bond_dim})`)) },
+          { label: 'Fidelity', num: true, render: (r) => (typeof r.p.fidelity === 'number' ? `${fmt(r.p.fidelity * 100, 1)}%` : el('span', { class: 'subtle', title: 'The exact state is too big to compare with at this size' }, 'not measured')) },
+          { label: 'Valid tries', num: true, render: (r) => `${fmt(r.p.feasibility_pct, 0)}%` },
+          { label: 'Way to the best plan', num: true, render: (r) => `${fmt(r.p.approx_ratio * 100, 0)}%` },
+        ], tops))));
     }
 
     // chart: one of three views
@@ -92,24 +94,28 @@ export default {
     const shade = (k) => shades[k % shades.length]; // after the 7 theme colours, lines repeat a colour but are dashed
     const take = el('figcaption', { class: 'takeaway' });
     const howto = el('p', { class: 'howto' });
+    const look = el('p', { class: 'look' });
     let chart = null;
     const VIEWS = {
       quality: () => {
         take.textContent = takeaway;
-        howto.replaceChildren(el('b', null, 'How to read this chart: '), 'Each line is one problem size, labelled at its right end. Higher is closer to the best plan. A line that only rises at the right needs more simulator memory before the circuit works well.');
-        canvas.setAttribute('aria-label', `Approximation ratio against bond dimension. ${sizes.map((n) => `${name(n)}: ${dims.map((d) => { const p = at(n, d); return p && p.status === 'ok' ? `${d}: ${fmt(p.approx_ratio * 100, 0)}%` : `${d}: no result`; }).join(', ')}`).join('. ')}`);
+        howto.replaceChildren(el('b', null, 'How to read this chart: '), 'Left to right the city gets bigger (more qubits). Up is better: 100% would be the best plan. Each line is a different level of simulator detail (its bond dimension: how many links between qubits the simulator remembers).');
+        look.replaceChildren(icon('pin', 20), el('span', null, el('b', null, 'Look at: '), 'the gap between the two lines. With too little detail the simulation falls apart, so the most-detail line is the one to trust. Even that line drops on the biggest cities, because the circuit settings were tuned on small ones.'));
+        canvas.setAttribute('aria-label', `Quality against city size. ${picks.map((d) => `${detailName(d)}: ${sizes.map((n) => { const p = at(n, d); return p && p.status === 'ok' ? `${n} qubits ${fmt(p.approx_ratio * 100, 0)}%` : `${n} qubits no result`; }).join(', ')}`).join('. ')}`);
+        const cols = [COLORS.series[0], COLORS.series[1]];
         return {
           type: 'line',
-          data: { labels: dims.map(String), datasets: sizes.map((n, k) => ({ label: `${n} qubits`,
-            data: dims.map((d) => { const p = at(n, d); return p && p.status === 'ok' ? p.approx_ratio * 100 : null; }),
-            borderColor: shade(k), backgroundColor: shade(k), borderDash: k >= shades.length ? [6, 4] : [], pointRadius: 4, borderWidth: 3, spanGaps: false, tension: 0 })) },
-          options: { layout: { padding: { right: 96 } },
-            scales: { x: axis({ title: { display: true, text: 'Bond dimension (simulator memory), more to the right' } }), y: axis({ min: 0, max: 100, title: { display: true, text: 'How close to the best plan (%)' } }) },
+          data: { labels: sizes.map(String), datasets: picks.map((d, k) => ({ label: detailName(d),
+            data: sizes.map((n) => { const p = at(n, d); return p && p.status === 'ok' ? p.approx_ratio * 100 : null; }),
+            borderColor: cols[k % cols.length], backgroundColor: cols[k % cols.length], borderDash: k ? [8, 4] : [], pointRadius: 4, borderWidth: 3, spanGaps: false, tension: 0 })) },
+          options: { layout: { padding: { right: 170 } },
+            scales: { x: axis({ title: { display: true, text: 'City size (qubits), bigger to the right' } }), y: axis({ min: 0, max: 100, title: { display: true, text: 'How close to the best plan (%)' } }) },
             plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmt(c.parsed.y, 0)}%` } } } },
           plugins: [endLabelsPlugin],
         };
       },
       memory: () => {
+        look.replaceChildren(icon('pin', 20), el('span', null, el('b', null, 'Look at: '), 'how far apart the two lines get. Each step up the side is a thousand times more memory.'));
         const rows = sizes.map((n) => ({ n, p: topMps(n) }));
         const last = [...rows].reverse().find((r) => r.p && typeof r.p.mps_memory_mb === 'number');
         take.textContent = last
@@ -132,6 +138,7 @@ export default {
         };
       },
       accuracy: () => {
+        look.replaceChildren(icon('pin', 20), el('span', null, el('b', null, 'Look at: '), 'whether the lines reach the top. 100% means the shortcut gives exactly the same answer as the full simulation.'));
         const n = fidSizes[fidSizes.length - 1];
         const fp = (d) => at(n, d);
         const lo = dims.map(fp).find((p) => p && typeof p.fidelity === 'number');
@@ -154,22 +161,24 @@ export default {
       },
     };
     const draw = (view) => {
+      lastView = view;
       if (chart) { chart.destroy(); chart = null; }
       chart = makeChart(canvas, (VIEWS[view] || VIEWS.quality)());
     };
     const options = [{ value: 'quality', label: 'Plan quality' }];
     if (hasMem) options.push({ value: 'memory', label: 'Memory needed' });
     if (hasFid) options.push({ value: 'accuracy', label: 'Accuracy' });
-    const fig = el('figure', { class: 'chart-fig' }, take, el('div', { class: 'chart-box chart-box--tall' }, canvas), howto,
+    const fig = el('figure', { class: 'chart-fig' }, take, el('div', { class: 'chart-box chart-box--tall' }, canvas), look, howto,
       el('ul', { class: 'plain-list' }, el('li', null, 'Bond dimension: how much connection between qubits the simulator remembers. Higher means more accurate and slower.'),
         el('li', null, `Every point uses ${sc.shots} tries; a try that breaks the rules scores 0.`)));
     if (options.length > 1) {
-      const seg = segmented({ label: 'Show', options, value: 'quality', onChange: draw });
+      if (!options.some((o) => o.value === lastView)) lastView = 'quality';
+      const seg = segmented({ label: 'Show', options, value: lastView, onChange: draw });
       page.append(panel(null, null, el('div', { class: 'stack' }, el('div', null, el('span', { class: 'field-label' }, 'Show'), seg.root), fig)));
     } else {
       page.append(panel(null, null, fig));      // older files: plan quality only, no switch
     }
-    draw('quality');
+    draw(options.some((o) => o.value === lastView) ? lastView : 'quality');
 
     const cell = (p) => {
       if (!p) return 'not run';
@@ -188,12 +197,12 @@ export default {
       rawJson('results/scaling.json', sc)));
     const failed = pts.filter((p) => p.status !== 'ok');
     if (failed.length) {
-      page.append(panel('Points with no result', 'These runs crashed or ran out of time. They carry no numbers.', table([
+      page.append(el('div', { class: 'expert-only stack' }, panel('Points with no result', 'These runs crashed or ran out of time. They carry no numbers.', table([
         { label: 'Problem', render: (p) => name(p.n_qubits) },
         { label: 'Bond dimension', num: true, render: (p) => (p.bond_dim === null ? 'full simulation' : String(p.bond_dim)) },
         { label: 'Status', render: (p) => p.status },
         { label: 'Reason', cls: 'note', render: (p) => (params.expert ? p.notes : p.notes.split(':').slice(0, 2).join(':')) },
-      ], failed)));
+      ], failed))));
     }
     return { destroy() { if (chart) chart.destroy(); } };
   },

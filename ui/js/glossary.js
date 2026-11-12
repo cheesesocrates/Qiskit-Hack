@@ -135,7 +135,7 @@ export function glossaryCard(key, opts = {}) {
     el('dt', null, 'What it means'), el('dd', null, t.def),
     el('dt', null, 'Everyday example'), el('dd', null, t.analogy),
     el('dt', null, 'In FairShed'), el('dd', null, t.here),
-    opts.link ? el('dd', null, el('a', { href: `#/learn/glossary?term=${key}` }, 'Open the full glossary')) : null);
+    opts.link ? el('dd', null, el('a', { href: `#/inner/glossary?term=${key}` }, 'Open the full glossary')) : null);
 }
 
 /** A glossary term inside text. `label` defaults to the term name. */
@@ -162,7 +162,7 @@ export function term(key, label) {
   return btn;
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) close(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { e.preventDefault(); close(); } });
 document.addEventListener('click', () => close(false));
 window.addEventListener('hashchange', () => close(false));
 

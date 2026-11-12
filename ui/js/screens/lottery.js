@@ -19,7 +19,7 @@ function heat(results, lot) {
 
 export default {
   async mount({ root, results, params }) {
-    const page = el('div', { class: 'page' }, pageHeader('When plans tie, is the choice fair?', 'Results: fair lottery (Grover mixer)',
+    const page = el('div', { class: 'page' }, pageHeader('When plans tie, is the choice fair?', null,
       'Several plans can be exactly as good as each other. FairShed should not quietly favour one neighbourhood among them.'));
     root.append(page);
     const lot = results.ok('lottery');
@@ -32,6 +32,11 @@ export default {
     const inst = base ? base.instance : results.ok('instance');
     const optimal = base && g && Math.abs(g.cost - base.exact.cost_min) < 1e-9 ? base.exact.optimal_bits : null;
     page.append(explainPanel('lottery', {
+      say: 'When several plans are exactly as good, the circuit gives each the same chance, so breaking a tie is a fair lottery and not an accident of the circuit.',
+      made: [{ kind: 'quantum', text: `A ${lot.method} circuit (${lot.layers} rounds, ${lot.n_qubits} qubits) is simulated exactly.` },
+        { kind: 'classical', text: 'The probability of every plan is read from the simulated state and grouped by score. We compare the probabilities within each group.' }],
+      qa: [{ q: 'Why does a fair tie-break matter?', a: 'Several plans can be exactly as good. If the method quietly favoured one, the same neighbourhood could lose out for no reason anyone could defend.' },
+        { q: 'Is it luck that the bars are equal?', a: 'No. The Grover mixer only "sees" a plan through its score, so equal scores must give equal probability. An automated check confirms the differences are rounding error.' }],
       what: [el('span', null, 'The plans that tie for the best score, and the chance the ', term('grover', 'Grover mixer'), ' circuit gives each of them in one try.')],
       how: ['Each bar is one tied plan. Equal bars mean an equal chance.', 'The small table under each plan shows which feeders are off in each hour.'],
       notice: g ? [`${g.n_plans} plans tie at score ${fmt(g.cost, 2)}.`, `Each gets a ${pct(g.prob_min)} chance per try; the largest difference between them is ${fmtSmart(g.prob_spread, 6)}, which is rounding error.`] : null,

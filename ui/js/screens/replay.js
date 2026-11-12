@@ -7,15 +7,19 @@ import { reduced } from '../motion.js';
 import { explainPanel, pageHeader, chartBlock, rawJson } from '../explain.js';
 import { term } from '../glossary.js';
 
+/** The hour on screen, kept for the session (a theme switch re-renders the screen). */
+let lastFrame = 0;
+
 const STEP_MS = 1600;
 const hourLabel = (h) => `${pad2(h)}:00`;
 
 export default {
   async mount({ root, results, params }) {
-    const page = el('div', { class: 'page' }, pageHeader('How does the plan change when the real shortage arrives?', 'Replay and rules: watch it hour by hour (was Replay)',
-      'Every hour the planner looks three hours ahead, commits only the next hour, then plans again with what it has learned.'));
-    root.append(page);
     const rep = results.ok('replay');
+    const H = rep ? `${rep.horizon_hours} hours` : 'a few hours';
+    const page = el('div', { class: 'page' }, pageHeader('How does the plan change when the real shortage arrives?', null,
+      `Every hour the planner looks ${H} ahead, commits only the next hour, then plans again with what it has learned.`));
+    root.append(page);
     if (!rep) {
       page.append(explainPanel('replay', { what: 'An evening replayed hour by hour.', how: 'Not available.', notice: null, not: 'Not available.' }), naPanel(results.get('replay')));
       return { destroy() {} };
@@ -27,8 +31,19 @@ export default {
     const nAudit = frames.filter((f) => f.audit_passed).length;
     const fc = frames.filter((f) => f.forecast_mw !== null);
     const mae = fc.length ? fc.reduce((a, f) => a + Math.abs(f.shortfall_mw - f.forecast_mw), 0) / fc.length : null;
+    const qFrame = frames.find((f) => /quantum/i.test(f.solver_used));
+    const qm = qFrame ? /\((.*?), best of (\d+)/.exec(qFrame.solver_used) : null;
+    const tries = qm ? `best of ${qm[2]} tries` : 'best of many tries';
+    const circuit = qm ? qm[1] : 'a QAOA circuit';
 
     page.append(explainPanel('replay', {
+      say: `One synthetic afternoon and evening replayed hour by hour: each hour the planner looks ${H} ahead, commits only the first, and plans again.`,
+      made: [{ kind: 'classical', text: `A forecast sets the quotas for the next ${H}; the first hour uses the real shortage.` },
+        { kind: 'quantum', text: `A quantum circuit (${circuit}, ${tries}) plans that window, starting from the previous hour's settings.` },
+        { kind: 'classical', text: 'The exact solver scores the same window so we can say whether the circuit matched the best plan. Only the first hour is committed and audited.' }],
+      qa: [{ q: `Why plan ${H} ahead but commit only one?`, a: 'Looking ahead stops the planner cutting a feeder now that it would have to cut again next hour. Committing one hour at a time lets it correct itself when the real shortage differs from the forecast.' },
+        { q: 'What if the circuit returns an invalid plan?', a: 'The replay falls back to the exact solver for that hour and says so on the "Planned by" chip. Costs and validity are always re-checked outside the circuit.' },
+        { q: 'Why did some hours not match the exact best plan?', a: `The plan is the ${tries}, and a try is a best plan only occasionally. Those hours were still valid and passed every rule, just a little worse than the best.` }],
       what: [el('span', null, 'One synthetic afternoon and evening, replayed with ', term('horizon', 'receding-horizon'), ' re-planning. Each hour is one frame.')],
       how: ['Press Play or drag the slider. The feeder cards show who is off in that hour; outlined cards changed since the hour before.',
         el('span', null, el('b', null, 'Solver chip: '), 'which method chose that hour\'s plan. "Quantum" means the simulated circuit; a fallback to the exact solver would say so.'),
@@ -59,6 +74,7 @@ export default {
 
     function show(i) {
       S.i = i;
+      lastFrame = i;
       slider.set(i);
       const f = frames[i];
       const changed = new Set(f.changed_from_previous);
@@ -67,8 +83,7 @@ export default {
         passChip(f.matches_exact, 'Matches best plan', 'Valid, but not the best plan'),
         passChip(f.audit_passed, 'Passes every rule', 'Breaks a rule'),
         el('span', { class: `chip ${/quantum/i.test(f.solver_used) ? 'chip--quantum' : 'chip--classical'}`, title: f.solver_used }, icon(/quantum/i.test(f.solver_used) ? 'atom' : 'chip', 16),
-          /quantum/i.test(f.solver_used) ? 'Planned by: quantum circuit (simulated)' : `Planned by: ${f.solver_used}`),
-        params.expert ? el('span', { class: 'subtle mono' }, f.solver_used) : null);
+          /quantum/i.test(f.solver_used) ? 'Planned by: quantum circuit (simulated)' : `Planned by: ${f.solver_used}`));
       feederBox.replaceChildren(...feeders.map((fd, k) => {
         const st = fd.protected ? STATE.protected : (f.plan[k] ? STATE.off : STATE.on);
         return el('div', { class: `fr-cell${changed.has(k) ? ' fr-changed' : ''}` },
@@ -107,6 +122,7 @@ export default {
     page.append(panel('Hour by hour', 'Use Play or the slider. Outlined feeders changed state since the hour before.',
       el('div', { class: 'stack', 'data-tour': 'replay' }, el('div', { class: 'row' }, playBtn, el('div', { style: 'flex:1;min-width:240px' }, slider.root)), head, feederBox, facts)));
     page.append(panel(null, null, chartBlock({ takeaway, chart: el('div', { class: 'chart-box' }, canvas),
+      look: 'the hours where the solid line rises above the dashed one: the real shortage was bigger than forecast, and re-planning each hour is what absorbs that surprise.',
       howto: 'Time runs left to right. The blue line is the real shortage, the orange dashed line is the classical forecast made in advance. The vertical line marks the hour you are looking at.',
       plain: ['MW is megawatts: one feeder carries a fixed share, so more MW means more feeders off.', 'The first hour of each plan uses the real shortage; later hours use the forecast.'] })));
     page.append(panel('Outage hours so far', 'Hours each feeder has been off since the replay started. Long bars mean more outage hours.', ledgerBox));
@@ -127,7 +143,7 @@ export default {
       panel('Solvers used (Expert)', null, table([{ label: 'Solver', render: (r) => r[0] }, { label: 'Hours', num: true, render: (r) => String(r[1]) }], Object.entries(solverCounts))),
       el('details', { class: 'disc' }, el('summary', null, 'Method notes'), el('p', { class: 'subtle' }, rep.notes)),
       rawJson('results/replay.json', rep)));
-    show(0);
+    show(Math.min(lastFrame, frames.length - 1));
     return { destroy() { stop(); } };
   },
 };

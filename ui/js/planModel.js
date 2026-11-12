@@ -45,7 +45,7 @@ export function buildOptions(results, scenario, paretoIndex) {
     const M = pt.plan.matrix;
     const audit = checkPlan(inst, M);
     opts.push({
-      key: 'quantum', label: 'Quantum Pareto plan', kind: 'quantum', bits: pt.plan.bits, matrix: M,
+      key: 'quantum', label: 'FairShed quantum plan', kind: 'quantum', bits: pt.plan.bits, matrix: M,
       cost: weightedCost(pt.breakdown, inst.weights), costAtPoint: pt.cost, breakdown: pt.breakdown,
       feasible: !audit.violations.some((v) => v.rule === 'quota' || v.rule === 'protected'),
       auditPassed: audit.passed, nViolations: audit.violations.length, auditSource: 'browser re-check',

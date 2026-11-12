@@ -9,11 +9,14 @@ import { term } from '../glossary.js';
 import { planGrid } from '../components/planGrid.js';
 import { RULES, checkPlan } from '../rules.js';
 
+/** The chosen example and any edits, kept for the session (a theme switch re-renders the screen). */
+let memo = null;
+
 export default {
   id: 'audit',
   title: 'Audit',
   async mount({ root, results, params }) {
-    const page = el('div', { class: 'page' }, pageHeader('Does this schedule follow the rules?', 'Replay and rules: rule checker (was Audit)',
+    const page = el('div', { class: 'page' }, pageHeader('Does this schedule follow the rules?', null,
       'Pick an example or edit one by clicking cells. The checker lists every broken rule in plain words.'));
     root.append(page);
     const aud = results.ok('audit_example');
@@ -25,6 +28,7 @@ export default {
     const inst = aud.instance;
     const ex = aud.examples;
     const S = { i: 0, editing: false, M: null, undo: [] };
+    if (memo && memo.i < ex.length) Object.assign(S, { i: memo.i, editing: memo.editing, M: memo.M });
     const rules = aud.rules;
 
     const gridHost = el('div');
@@ -37,7 +41,7 @@ export default {
     const seg = segmented({
       label: 'Example schedule',
       options: ex.map((e, i) => ({ value: i, label: e.label })),
-      value: 0,
+      value: S.i,
       onChange: (i) => { S.i = i; S.editing = false; S.M = null; S.undo = []; render(); },
     });
 
@@ -49,6 +53,7 @@ export default {
     }
 
     function render() {
+      memo = { i: S.i, editing: S.editing, M: S.M };
       const { M, res, edited } = current();
       const g = planGrid({
         inst, matrix: M, violations: res.violations, editable: S.editing, debug: params.debug,
@@ -93,6 +98,11 @@ export default {
     const passedN = ex.filter((e) => e.passed).length;
     page.append(
       explainPanel('rules', {
+        say: 'A referee for any schedule: it lists every rule a schedule breaks, in plain words. The planner\'s own plans are audited with the same checker.',
+        made: [{ kind: 'classical', text: 'Four rules are checked cell by cell: the quota, protected feeders, the back-to-back cap and the daily cap.' },
+          { kind: 'classical', text: 'The stored examples come from the Python checker (src/audit/rules.py); edits are re-checked in your browser with the same rules and score.' }],
+        qa: [{ q: 'Why have a checker if the planner is optimal?', a: 'A schedule is published to the public, and anyone should be able to verify it. A plan can also pass every rule and still score badly, so the checker and the score answer different questions.' },
+          { q: 'Is the checker quantum?', a: 'No. It is plain classical code, on purpose, so that the quantum part is always judged by something independent.' }],
         what: [el('span', null, 'An ', term('audit'), ' of one schedule in the heatwave scenario (synthetic feeders): hours down, feeders across.')],
         how: ['Pick an example. Each cell says On, Off or Protected with an icon.', 'A red outline marks a cell that breaks a rule. Click "Edit this plan", then click cells to switch them; Undo and Reset are next to it.'],
         notice: [`The four rules: exactly the ${term('quota', 'quota').textContent} of feeders off each hour; protected feeders never off; at most ${rules.max_consecutive} hour${rules.max_consecutive === 1 ? '' : 's'} in a row off; at most ${rules.max_daily_hours} hours in a day, counting hours already served.`,

@@ -1,37 +1,34 @@
-// "What am I looking at?" panel and the page header used by every screen.
-// The panel is open on the first visit to a screen and remembers when the reader collapses it.
+// Every screen describes itself with explainPanel(id, parts), but nothing is drawn on the page: the
+// app is for the people who use the schedule. The parts are kept here and shown on demand in the
+// Inner working drawer (drawer.js), which judges and curious readers open with one button.
 import { el } from './util.js';
 import { icon } from './icons.js';
 
-const KEY = 'fairshed-explain-closed';
-function readClosed() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
-function writeClosed(list) { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) { /* private mode: ignore */ } }
+let current = null;
 
 /**
- * id: screen id. parts: { what, how, notice, not } where each is a node, string, or array of those.
- * `notice` should be built from the JSON by the screen; pass null when the data is not available
- * and the panel says so instead.
+ * Register the explanation of the screen being mounted. Returns an empty comment node, so screens can
+ * keep calling page.append(explainPanel(...)).
+ * parts: {
+ *   say:    one sentence: what this screen is, in plain words
+ *   what:   what is on the screen (node, string or array of them)
+ *   how:    how to read it
+ *   notice: what to notice, built from the JSON by the screen (null when the data is missing)
+ *   made:   [{ kind: 'quantum' | 'classical', text }] how the numbers were made, in order
+ *   not:    what the screen does not show (the honest limits)
+ *   qa:     [{ q, a }] questions a judge is likely to ask; `a` may be a function returning nodes
+ * }
  */
 export function explainPanel(id, parts) {
-  const closed = readClosed().includes(id);
-  const list = (x) => (Array.isArray(x) ? el('ul', null, x.map((i) => el('li', null, i))) : el('p', null, x));
-  const d = el('details', { class: 'explain', 'data-explain': id }, el('summary', null, icon('info', 22), 'What am I looking at?',
-    el('span', { class: 'ex-state' }, 'Show or hide')),
-  el('div', { class: 'explain-b' },
-    el('section', null, el('h3', null, 'What this shows'), list(parts.what)),
-    el('section', null, el('h3', null, 'How to read it'), list(parts.how)),
-    el('section', null, el('h3', null, 'What to notice'), parts.notice ? list(parts.notice) : el('p', null, 'Not available: the results file this screen needs is missing.')),
-    el('section', null, el('h3', null, 'What it does not show'), list(parts.not))));
-  if (!closed) d.open = true;
-  d.addEventListener('toggle', () => {
-    const set = new Set(readClosed());
-    if (d.open) set.delete(id); else set.add(id);
-    writeClosed([...set]);
-  });
-  return d;
+  current = { id, ...parts };
+  return document.createComment(`inner working: ${id}`);
 }
 
-/** Page header: the question the screen answers, the technical name as a small subtitle, a lede. */
+/** The explanation registered by the screen on show, or null. */
+export const takeExplain = () => current;
+export function resetExplain() { current = null; }
+
+/** Page header: the question the screen answers, an optional small kicker, a lede. */
 export function pageHeader(question, technical, lede) {
   return el('header', { class: 'page-head' },
     technical ? el('div', { class: 'kicker' }, technical) : null,
@@ -39,16 +36,22 @@ export function pageHeader(question, technical, lede) {
     lede ? el('p', { class: 'lede' }, lede) : null);
 }
 
-/** A chart block: takeaway title (a sentence from the data), the chart, how to read it, plain translations. */
-export function chartBlock({ takeaway, chart, howto, plain }) {
+/** "Look at: ..." pointer under a chart: the one thing to look at first. */
+export function lookAt(text) {
+  return el('p', { class: 'look' }, icon('pin', 20), el('span', null, el('b', null, 'Look at: '), text));
+}
+
+/** A chart block: takeaway title (a sentence from the data), the chart, what to look at, how to read it, plain translations. */
+export function chartBlock({ takeaway, chart, look, howto, plain }) {
   return el('figure', { class: 'chart-fig' },
     el('figcaption', { class: 'takeaway' }, takeaway),
     chart,
+    look ? lookAt(look) : null,
     howto ? el('p', { class: 'howto' }, el('b', null, 'How to read this chart: '), howto) : null,
     plain && plain.length ? el('ul', { class: 'plain-list' }, plain.map((p) => el('li', null, p))) : null);
 }
 
-/** Raw JSON viewer for Expert mode. */
+/** Raw JSON viewer. Marked .expert-only, so it is shown in the drawer's "For specialists" section. */
 export function rawJson(label, data) {
   return el('details', { class: 'disc expert-only' }, el('summary', null, `Raw JSON: ${label}`),
     el('pre', { class: 'raw-json' }, JSON.stringify(data, null, 2).slice(0, 20000)));

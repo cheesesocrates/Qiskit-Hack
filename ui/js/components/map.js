@@ -123,10 +123,9 @@ export function createFeederMap(host, opts) {
     m.stateLayers.forEach((n, k) => motion.to(n, { opacity: k === idx ? 1 : 0, duration: dur }));
     motion.to(m.chip, { borderColor: c.fg, backgroundColor: c.tint, duration: dur });
     motion.to(m.dot, { backgroundColor: c.fg, duration: dur });
-    motion.to(m.lead, { backgroundColor: c.fg, duration: dur });
     m.chip.style.color = c.fg;
     if (first) { // no tween on first paint: set directly so nothing flashes
-      m.chip.style.borderColor = c.fg; m.chip.style.backgroundColor = c.tint; m.dot.style.backgroundColor = c.fg; m.lead.style.backgroundColor = c.fg;
+      m.chip.style.borderColor = c.fg; m.chip.style.backgroundColor = c.tint; m.dot.style.backgroundColor = c.fg;
       m.iconLayers.forEach((n, k) => { n.style.opacity = k === idx ? 1 : 0; });
       m.stateLayers.forEach((n, k) => { n.style.opacity = k === idx ? 1 : 0; });
     }
@@ -212,6 +211,8 @@ export function createFeederMap(host, opts) {
     setFeeders(newFeeders) { feeders = newFeeders; selected = null; if (popup) map.closePopup(popup); build(); },
     refreshPopup() { if (selected !== null && popup && map.hasLayer(popup)) popup.setContent(buildPopup(selected)); },
     closePopup() { if (popup) map.closePopup(popup); },
+    /** Open the reason popup of feeder index i (used by the "This hour" list). */
+    open(i) { openFor(i); },
     selected: () => selected,
     relayout: layoutLabels,
     destroy() { destroyed = true; ro.disconnect(); map.remove(); },

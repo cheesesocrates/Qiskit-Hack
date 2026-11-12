@@ -154,3 +154,26 @@ export function valueLabels(format) {
     },
   };
 }
+
+/** Print each vertical bar's value just above it. */
+export function valueLabelsTop(format) {
+  return {
+    id: 'valueLabelsTop',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        chart.getDatasetMeta(di).data.forEach((bar, i) => {
+          const v = ds.data[i];
+          if (v === null || v === undefined) return;
+          ctx.save();
+          ctx.fillStyle = COLORS.text;
+          ctx.font = `bold 14px ${FONT}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(format(v), bar.x, bar.y - 4);
+          ctx.restore();
+        });
+      });
+    },
+  };
+}

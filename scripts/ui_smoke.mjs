@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCREENS = ['home', 'schedule', 'replay/watch', 'replay/rules', 'results/scoreboard', 'results/lottery',
-  'results/uncertainty', 'results/scale', 'results/forecast', 'learn/how', 'learn/algorithms', 'learn/glossary'];
+  'results/uncertainty', 'results/scale', 'results/forecast', 'inner/story', 'inner/questions', 'inner/algorithms', 'inner/glossary'];
 const shotName = (s) => s.replace('/', '-');
 const args = process.argv.slice(2);
 const argv = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
@@ -65,20 +65,32 @@ const FOCUS_PROBE = `(() => { const a = document.activeElement; if (!a || a === 
 const FLOW_SCRIPT = `(async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = [];
-  const shown = () => [...document.querySelectorAll('.expert-only')].some((n) => n.getBoundingClientRect().height > 0);
-  const exp = document.querySelector('[role=radio][data-mode="expert"]');
-  if (!exp) return ['no Expert switch'];
-  exp.click(); await wait(900);
-  if (document.body.dataset.mode !== 'expert') out.push('Expert mode did not switch');
-  if (!shown()) out.push('Expert mode shows no expert detail');
-  document.querySelector('[role=radio][data-mode="beginner"]').click(); await wait(900);
-  if (shown()) out.push('Beginner mode still shows expert detail');
-  const g = document.querySelector('#main .gl-term');
-  if (!g) out.push('no glossary term on the Scoreboard'); else {
-    g.click(); await wait(200);
-    if (!document.querySelector('.gl-pop')) out.push('glossary term did not open');
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await wait(100);
-    if (document.querySelector('.gl-pop')) out.push('Escape did not close the glossary card');
+  const btn = document.getElementById('inner-btn');
+  if (!btn) return ['no Inner working button'];
+  if (document.querySelector('#main .explain')) out.push('an always-open explanation panel is still on the page');
+  if (document.querySelector('[role=radio][data-mode]')) out.push('the Beginner/Expert switch is still in the top bar');
+  btn.click(); await wait(500);
+  const dr = document.getElementById('inner-drawer');
+  if (!dr || dr.hidden) out.push('Inner working drawer did not open');
+  else {
+    const heads = [...dr.querySelectorAll('h3')].map((h) => h.textContent);
+    if (!heads.some((t) => /looking at/i.test(t))) out.push('drawer has no "What you are looking at" section');
+    if (!heads.some((t) => /does not show/i.test(t))) out.push('drawer has no "What it does not show" section');
+    if (!heads.some((t) => /specialists/i.test(t))) out.push('drawer has no "For specialists" section');
+    if (!dr.querySelector('.qa')) out.push('drawer has no questions');
+    const sz = ${SIZE_CHECK};
+    if (sz.nSmall) out.push('drawer: ' + sz.nSmall + ' text runs under 14px: ' + sz.small.join('; '));
+    if (sz.nTiny) out.push('drawer: ' + sz.nTiny + ' targets under 44px: ' + sz.tiny.join('; '));
+    const g = dr.querySelector('.gl-term');
+    if (!g) out.push('no glossary term in the drawer'); else {
+      g.click(); await wait(200);
+      if (!document.querySelector('.gl-pop')) out.push('glossary term did not open');
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })); await wait(150);
+      if (document.querySelector('.gl-pop')) out.push('Escape did not close the glossary card');
+      if (dr.hidden) out.push('Escape closed the drawer along with the glossary card');
+    }
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })); await wait(200);
+    if (!dr.hidden) out.push('Escape did not close the drawer');
   }
   const tb = document.getElementById('tour-btn');
   if (!tb) out.push('no Tour button'); else {
@@ -352,7 +364,7 @@ async function main() {
     for (const p of problems) console.log(`        ${p}`);
   }
   if (!QUICK) {
-    // flows: Beginner and Expert toggle, a glossary term, the guided tour (on the Scoreboard)
+    // flows: the Inner working drawer, a glossary term, the guided tour (on the method comparison)
     events = [];
     query.set('smoke', 'flows');
     await S('Page.navigate', { url: `http://127.0.0.1:${port}/ui/?${query}#/results/scoreboard` });
@@ -361,7 +373,7 @@ async function main() {
     const flowFatal = events.filter((e) => !((e.kind === 'http' || e.kind === 'log.error') && /\/results\/.*\.json/.test(e.url || '')));
     const fp = [...(flow || ['flow script failed']), ...flowFatal.map((e) => `${e.kind}: ${e.text}`)];
     if (fp.length) failed++;
-    console.log(`${fp.length ? 'FAIL' : 'PASS'}  ${'flows'.padEnd(20)} Expert and Beginner, glossary card, 8-step tour`);
+    console.log(`${fp.length ? 'FAIL' : 'PASS'}  ${'flows'.padEnd(20)} Inner working drawer, glossary card, 8-step tour`);
     for (const p of fp) console.log(`        ${p}`);
   }
   if (resultsArg === null) {

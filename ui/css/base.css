@@ -43,9 +43,11 @@ code, .mono { font-family: var(--font-mono); }
   padding: 12px 16px; border-radius: var(--radius); font-weight: 700; text-decoration: none; }
 .skip:focus { top: 8px; }
 
-/* Mode switch: Beginner hides expert detail, Expert shows it */
-body[data-mode="beginner"] .expert-only { display: none !important; }
-body[data-mode="expert"] .beginner-only { display: none !important; }
+[hidden] { display: none !important; }
+
+/* Technical detail never sits on a page: screens mark it .expert-only and main.js moves block-level ones
+   into the Inner working drawer (outside #main, where they show). Anything left in #main stays hidden. */
+#main .expert-only { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; scroll-behavior: auto !important; }

@@ -38,7 +38,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
   0.846; a standard penalty mixer gives valid plans only 19.6% and 27.9% of the
   time. With the Grover mixer, tied optimal plans get equal probability: a fair lottery. Amplitude
   estimation counts the valid plans, 9.07 against an exact 9, and puts the tail risk at 0.911 MW against an exact 0.906 MW.
-  30 of 30 proof checks pass."
+  36 of 36 proof checks pass."
 - **Numbers on screen for reference:** 8 feeders x 3 hours, 4500 valid plans, 4 tied optima at cost 10.50; 4 plans tied at cost 10.50 get equal probability (spread 4.8e-18); counting exact 9, estimate 9.07 (95% interval 8.90 to 9.23); risk CVaR 95% exact 0.906 MW, estimate 0.911 MW; P(unplanned cut) exact 0.125, estimate 0.125.
 
 ## 2:00 to 2:30 Honest limits and scale
@@ -48,7 +48,7 @@ Start the dashboard first: `python scripts/tasks.py ui`, open http://localhost:8
 - **Voice-over:** "Be clear about the limits. This runs on a simulator, the data is synthetic, and
   at 18 qubits a classical brute force finds the exact answer, which is better than our
   sampled plans. Per-shot probability of the optimum is low; the plan is the best of 256 shots. The
-  scale curve uses a matrix product state simulator: 39 of 40 points ran, up to 36 qubits; at 36 qubits and bond dimension 64 the ratio is 0.732. That shows how the circuit
+  scale curve uses a matrix product state simulator: 52 of 52 points ran, up to 72 qubits; at 72 qubits and bond dimension 64 the ratio is 0.599. That shows how the circuit
   behaves as it grows; it is not a quantum advantage."
 
 ## 2:30 to 3:00 Close
@@ -83,7 +83,7 @@ number against the exact answer instead of claiming an advantage.
 Karachi zones, because real feeder maps are not public. Weather in the forecast is a real
 Open-Meteo snapshot. Every screen carries the "Simulator - synthetic data" badge.
 
-**How do you know the quantum code is right?** 30 of 30 proof checks run in pytest: the
+**How do you know the quantum code is right?** 36 of 36 proof checks run in pytest: the
 cost table equals the classical cost on every bitstring, every XY and Grover-mixer sample is a
 valid plan, Dicke states are uniform, tied plans get equal amplitude, counting is within
 tolerance of enumeration, the qubit-to-plan bit order is tested, and fixed seeds reproduce.
